@@ -1,0 +1,60 @@
+# Archivos y directorios generados por el sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos de compilación y ejecutables
+*.exe
+*.dll
+*.class
+*.jar
+
+# Directorios de dependencias y entornos virtuales
+/node_modules
+/venv
+/.venv
+
+# Archivos de configuración local
+.env
+.env.local
+.env.*.local
+
+# Archivos de registro y salida
+*.log
+logs/
+log/
+
+# Archivos de respaldo y temporales
+*.bak
+*.swp
+*.tmp
+*.temp
+
+# Archivos de caché
+.cache/
+.cached/
+
+# Archivos de IDE y editores de texto
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Archivos de configuración específicos de lenguaje o herramienta
+*.config
+*.conf
+*.cfg
+*.ini
+*.properties
+
+# Archivos de datos sensibles o confidenciales
+secrets.yml
+secrets.json
+secrets.env
+
+# Archivos de compilación y configuración de construcción
+/build/
+/dist/
+/out/
+/.gradle/
+/.idea/
+/.vs/
