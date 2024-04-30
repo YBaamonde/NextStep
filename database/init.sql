@@ -1,3 +1,5 @@
+-- DROP DATABASE NextStepDB; --
+
 -- Crear la base de datos y las tablas necesarias para el proyecto
 CREATE DATABASE NextStepDB;
 
@@ -34,17 +36,27 @@ CREATE TABLE Categoría (
     FOREIGN KEY (idUsuario) REFERENCES Usuario(idUsuario)
 );
 
+
 -- Tabla Gasto
 CREATE TABLE Gasto (
     idGasto INT PRIMARY KEY,
     idUsuario INT,
-    idCategoría INT,
     nombre VARCHAR(50),
     cantidad DECIMAL(10, 2),
     fecha DATE,
-    FOREIGN KEY (idUsuario) REFERENCES Usuario(idUsuario),
+    FOREIGN KEY (idUsuario) REFERENCES Usuario(idUsuario)
+);
+
+
+-- Crear la tabla de unión Gasto_Categoría
+CREATE TABLE Gasto_Categoría (
+    idGasto INT,
+    idCategoría INT,
+    PRIMARY KEY (idGasto, idCategoría),
+    FOREIGN KEY (idGasto) REFERENCES Gasto(idGasto),
     FOREIGN KEY (idCategoría) REFERENCES Categoría(idCategoría)
 );
+
 
 -- Tabla Informe
 CREATE TABLE Informe (
@@ -55,4 +67,3 @@ CREATE TABLE Informe (
     tipo VARCHAR(50),
     FOREIGN KEY (idUsuario) REFERENCES Usuario(idUsuario)
 );
-
