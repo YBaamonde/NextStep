@@ -1,14 +1,11 @@
--- DROP DATABASE NextStepDB; --
+-- Eliminar la base de datos si existe
+DROP DATABASE IF EXISTS NextStepDB;
 
--- Crear la base de datos y las tablas necesarias para el proyecto
+-- Crear la base de datos y conectar a ella
 CREATE DATABASE NextStepDB;
-
--- Conectar a la base de datos
 USE NextStepDB;
 
--- Crear las tablas necesarias
-
--- Tabla Usuario
+-- Crear la tabla Usuario
 CREATE TABLE Usuario (
     idUsuario INT PRIMARY KEY,
     nombre VARCHAR(50),
@@ -17,7 +14,7 @@ CREATE TABLE Usuario (
     rol ENUM('user', 'admin')
 );
 
--- Tabla Pago
+-- Crear la tabla Pago
 CREATE TABLE Pago (
     idPago INT PRIMARY KEY,
     idUsuario INT,
@@ -28,7 +25,7 @@ CREATE TABLE Pago (
     FOREIGN KEY (idUsuario) REFERENCES Usuario(idUsuario)
 );
 
--- Tabla Categoría, que contiene las categorías de los gastos
+-- Crear la tabla Categoría
 CREATE TABLE Categoría (
     idCategoría INT PRIMARY KEY,
     idUsuario INT,
@@ -36,19 +33,28 @@ CREATE TABLE Categoría (
     FOREIGN KEY (idUsuario) REFERENCES Usuario(idUsuario)
 );
 
-
--- Tabla Gasto
+-- Crear la tabla Gasto
 CREATE TABLE Gasto (
     idGasto INT PRIMARY KEY,
     idUsuario INT,
+    idCategoría INT,
     nombre VARCHAR(50),
     cantidad DECIMAL(10, 2),
     fecha DATE,
+    FOREIGN KEY (idUsuario) REFERENCES Usuario(idUsuario),
+    FOREIGN KEY (idCategoría) REFERENCES Categoría(idCategoría)
+);
+
+-- Crear la tabla Informe
+CREATE TABLE Informe (
+    idInforme INT PRIMARY KEY,
+    idUsuario INT,
+    fecha_generacion DATE,
+    contenido TEXT,
     FOREIGN KEY (idUsuario) REFERENCES Usuario(idUsuario)
 );
 
-
--- Crear la tabla de unión Gasto_Categoría
+-- Crear tabla de relación para Gasto-Categoría
 CREATE TABLE Gasto_Categoría (
     idGasto INT,
     idCategoría INT,
@@ -57,13 +63,7 @@ CREATE TABLE Gasto_Categoría (
     FOREIGN KEY (idCategoría) REFERENCES Categoría(idCategoría)
 );
 
-
--- Tabla Informe
-CREATE TABLE Informe (
-    idInforme INT PRIMARY KEY,
-    idUsuario INT,
-    fechaInicio DATE,
-    fechaFin DATE,
-    tipo VARCHAR(50),
-    FOREIGN KEY (idUsuario) REFERENCES Usuario(idUsuario)
-);
+-- Insertar algunos datos de prueba en la tabla Usuario
+INSERT INTO Usuario (idUsuario, nombre, correo, contraseña, rol)
+VALUES (1, 'Usuario1', 'usuario1@example.com', 'contraseña1', 'user'),
+       (2, 'Usuario2', 'usuario2@example.com', 'contraseña2', 'admin');
