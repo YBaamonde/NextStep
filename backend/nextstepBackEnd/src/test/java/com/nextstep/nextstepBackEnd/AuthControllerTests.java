@@ -32,4 +32,3 @@ public class AuthControllerTests {
                 .andExpect(MockMvcResultMatchers.content().string("Login exitoso"));
     }
 }
-
