@@ -1,8 +1,8 @@
 -- Eliminar la base de datos si existe
-DROP DATABASE IF EXISTS NextStep;
+DROP DATABASE IF EXISTS NextStepDB;
 
-CREATE DATABASE NextStep;
-USE NextStep;
+CREATE DATABASE NextStepDB;
+USE NextStepDB;
 
 -- Tabla Usuario
 CREATE TABLE Usuario (

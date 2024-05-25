@@ -1,45 +1,38 @@
 package com.nextstep.nextstepBackEnd.model;
 
 import jakarta.persistence.*;
-import javax.validation.constraints.NotBlank;
-import  javax.validation.constraints.Email;
 
 
 // Anotación para indicar que es una entidad
 @Entity
 @Table(name = "Usuario")
 public class Usuario {
+
     @Id
-    // Generamos el id automáticamente
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    // Columna id
-    @Column(name = "id")
-    private Integer id;
-    // Columna nombre
-    @Column(name = "nombre")
+    private Long id;
+
+    @Column(nullable = false)
     private String nombre;
-    // Columna correo
-    @Column(name = "correo")
-    // El email debe ser válido
-    @Email(message = "El email debe ser válido")
-    private String email;
-    // Columna contraseña
-    @Column(name = "contraseña")
+
+    @Column(unique = true, nullable = false)
+    private String correo;
+
+    @Column(nullable = false)
     private String contraseña;
-    // Columna rol
-    @Column(name = "rol")
-    // El rol es de tipo enumerated
+
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Rol rol;
 
     // Getters y Setters
 
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -51,12 +44,12 @@ public class Usuario {
         this.nombre = nombre;
     }
 
-    public String getEmail() {
-        return email;
+    public String getCorreo() {
+        return correo;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setCorreo(String correo) {
+        this.correo = correo;
     }
 
     public String getContraseña() {
@@ -72,6 +65,20 @@ public class Usuario {
     }
 
     public void setRol(Rol rol) {
+        this.rol = rol;
+    }
+
+    // Constructores
+
+    public Usuario() {
+
+    }
+
+    public Usuario(Long id, String nombre, String correo, String contraseña, Rol rol) {
+        this.id = id;
+        this.nombre = nombre;
+        this.correo = correo;
+        this.contraseña = contraseña;
         this.rol = rol;
     }
 }
