@@ -1,6 +1,5 @@
 package com.nextstep.nextstepBackEnd.service;
 
-
 import com.nextstep.nextstepBackEnd.model.Usuario;
 import com.nextstep.nextstepBackEnd.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,13 +23,13 @@ public class UsuarioService implements UserDetailsService {
 
         return User.builder()
                 .username(usuario.getCorreo())
-                .password(usuario.getContraseña())
+                .password(usuario.getContrasena()) // Asegúrate de que este es el getter correcto
                 .roles(usuario.getRol().name())
                 .build();
     }
 
-    public Usuario registrarUsuario(Usuario usuario) {
-        usuario.setContraseña(passwordEncoder.encode(usuario.getContraseña()));
-        return usuarioRepository.save(usuario);
+    public void registrarUsuario(Usuario usuario) {
+        usuario.setContrasena(passwordEncoder.encode(usuario.getContrasena()));
+        usuarioRepository.save(usuario);
     }
 }

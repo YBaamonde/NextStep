@@ -2,8 +2,6 @@ package com.nextstep.nextstepBackEnd.model;
 
 import jakarta.persistence.*;
 
-
-// Anotación para indicar que es una entidad
 @Entity
 @Table(name = "Usuario")
 public class Usuario {
@@ -19,15 +17,13 @@ public class Usuario {
     private String correo;
 
     @Column(nullable = false)
-    private String contraseña;
+    private String contrasena;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Rol rol;
 
     // Getters y Setters
-
-
     public Long getId() {
         return id;
     }
@@ -52,12 +48,12 @@ public class Usuario {
         this.correo = correo;
     }
 
-    public String getContraseña() {
-        return contraseña;
+    public String getContrasena() {
+        return contrasena;
     }
 
-    public void setContraseña(String contraseña) {
-        this.contraseña = contraseña;
+    public void setContrasena(String contrasena) {
+        this.contrasena = contrasena;
     }
 
     public Rol getRol() {
@@ -69,17 +65,14 @@ public class Usuario {
     }
 
     // Constructores
-
     public Usuario() {
-
     }
 
-    public Usuario(Long id, String nombre, String correo, String contraseña, Rol rol) {
+    public Usuario(Long id, String nombre, String correo, String contrasena, Rol rol) {
         this.id = id;
         this.nombre = nombre;
         this.correo = correo;
-        this.contraseña = contraseña;
+        this.contrasena = contrasena;
         this.rol = rol;
     }
 }
-
