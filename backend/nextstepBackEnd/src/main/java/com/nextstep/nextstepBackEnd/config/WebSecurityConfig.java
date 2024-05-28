@@ -1,55 +1,54 @@
 package com.nextstep.nextstepBackEnd.config;
 
+import com.nextstep.nextstepBackEnd.service.UsuarioService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-public class WebSecurityConfig {
+@EnableWebSecurity
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .authorizeRequests(authorize -> {
-                    try {
-                        authorize
-                                .requestMatchers("/login").permitAll() // allow unauthenticated access to /login
-                                .requestMatchers("/auth/register").permitAll() // allow unauthenticated access to /auth/register
-                                .requestMatchers("/css/**", "/js/**", "/images/**", "/error/**").permitAll() // allow access to static resources and error pages
-                                .anyRequest().authenticated(); // all other requests require authentication
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .formLogin(formLogin -> {
-                    try {
-                        formLogin
-                                .loginPage("/login") // specify the login page
-                                .defaultSuccessUrl("/home", true) // redirect to /home after successful login
-                                .permitAll(); // allow unauthenticated access to the login process
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .logout(logout -> {
-                    try {
-                        logout
-                                .logoutUrl("/logout")
-                                .logoutSuccessUrl("/login?logout")
-                                .permitAll();
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                });
+    @Autowired
+    private JwtRequestFilter jwtRequestFilter;
 
-        return http.build();
+    @Autowired
+    private UsuarioService usuarioService;
+
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.userDetailsService(usuarioService).passwordEncoder(passwordEncoder());
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    @Override
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
+    }
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.csrf().disable()
+                .authorizeRequests()
+                .antMatchers("/register", "/login").permitAll()
+                .anyRequest().authenticated()
+                .and()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
+        http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
     }
 }

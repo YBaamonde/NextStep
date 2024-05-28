@@ -1,4 +1,4 @@
-USE NextStep;
+USE NextStepDB;
 
 -- Prueba de inserción de usuarios
 INSERT INTO Usuario (nombre, correo, contraseña, rol) VALUES 
