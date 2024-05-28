@@ -13,9 +13,6 @@ public class UsuarioService implements UserDetailsService {
     @Autowired
     private UserRepository usuarioRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
     @Override
     public UserDetails loadUserByUsername(String correo) throws UsernameNotFoundException {
         Usuario usuario = usuarioRepository.findByCorreo(correo)
@@ -29,7 +26,7 @@ public class UsuarioService implements UserDetailsService {
     }
 
     public void registrarUsuario(Usuario usuario) {
-        usuario.setContrasena(passwordEncoder.encode(usuario.getContrasena()));
+        // Registrar usuario sin passwordEncoder.encode
         usuarioRepository.save(usuario);
     }
 }

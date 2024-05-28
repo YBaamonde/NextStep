@@ -2,7 +2,7 @@ package com.nextstep.nextstepBackEnd.controller;
 
 import com.nextstep.nextstepBackEnd.model.Usuario;
 import com.nextstep.nextstepBackEnd.service.UsuarioService;
-import com.nextstep.nextstepBackEnd.util.JwtUtil;
+import com.nextstep.nextstepBackEnd.config.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
