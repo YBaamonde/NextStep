@@ -1,14 +1,22 @@
 package com.nextstep.nextstepBackEnd.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
+import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-@Getter
+import java.util.Collection;
+import java.util.List;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
-@Table(name = "Usuario")
-public class Usuario {
+@Table(name = "Usuario", uniqueConstraints = {@UniqueConstraint(columnNames = {"correo"})})
+public class Usuario implements UserDetails {
 
-    // Getters y Setters
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,35 +34,30 @@ public class Usuario {
     @Column(nullable = false)
     private Rol rol;
 
-    public void setId(Long id) {
-        this.id = id;
+
+    // Métodos de UserDetails
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority((rol.name())));
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
     }
 
-    public void setCorreo(String correo) {
-        this.correo = correo;
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
     }
 
-    public void setContrasena(String contrasena) {
-        this.contrasena = contrasena;
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
     }
 
-    public void setRol(Rol rol) {
-        this.rol = rol;
-    }
-
-    // Constructores
-    public Usuario() {
-    }
-
-    public Usuario(Long id, String nombre, String correo, String contrasena, Rol rol) {
-        this.id = id;
-        this.nombre = nombre;
-        this.correo = correo;
-        this.contrasena = contrasena;
-        this.rol = rol;
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }
