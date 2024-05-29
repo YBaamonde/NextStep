@@ -15,24 +15,23 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "Usuario", uniqueConstraints = {@UniqueConstraint(columnNames = {"correo"})})
+
 public class Usuario implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue
+    Integer id;
 
-    @Column(nullable = false)
-    private String nombre;
+    String nombre;
 
+    @Basic
     @Column(unique = true, nullable = false)
-    private String correo;
+    String username;
 
-    @Column(nullable = false)
-    private String contrasena;
+    String password;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Rol rol;
+    Rol rol;
 
 
     // Métodos de UserDetails
@@ -40,22 +39,18 @@ public class Usuario implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority((rol.name())));
     }
-
     @Override
     public boolean isAccountNonExpired() {
         return true;
     }
-
     @Override
     public boolean isAccountNonLocked() {
         return true;
     }
-
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
-
     @Override
     public boolean isEnabled() {
         return true;

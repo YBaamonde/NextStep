@@ -4,7 +4,6 @@ import com.nextstep.nextstepBackEnd.model.Usuario;
 import com.nextstep.nextstepBackEnd.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.*;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,13 +13,13 @@ public class UsuarioService implements UserDetailsService {
     private UserRepository usuarioRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String correo) throws UsernameNotFoundException {
-        Usuario usuario = usuarioRepository.findByCorreo(correo)
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Usuario usuario = usuarioRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
         return User.builder()
-                .username(usuario.getCorreo())
-                .password(usuario.getContrasena()) // Asegúrate de que este es el getter correcto
+                .username(usuario.getUsername())
+                .password(usuario.getPassword()) // Asegúrate de que este es el getter correcto
                 .roles(usuario.getRol().name())
                 .build();
     }

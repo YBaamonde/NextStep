@@ -8,8 +8,8 @@ USE NextStepDB;
 CREATE TABLE Usuario (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(255) NOT NULL,
-    correo VARCHAR(255) UNIQUE NOT NULL,
-    contrasena VARCHAR(255) NOT NULL,
+    username VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
     rol ENUM('normal', 'admin') NOT NULL
 );
 
@@ -64,7 +64,7 @@ CREATE TABLE Informe (
 -- Insertar algunos datos de prueba
 
 -- Insertar usuarios
-INSERT INTO Usuario (nombre, correo, contrasena, rol) VALUES 
+INSERT INTO Usuario (nombre, username, password, rol) VALUES 
 ('Juan Perez', 'juan.perez@example.com', 'hashed_password1', 'normal'),
 ('Maria Lopez', 'maria.lopez@example.com', 'hashed_password2', 'normal'),
 ('Admin', 'admin@example.com', 'hashed_password3', 'admin');
