@@ -1,7 +1,7 @@
 USE NextStepDB;
 
 -- Prueba de inserción de usuarios
-INSERT INTO Usuario (nombre, correo, contraseña, rol) VALUES 
+INSERT INTO Usuario (nombre, username, password, rol) VALUES 
 ('Carlos Sanchez', 'carlos.sanchez@example.com', 'hashed_password4', 'normal'),
 ('Ana Gutierrez', 'ana.gutierrez@example.com', 'hashed_password5', 'normal'),
 ('SuperAdmin', 'superadmin@example.com', 'hashed_password6', 'admin');

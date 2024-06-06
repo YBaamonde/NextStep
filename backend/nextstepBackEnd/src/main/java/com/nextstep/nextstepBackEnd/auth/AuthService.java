@@ -10,9 +10,15 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Transactional;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
     private final UserRepository userRepository;
     private final JwtService jwtService;
@@ -27,15 +33,19 @@ public class AuthService {
                 .build();
     }
 
+    @Transactional
     public AuthResponse register(RegisterRequest request) {
+        logger.info("Registering user: {}", request.getUsername());
+
         Usuario usuario = Usuario.builder()
                 .nombre(request.getNombre())
-                .username(request.getUsername()) // change this line
+                .username(request.getUsername())
                 .password(request.getPassword())
                 .rol(Rol.NORMAL)
                 .build();
 
         userRepository.save(usuario);
+        logger.info("User registered: {}", usuario.getUsername());
 
         return AuthResponse.builder()
                 .token(jwtService.getToken(usuario))

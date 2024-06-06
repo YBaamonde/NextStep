@@ -1,5 +1,5 @@
 -- Eliminar la base de datos si existe
-DROP DATABASE IF EXISTS NextStepDB;
+-- DROP DATABASE IF EXISTS NextStepDB;
 
 CREATE DATABASE NextStepDB;
 USE NextStepDB;
