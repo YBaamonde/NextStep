@@ -44,8 +44,8 @@ public class JwtService {
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username=getUsernameFromToken(token);
-        return (username.equals(userDetails.getUsername())&& !isTokenExpired(token));
+        final String username = getUsernameFromToken(token);
+        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
     private Claims getAllClaims(String token)
@@ -60,7 +60,7 @@ public class JwtService {
 
     public <T> T getClaim(String token, Function<Claims,T> claimsResolver)
     {
-        final Claims claims=getAllClaims(token);
+        final Claims claims = getAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
