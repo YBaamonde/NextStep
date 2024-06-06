@@ -44,7 +44,7 @@ public class AuthService {
                 .nombre(request.getNombre())
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword())) // Cifra la contraseña antes de guardarla
-                .rol(Rol.NORMAL)
+                .rol(Rol.valueOf(request.getRol().toUpperCase()))
                 .build();
 
         userRepository.save(usuario);
