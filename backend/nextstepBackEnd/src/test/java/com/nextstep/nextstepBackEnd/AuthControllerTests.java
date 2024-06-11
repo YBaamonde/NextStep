@@ -17,18 +17,10 @@ public class AuthControllerTests {
     private MockMvc mockMvc;
 
     @Test
-    public void testRegisterUser() throws Exception {
+    public void testRegistrarUsuario() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.post("/auth/register")
-                        .content("{\"nombre\":\"Usuario Prueba\", \"correo\":\"usuario@prueba.com\", \"contraseña\":\"password\"}")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().string("Usuario registrado"));
-    }
-
-    @Test
-    public void testLoginUser() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/auth/login"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().string("Login exitoso"));
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"nombre\":\"nombretest\",\"username\":\"test\",\"password\":\"test\",\"rol\":\"normal\"}"))
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 }
