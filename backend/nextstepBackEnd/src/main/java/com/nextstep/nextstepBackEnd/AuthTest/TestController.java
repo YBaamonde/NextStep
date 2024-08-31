@@ -12,8 +12,12 @@ import lombok.RequiredArgsConstructor;
 public class TestController {
 
     @PostMapping(value = "test")
-    public String welcome()
+    public String bienvenida()
     {
-        return "Bienvenido a la API de NextStep";
+        if (true) {
+            return "Bienvenido a la zona protegida";
+        } else {
+            return "No tienes permisos para acceder a esta zona";
+        }
     }
 }
