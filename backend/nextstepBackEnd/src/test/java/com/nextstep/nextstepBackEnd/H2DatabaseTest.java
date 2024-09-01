@@ -1,7 +1,7 @@
 package com.nextstep.nextstepBackEnd;
 
-import com.nextstep.nextstepBackEnd.model.Usuario;
 import com.nextstep.nextstepBackEnd.repository.UserRepository;
+import com.nextstep.nextstepBackEnd.model.Usuario;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,4 +31,5 @@ public class H2DatabaseTest {
         assertTrue("testuser".equals(foundUser.getUsername()), "Username should match");
     }
 }
+
 
