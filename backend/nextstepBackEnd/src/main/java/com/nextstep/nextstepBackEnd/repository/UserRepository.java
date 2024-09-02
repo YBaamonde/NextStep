@@ -7,6 +7,7 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<Usuario, Long> {
 
+    // Método para buscar un usuario por su nombre de usuario (correo)
     Optional<Usuario>findByUsername(String correo);
 
 }
