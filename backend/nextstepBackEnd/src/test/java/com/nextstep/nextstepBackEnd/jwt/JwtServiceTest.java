@@ -1,6 +1,5 @@
-package com.nextstep.nextstepBackEnd;
+package com.nextstep.nextstepBackEnd.jwt;
 
-import com.nextstep.nextstepBackEnd.jwt.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;

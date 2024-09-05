@@ -1,9 +1,5 @@
-package com.nextstep.nextstepBackEnd;
+package com.nextstep.nextstepBackEnd.auth;
 
-import com.nextstep.nextstepBackEnd.auth.AuthResponse;
-import com.nextstep.nextstepBackEnd.auth.AuthService;
-import com.nextstep.nextstepBackEnd.auth.LoginRequest;
-import com.nextstep.nextstepBackEnd.auth.RegisterRequest;
 import com.nextstep.nextstepBackEnd.jwt.JwtService;
 import com.nextstep.nextstepBackEnd.model.Usuario;
 import com.nextstep.nextstepBackEnd.repository.UserRepository;

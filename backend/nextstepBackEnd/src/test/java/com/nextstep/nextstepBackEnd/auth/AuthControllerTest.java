@@ -1,10 +1,5 @@
-package com.nextstep.nextstepBackEnd;
+package com.nextstep.nextstepBackEnd.auth;
 
-import com.nextstep.nextstepBackEnd.auth.AuthController;
-import com.nextstep.nextstepBackEnd.auth.AuthResponse;
-import com.nextstep.nextstepBackEnd.auth.AuthService;
-import com.nextstep.nextstepBackEnd.auth.LoginRequest;
-import com.nextstep.nextstepBackEnd.auth.RegisterRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
