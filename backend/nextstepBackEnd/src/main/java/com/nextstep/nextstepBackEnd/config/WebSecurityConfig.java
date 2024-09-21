@@ -1,6 +1,7 @@
 package com.nextstep.nextstepBackEnd.config;
 
 import com.nextstep.nextstepBackEnd.jwt.JwtAuthFilter;
+import com.nextstep.nextstepBackEnd.jwt.JwtAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,7 +30,7 @@ public class WebSecurityConfig {
         return http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers("auth/**").permitAll()
+                                .requestMatchers("/auth/login", "/auth/register").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(sessionManagement ->
@@ -37,7 +38,11 @@ public class WebSecurityConfig {
                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(exceptions ->
+                        exceptions
+                                .authenticationEntryPoint(new JwtAuthenticationEntryPoint())) // Manejo de excepciones personalizado
                 .build();
     }
 
-    }
+
+}
