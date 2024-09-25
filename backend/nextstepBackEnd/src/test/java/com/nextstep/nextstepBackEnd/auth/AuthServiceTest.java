@@ -67,7 +67,7 @@ public class AuthServiceTest {
         verify(jwtService).getToken(user); // Verifica que se generó un token para el usuario
     }
 
-    // Test para el método register
+    // Test para el metodo register
     @Test
     public void testRegister() {
         // Arrange: Configura el escenario de prueba
@@ -81,7 +81,7 @@ public class AuthServiceTest {
         when(passwordEncoder.encode(password)).thenReturn(encodedPassword);
         when(jwtService.getToken(any(Usuario.class))).thenReturn(token);
 
-        // Act: Ejecuta el método a probar
+        // Act: Ejecuta el metodo a probar
         AuthResponse response = authService.register(request);
 
         // Assert: Verifica que el comportamiento sea el esperado
