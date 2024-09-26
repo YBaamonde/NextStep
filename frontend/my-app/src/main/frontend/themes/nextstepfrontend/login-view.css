@@ -1,0 +1,43 @@
+/* login-view.css */
+.login-view {
+    display: flex;
+    justify-content: flex-start; /* Alinea a la izquierda */
+    align-items: center;
+    height: 100vh;
+    padding-left: 5%; /* Añade un padding para dar un poco de margen a la izquierda */
+    background: url('H:/Documentos/UFV/PFG II/frontend/my-app/src/main/resources/media/edificiosLogin.jpg') no-repeat center center;
+    background-size: cover;
+}
+
+.login-container {
+    background-color: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 2rem;
+    width: 350px; /* Ajuste a un ancho más normal */
+    max-width: 350px; /* Fija el ancho máximo */
+    text-align: center;
+}
+
+.login-container h1 {
+    color: #FF5722; /* Color similar al del botón */
+    font-size: 2rem;
+    margin-bottom: 0;
+}
+
+.login-container p {
+    font-size: 1rem;
+    color: #9E9E9E;
+    margin-top: 0;
+}
+
+.login-container .vaadin-login-form {
+    /* width: 100%; */
+}
+
+.login-container .vaadin-button {
+    background-color: #FF5722; /* Color del botón de inicio */
+    color: white;
+    width: 100%; /* Asegura que el botón ocupe el ancho completo */
+}
+
