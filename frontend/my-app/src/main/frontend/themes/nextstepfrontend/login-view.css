@@ -41,10 +41,6 @@
     width: 100%; /* Asegura que el botón ocupe el ancho completo */
 }
 
-.vaadin-button-container {
-    cursor: pointer;
-}
-
 /* Estilo del botón de registro */
 .register-button {
     background: none;
