@@ -5,7 +5,7 @@
     align-items: center;
     height: 100vh;
     padding-left: 5%; /* Añade un padding para dar un poco de margen a la izquierda */
-    background: url('H:/Documentos/UFV/PFG II/frontend/my-app/src/main/resources/media/edificiosLogin.jpg') no-repeat center center;
+    background: url('../../../resources/media/edificiosLogin.jpg') no-repeat center center;
     background-size: cover;
 }
 
