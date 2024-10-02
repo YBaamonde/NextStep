@@ -31,10 +31,6 @@
     margin-top: 0;
 }
 
-.login-container .vaadin-login-form {
-    /* width: 100%; */
-}
-
 .login-container .vaadin-button {
     background-color: #FF5722; /* Color del botón de inicio */
     color: white;
@@ -42,7 +38,7 @@
 }
 
 /* Estilo del botón de registro */
-.register-button {
+.register-link {
     background: none;
     border: none;
     color: #FF5722;
@@ -52,7 +48,7 @@
 }
 
 /* Estilo del botón de registro en formulario de registro */
-.register-button2 {
+.register-summit-button {
     background-color: white;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     text-align: center;

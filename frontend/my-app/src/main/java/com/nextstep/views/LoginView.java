@@ -3,13 +3,10 @@ package com.nextstep.views;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.login.LoginForm;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.RouterLink;
 
 @CssImport("./themes/nextstepfrontend/login-view.css")
 @Route("login")
@@ -32,7 +29,7 @@ public class LoginView extends Div {
         });
 
         // Estilo del botón de registro
-        registerButton.addClassName("register-button");
+        registerButton.addClassName("register-link");
 
 
         LoginForm loginForm = new LoginForm();

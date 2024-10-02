@@ -44,7 +44,7 @@ public class RegisterView extends Div {
         });
 
         // Estilo del botón de registro
-        registerButton.addClassName("register-button2");
+        registerButton.addClassName("register-summit-button");
 
         // Añadir el botón al layout
         layout.add(registerButton);
