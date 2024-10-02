@@ -33,8 +33,9 @@ public class RegisterView extends Div {
         TextField usernameField = new TextField("Username");
         TextField emailField = new TextField("Email");
         PasswordField passwordField = new PasswordField("Password");
+        PasswordField passwordField2 = new PasswordField("Confirm Password");
 
-        layout.add(usernameField, emailField, passwordField);
+        layout.add(usernameField, emailField, passwordField, passwordField2);
 
         // Botón para registrarse
         Button registerButton = new Button("Register", event -> {
@@ -43,7 +44,7 @@ public class RegisterView extends Div {
         });
 
         // Estilo del botón de registro
-        registerButton.addClassName("register-button");
+        registerButton.addClassName("register-button2");
 
         // Añadir el botón al layout
         layout.add(registerButton);
