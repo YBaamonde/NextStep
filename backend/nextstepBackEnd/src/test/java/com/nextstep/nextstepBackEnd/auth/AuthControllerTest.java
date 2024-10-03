@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -65,32 +66,31 @@ public class AuthControllerTest {
 
     // Prueba para casos en los que el servicio lanza una excepción
     @Test
-    public void testLoginWithException() {
-        // Arrange
-        LoginRequest request = new LoginRequest("testuser", "testpassword");
-        // Configura el comportamiento simulado para lanzar una excepción
-        when(authService.login(any(LoginRequest.class))).thenThrow(new RuntimeException("Login failed"));
+    public void testLoginThrowsException() {
+        LoginRequest request = new LoginRequest("username", "password");
 
-        // Act
+        // Simula que el servicio lanza una excepción
+        when(authService.login(request)).thenThrow(new RuntimeException("Error en el servicio"));
+
         ResponseEntity<AuthResponse> response = authController.login(request);
 
-        // Assert
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);  // Verifica que el código de estado sea 500 Internal Server Error
-        assertThat(response.getBody()).isNull();  // Verifica que el cuerpo de la respuesta sea nulo
+        // Verifica que el código de estado sea 500
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals(null, response.getBody());
     }
 
     @Test
-    public void testRegisterWithException() {
-        // Arrange
-        RegisterRequest request = new RegisterRequest("Test User", "testuser", "testpassword", "USER");
-        // Configura el comportamiento simulado para lanzar una excepción
-        when(authService.register(any(RegisterRequest.class))).thenThrow(new RuntimeException("Registration failed"));
+    public void testRegisterThrowsException() {
+        // Proporciona todos los parámetros requeridos
+        RegisterRequest request = new RegisterRequest("Nombre", "username", "password", "rol");
 
-        // Act
+        // Simula que el servicio lanza una excepción
+        when(authService.register(request)).thenThrow(new RuntimeException("Error en el servicio"));
+
         ResponseEntity<AuthResponse> response = authController.register(request);
 
-        // Assert
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);  // Verifica que el código de estado sea 500 Internal Server Error
-        assertThat(response.getBody()).isNull();  // Verifica que el cuerpo de la respuesta sea nulo
+        // Verifica que el código de estado sea 500
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals(null, response.getBody());
     }
 }
