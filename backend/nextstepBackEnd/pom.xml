@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.nextstep</groupId>
-	<artifactId>nextstepBackEnd</artifactId>
+	<artifactId>nextStepBackEnd</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>nextstepBackEnd</name>
 	<description>Backend para el proyecto NextStep</description>
