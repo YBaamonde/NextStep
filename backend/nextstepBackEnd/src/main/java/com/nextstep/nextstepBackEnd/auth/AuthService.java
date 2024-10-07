@@ -51,26 +51,22 @@ public class AuthService {
     public AuthResponse register(RegisterRequest request) {
         logger.info("Registering user: {}", request.getUsername());
 
-        // Verifica si el nombre de usuario ya existe
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-            logger.warn("Username already taken: {}", request.getUsername());
             throw new RuntimeException("Username already taken");
         }
 
-        // Crea el usuario si el nombre de usuario es único
         Usuario usuario = Usuario.builder()
                 .nombre(request.getNombre())
                 .username(request.getUsername())
-                .password(passwordEncoder.encode(request.getPassword())) // Cifra la contraseña antes de guardarla
-                .rol(Rol.valueOf(request.getRol()))
+                .password(passwordEncoder.encode(request.getPassword()))  // Encripta la contraseña
+                .rol(Rol.normal)  // Todos los usuarios que se registren tendrán el rol 'normal', porque solo hay un admin
                 .build();
 
         userRepository.save(usuario);
-        logger.info("User registered: {}", usuario.getUsername());
-
         return AuthResponse.builder()
                 .token(jwtService.getToken(usuario))
                 .build();
     }
+
 
 }

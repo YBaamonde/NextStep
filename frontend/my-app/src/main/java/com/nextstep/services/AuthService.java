@@ -28,11 +28,11 @@ public class AuthService {
     }
 
     // Método para realizar login
-    public void login(String username, String password) {
+    public void login(String email, String password) {
         try {
             // Crear el cuerpo del request
             Map<String, String> requestBody = new HashMap<>();
-            requestBody.put("username", username);
+            requestBody.put("username", email);
             requestBody.put("password", password);
 
             // Convertir el cuerpo a JSON
@@ -52,7 +52,7 @@ public class AuthService {
             if (response.statusCode() == 200) {
                 // Aquí se maneja el JWT recibido
                 Map<String, String> responseMap = objectMapper.readValue(response.body(), new TypeReference<>() {});
-                String token = responseMap.get("token"); // Suponiendo que el backend devuelve el token en la clave 'token'
+                String token = responseMap.get("token");
 
                 Notification.show("Inicio de sesión exitoso. Token: " + token);
                 // Almacena el token o úsalo para futuras solicitudes
@@ -64,16 +64,15 @@ public class AuthService {
         }
     }
 
-    // Método para realizar registro
-    public void register(String username, String email, String password, String confirmPassword, String rol) {
+    // Método para registrar al usuario (sin el parámetro 'rol')
+    public void register(String username, String email, String password, String confirmPassword) {
         try {
             // Crear el cuerpo del request
             Map<String, String> requestBody = new HashMap<>();
-            requestBody.put("username", username);
-            requestBody.put("email", email);
+            requestBody.put("nombre", username);  // Se espera el 'nombre' del usuario
+            requestBody.put("username", email);
             requestBody.put("password", password);
-            requestBody.put("confirmPassword", confirmPassword);
-            requestBody.put("rol", rol); // Añadir el rol al request
+            requestBody.put("confirmPassword", confirmPassword);  // Validar las contraseñas antes de enviar
 
             // Convertir el cuerpo a JSON
             String requestBodyJson = objectMapper.writeValueAsString(requestBody);
