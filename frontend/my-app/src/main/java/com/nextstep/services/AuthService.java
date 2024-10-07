@@ -3,6 +3,7 @@ package com.nextstep.services;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.notification.Notification;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URI;
@@ -12,6 +13,7 @@ import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.Map;
 
+@Service
 public class AuthService {
 
     private final String baseUrl; // URL base del backend
@@ -19,8 +21,8 @@ public class AuthService {
     private final ObjectMapper objectMapper;
 
     // Constructor que acepta la URL base
-    public AuthService(String baseUrl) {
-        this.baseUrl = baseUrl;
+    public AuthService() {
+        this.baseUrl = "http://localhost:8080";
         this.client = HttpClient.newHttpClient();
         this.objectMapper = new ObjectMapper();
     }
@@ -63,7 +65,7 @@ public class AuthService {
     }
 
     // Método para realizar registro
-    public void register(String username, String email, String password, String confirmPassword) {
+    public void register(String username, String email, String password, String confirmPassword, String rol) {
         try {
             // Crear el cuerpo del request
             Map<String, String> requestBody = new HashMap<>();
@@ -71,6 +73,7 @@ public class AuthService {
             requestBody.put("email", email);
             requestBody.put("password", password);
             requestBody.put("confirmPassword", confirmPassword);
+            requestBody.put("rol", rol); // Añadir el rol al request
 
             // Convertir el cuerpo a JSON
             String requestBodyJson = objectMapper.writeValueAsString(requestBody);
