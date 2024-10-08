@@ -114,22 +114,49 @@ public class AuthServiceTest {
     // Test para registro con un nombre de usuario ya existente
     @Test
     public void testRegisterWithExistingUsername() {
-        // Arrange: Configura el escenario de prueba con un nombre de usuario existente
+        // Configura el escenario de prueba con un nombre de usuario existente
         String username = "existingUser";
+        String email = "test@example.com"; // Agrega un correo ficticio
         String password = "testpassword";
-        RegisterRequest request = new RegisterRequest("Test User", username, password, "normal");
+        RegisterRequest request = new RegisterRequest(username, email, password, "normal");
 
         // Simula que ya existe un usuario con ese nombre
         when(userRepository.findByUsername(username)).thenReturn(Optional.of(new Usuario()));
 
-        // Act & Assert: Verifica que se lance una excepción al intentar registrar un usuario con un nombre de usuario ya existente
+        // Verifica que se lance una excepción al intentar registrar un usuario con un nombre de usuario ya existente
         Exception exception = assertThrows(RuntimeException.class, () -> {
             authService.register(request);
         });
 
-        assertEquals("Username already taken", exception.getMessage()); // Verifica que la excepción tenga el mensaje correcto
+        assertEquals("Username already taken", exception.getMessage());
+        verify(userRepository, never()).save(any(Usuario.class));
+        verify(passwordEncoder, never()).encode(password);
+        verify(jwtService, never()).getToken(any(Usuario.class));
+    }
+
+
+    // Test para registro con un email ya existente
+    @Test
+    public void testRegisterWithExistingEmail() {
+        // Configura el escenario de prueba con un correo existente
+        String username = "newUser";
+        String email = "existingUser@example.com"; // Mantén el mismo orden
+        String password = "testpassword";
+        RegisterRequest request = new RegisterRequest(username, email, password, "normal");
+
+        // Simula que ya existe un usuario con ese correo
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(new Usuario()));
+
+        // Verifica que se lance una excepción al intentar registrar un usuario con un correo ya existente
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            authService.register(request);
+        });
+
+        assertEquals("Email already exists", exception.getMessage()); // Verifica que la excepción tenga el mensaje correcto
         verify(userRepository, never()).save(any(Usuario.class)); // Verifica que no se intenta guardar un usuario nuevo
         verify(passwordEncoder, never()).encode(password); // Verifica que no se codifica la contraseña
         verify(jwtService, never()).getToken(any(Usuario.class)); // Verifica que no se genera un token
     }
+
+
 }

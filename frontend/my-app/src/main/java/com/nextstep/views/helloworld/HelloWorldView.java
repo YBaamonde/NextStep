@@ -28,6 +28,9 @@ public class HelloWorldView extends HorizontalLayout {
         setVerticalComponentAlignment(Alignment.END, name, sayHello);
 
         add(name, sayHello);
+
+
+
     }
 
 }

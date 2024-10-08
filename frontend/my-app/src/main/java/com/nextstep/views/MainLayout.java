@@ -50,7 +50,10 @@ public class MainLayout extends AppLayout {
     private SideNav createNavigation() {
         SideNav nav = new SideNav();
 
+        // Agregar elementos de navegación para las vistas
         nav.addItem(new SideNavItem("Hello World", HelloWorldView.class, LineAwesomeIcon.GLOBE_SOLID.create()));
+        nav.addItem(new SideNavItem("Login", LoginView.class, LineAwesomeIcon.USER.create()));
+        nav.addItem(new SideNavItem("Register", RegisterView.class, LineAwesomeIcon.USER.create()));
 
         return nav;
     }

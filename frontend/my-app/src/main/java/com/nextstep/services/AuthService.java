@@ -2,7 +2,10 @@ package com.nextstep.services;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nextstep.views.helloworld.HelloWorldView;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.router.Router;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -16,46 +19,41 @@ import java.util.Map;
 @Service
 public class AuthService {
 
-    private final String baseUrl; // URL base del backend
+    private final String baseUrl;
     private final HttpClient client;
     private final ObjectMapper objectMapper;
+    // private final Router router; // Inyecta el router para manejar redirecciones
 
-    // Constructor que acepta la URL base
-    public AuthService() {
-        this.baseUrl = "http://localhost:8080";
+    public AuthService(/* Router router */) {
+        this.baseUrl = "http://localhost:8081";
         this.client = HttpClient.newHttpClient();
         this.objectMapper = new ObjectMapper();
+        // this.router = router; // Inicializa el router
     }
 
-    // Método para realizar login
-    public void login(String email, String password) {
+    public void login(String username, String password) {
         try {
-            // Crear el cuerpo del request
             Map<String, String> requestBody = new HashMap<>();
-            requestBody.put("username", email);
+            requestBody.put("username", username);
             requestBody.put("password", password);
 
-            // Convertir el cuerpo a JSON
             String requestBodyJson = objectMapper.writeValueAsString(requestBody);
 
-            // Crear la solicitud HTTP POST
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(baseUrl + "/auth/login"))  // Endpoint de login
+                    .uri(URI.create(baseUrl + "/auth/login"))
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(requestBodyJson))
                     .build();
 
-            // Enviar la solicitud
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            // Verificar si la respuesta es exitosa (código 200)
             if (response.statusCode() == 200) {
-                // Aquí se maneja el JWT recibido
                 Map<String, String> responseMap = objectMapper.readValue(response.body(), new TypeReference<>() {});
                 String token = responseMap.get("token");
-
                 Notification.show("Inicio de sesión exitoso. Token: " + token);
-                // Almacena el token o úsalo para futuras solicitudes
+
+                // Redirige a la página de inicio después del inicio de sesión exitoso
+                UI.getCurrent().navigate(HelloWorldView.class); // Navegar a HelloWorldView
             } else {
                 Notification.show("Error en el inicio de sesión. Estado: " + response.statusCode());
             }
@@ -64,32 +62,29 @@ public class AuthService {
         }
     }
 
-    // Método para registrar al usuario (sin el parámetro 'rol')
     public void register(String username, String email, String password, String confirmPassword) {
         try {
-            // Crear el cuerpo del request
             Map<String, String> requestBody = new HashMap<>();
-            requestBody.put("nombre", username);  // Se espera el 'nombre' del usuario
-            requestBody.put("username", email);
+            requestBody.put("nombre", username); // 'nombre' en lugar de 'username'
+            requestBody.put("username", email); // 'username' como el email
             requestBody.put("password", password);
-            requestBody.put("confirmPassword", confirmPassword);  // Validar las contraseñas antes de enviar
+            requestBody.put("rol", "normal"); // Asignar "normal" directamente
 
-            // Convertir el cuerpo a JSON
             String requestBodyJson = objectMapper.writeValueAsString(requestBody);
 
-            // Crear la solicitud HTTP POST
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(baseUrl + "/auth/register"))  // Endpoint de registro
+                    .uri(URI.create(baseUrl + "/auth/register"))
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(requestBodyJson))
                     .build();
 
-            // Enviar la solicitud
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            // Verificar si la respuesta es exitosa (código 201 para creación exitosa)
             if (response.statusCode() == 201) {
-                Notification.show("Registro exitoso.");
+                Notification.show("Registro exitoso. Redirigiendo a la página de inicio de sesión...");
+
+                // Redirige a la página de inicio de sesión después del registro exitoso
+                UI.getCurrent().navigate("login");  // Navegar a la vista de login
             } else {
                 Notification.show("Error en el registro. Estado: " + response.statusCode());
             }
@@ -97,4 +92,5 @@ public class AuthService {
             Notification.show("Ocurrió un error durante el registro: " + e.getMessage());
         }
     }
+
 }

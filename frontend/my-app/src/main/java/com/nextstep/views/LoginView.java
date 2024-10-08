@@ -14,6 +14,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 public class LoginView extends Div {
 
     public LoginView() {
+
         addClassName("login-view");
 
         // Crear un layout para centrar el formulario
@@ -39,6 +40,7 @@ public class LoginView extends Div {
         LoginI18n i18n = LoginI18n.createDefault();
 
         i18n.getForm().setTitle("Inicio de sesión");
+        i18n.getForm().setUsername("Email");
         i18n.getForm().setSubmit("Iniciar sesión");
         i18n.getForm().setForgotPassword("Olvidé mi contraseña");
         loginForm.setI18n(i18n); // Establecer el texto personalizado en el formulario

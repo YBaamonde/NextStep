@@ -49,7 +49,7 @@ public class AuthControllerTest {
     public void testRegister() {
         // Arrange
         String token = "testtoken";
-        RegisterRequest request = new RegisterRequest("Test User", "testuser", "testpassword", "USER");
+        RegisterRequest request = new RegisterRequest("Test User", "testuser", "testpassword", "normal");
         AuthResponse authResponse = new AuthResponse(token);
 
         // Configura el comportamiento simulado del servicio
@@ -59,7 +59,7 @@ public class AuthControllerTest {
         ResponseEntity<AuthResponse> response = authController.register(request);
 
         // Assert
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);  // Verifica que el código de estado sea 200 OK
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);  // Verifica que el código de estado sea 200 OK
         assertThat(response.getBody()).isNotNull();  // Verifica que el cuerpo de la respuesta no sea nulo
         assertThat(response.getBody().getToken()).isEqualTo(token);  // Verifica que el token en la respuesta sea el esperado
     }

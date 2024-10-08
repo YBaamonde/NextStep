@@ -4,6 +4,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
@@ -44,15 +45,21 @@ public class RegisterView extends Div {
         layout.add(usernameField, emailField, passwordField, confirmPasswordField);
 
         // Botón para registrarse
-        Button registerButton = new Button("Registrar", event -> {
+        Button registerButton = new Button("Registrarse"); // Asignar texto al botón
+        registerButton.addClickListener(event -> {
             String username = usernameField.getValue();
             String email = emailField.getValue();
             String password = passwordField.getValue();
             String confirmPassword = confirmPasswordField.getValue();
 
-            // Llama al servicio de registro del frontend
-            authService.register(username, email, password, confirmPassword);
+            if (!password.equals(confirmPassword)) {
+                Notification.show("Las contraseñas no coinciden", 3000, Notification.Position.MIDDLE);
+            } else {
+                // Usar AuthService para registrar al usuario
+                authService.register(username, email, password, confirmPassword);
+            }
         });
+
 
         registerButton.addClassName("register-summit-button");
         layout.add(registerButton);
