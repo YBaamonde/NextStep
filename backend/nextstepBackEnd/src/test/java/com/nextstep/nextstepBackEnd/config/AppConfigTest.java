@@ -78,6 +78,7 @@ public class AppConfigTest {
         Usuario mockUser = new Usuario();
         mockUser.setId(1);
         mockUser.setUsername("user");
+        mockUser.setEmail("email@simulado.com");
         mockUser.setPassword("password");
         mockUser.setRol(Rol.normal);
 
