@@ -32,6 +32,7 @@ public class Usuario implements UserDetails {
     @Column(unique = true, nullable = false)
     String email;  // Correo electrónico
 
+    @Column(nullable = false)
     String password;
 
     @Enumerated(EnumType.STRING)

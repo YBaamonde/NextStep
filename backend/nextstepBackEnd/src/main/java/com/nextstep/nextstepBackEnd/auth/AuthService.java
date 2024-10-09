@@ -28,8 +28,8 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder; // Inyecta el PasswordEncoder
 
     public AuthResponse login(LoginRequest request) {
-        // Verifica si el usuario existe en la base de datos antes de intentar autenticar
-        UserDetails user = userRepository.findByUsername(request.getUsername())
+        // Busca al usuario por nombre de usuario o email
+        UserDetails user = userRepository.findByUsernameOrEmail(request.getUsername(), request.getUsername())
                 .orElseThrow(() -> new RuntimeException("Invalid credentials"));
 
         // Autentica al usuario usando las credenciales proporcionadas
@@ -45,6 +45,7 @@ public class AuthService {
                 .token(token)
                 .build();
     }
+
 
 
     @Transactional
