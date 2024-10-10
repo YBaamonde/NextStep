@@ -30,12 +30,18 @@ public class AuthService {
 
     public AuthResponse login(LoginRequest request) {
         // Busca al usuario por nombre de usuario o email
-        UserDetails user = userRepository.findByUsernameOrEmail(request.getUsername(), request.getEmail())
+        UserDetails user = userRepository.findByUsernameOrEmail(request.getUsername(), request.getUsername())
                 .orElseThrow(() -> new InvalidCredentialsException("Invalid credentials"));
+
+        // Determina si se ingresó un email o un nombre de usuario
+        String loginIdentifier = request.getUsername();
+        if (loginIdentifier.contains("@")) {
+            loginIdentifier = user.getUsername(); // Si es un email, usa el nombre de usuario para la autenticación
+        }
 
         // Autentica al usuario usando las credenciales proporcionadas
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+                new UsernamePasswordAuthenticationToken(loginIdentifier, request.getPassword())
         );
 
         // Genera el token JWT
@@ -46,6 +52,7 @@ public class AuthService {
                 .token(token)
                 .build();
     }
+
 
 
 
