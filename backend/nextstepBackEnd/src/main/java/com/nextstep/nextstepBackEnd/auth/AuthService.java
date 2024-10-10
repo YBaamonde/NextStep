@@ -1,5 +1,6 @@
 package com.nextstep.nextstepBackEnd.auth;
 
+import com.nextstep.nextstepBackEnd.exception.InvalidCredentialsException;
 import com.nextstep.nextstepBackEnd.jwt.JwtService;
 import com.nextstep.nextstepBackEnd.model.Rol;
 import com.nextstep.nextstepBackEnd.model.Usuario;
@@ -29,8 +30,8 @@ public class AuthService {
 
     public AuthResponse login(LoginRequest request) {
         // Busca al usuario por nombre de usuario o email
-        UserDetails user = userRepository.findByUsernameOrEmail(request.getUsername(), request.getUsername())
-                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+        UserDetails user = userRepository.findByUsernameOrEmail(request.getUsername(), request.getEmail())
+                .orElseThrow(() -> new InvalidCredentialsException("Invalid credentials"));
 
         // Autentica al usuario usando las credenciales proporcionadas
         authenticationManager.authenticate(
