@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Route("register")
 public class RegisterView extends Div {
 
-    private final AuthService authService;  // Inyecta el servicio AuthService del frontend
+    private final AuthService authService;
 
     @Autowired
     public RegisterView(AuthService authService) {
@@ -45,7 +45,7 @@ public class RegisterView extends Div {
         layout.add(usernameField, emailField, passwordField, confirmPasswordField);
 
         // Botón para registrarse
-        Button registerButton = new Button("Registrarse"); // Asignar texto al botón
+        Button registerButton = new Button("Registrarse");
         registerButton.addClickListener(event -> {
             String username = usernameField.getValue();
             String email = emailField.getValue();
@@ -54,12 +54,15 @@ public class RegisterView extends Div {
 
             if (!password.equals(confirmPassword)) {
                 Notification.show("Las contraseñas no coinciden", 3000, Notification.Position.MIDDLE);
+            } else if (!email.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
+                Notification.show("Formato de correo electrónico inválido", 3000, Notification.Position.MIDDLE);
+            } else if (password.length() < 8) {
+                Notification.show("La contraseña debe tener al menos 8 caracteres", 3000, Notification.Position.MIDDLE);
             } else {
                 // Usar AuthService para registrar al usuario
                 authService.register(username, email, password, confirmPassword);
             }
         });
-
 
         registerButton.addClassName("register-summit-button");
         layout.add(registerButton);

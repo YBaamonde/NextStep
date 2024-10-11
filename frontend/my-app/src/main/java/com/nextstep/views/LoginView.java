@@ -38,12 +38,13 @@ public class LoginView extends Div {
 
         // Configurar el texto internacionalizado
         LoginI18n i18n = LoginI18n.createDefault();
-
         i18n.getForm().setTitle("Inicio de sesión");
-        i18n.getForm().setUsername("Email");
+        i18n.getForm().setUsername("Username or Email");
         i18n.getForm().setSubmit("Iniciar sesión");
         i18n.getForm().setForgotPassword("Olvidé mi contraseña");
-        loginForm.setI18n(i18n); // Establecer el texto personalizado en el formulario
+        i18n.getErrorMessage().setTitle("Credenciales inválidas");
+        i18n.getErrorMessage().setMessage("Por favor, verifica tu email y contraseña e intenta nuevamente.");
+        loginForm.setI18n(i18n);
 
         layout.add(loginForm, registerButton);
         add(layout);
