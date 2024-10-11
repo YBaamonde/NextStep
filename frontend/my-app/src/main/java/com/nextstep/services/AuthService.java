@@ -22,15 +22,14 @@ public class AuthService {
     private final String baseUrl;
     private final HttpClient client;
     private final ObjectMapper objectMapper;
-    // private final Router router; // Inyecta el router para manejar redirecciones
 
-    public AuthService(/* Router router */) {
+    public AuthService() {
         this.baseUrl = "http://localhost:8081";
         this.client = HttpClient.newHttpClient();
         this.objectMapper = new ObjectMapper();
-        // this.router = router; // Inicializa el router
     }
 
+    // Metodo para iniciar sesión
     public void login(String username, String password) {
         try {
             Map<String, String> requestBody = new HashMap<>();
@@ -53,7 +52,7 @@ public class AuthService {
                 Notification.show("Inicio de sesión exitoso. Token: " + token);
 
                 // Redirige a la página de inicio después del inicio de sesión exitoso
-                UI.getCurrent().navigate(HelloWorldView.class); // Navegar a HelloWorldView
+                UI.getCurrent().navigate(HelloWorldView.class);
             } else {
                 Notification.show("Error en el inicio de sesión. Estado: " + response.statusCode());
             }
@@ -62,13 +61,14 @@ public class AuthService {
         }
     }
 
+    // Metodo para registrar un nuevo usuario
     public void register(String username, String email, String password, String confirmPassword) {
         try {
             Map<String, String> requestBody = new HashMap<>();
-            requestBody.put("nombre", username); // 'nombre' en lugar de 'username'
-            requestBody.put("username", email); // 'username' como el email
+            requestBody.put("username", username);
+            requestBody.put("email", email);    
             requestBody.put("password", password);
-            requestBody.put("rol", "normal"); // Asignar "normal" directamente
+            requestBody.put("rol", "normal");      // Asignar "normal" por defecto
 
             String requestBodyJson = objectMapper.writeValueAsString(requestBody);
 
@@ -82,9 +82,7 @@ public class AuthService {
 
             if (response.statusCode() == 201) {
                 Notification.show("Registro exitoso. Redirigiendo a la página de inicio de sesión...");
-
-                // Redirige a la página de inicio de sesión después del registro exitoso
-                UI.getCurrent().navigate("login");  // Navegar a la vista de login
+                UI.getCurrent().navigate("login");  // Redirigir a la vista de login
             } else {
                 Notification.show("Error en el registro. Estado: " + response.statusCode());
             }
@@ -94,3 +92,4 @@ public class AuthService {
     }
 
 }
+
