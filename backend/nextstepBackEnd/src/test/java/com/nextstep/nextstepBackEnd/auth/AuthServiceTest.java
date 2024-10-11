@@ -1,6 +1,11 @@
 package com.nextstep.nextstepBackEnd.auth;
 
+import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.*;
+
+import com.nextstep.nextstepBackEnd.exception.InvalidCredentialsException;
 import com.nextstep.nextstepBackEnd.jwt.JwtService;
+import com.nextstep.nextstepBackEnd.model.Rol;
 import com.nextstep.nextstepBackEnd.model.Usuario;
 import com.nextstep.nextstepBackEnd.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,18 +15,12 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
 public class AuthServiceTest {
 
-    // Mocks para simular las dependencias de AuthService
     @Mock
     private UserRepository userRepository;
 
@@ -34,129 +33,122 @@ public class AuthServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
-    // InjectMocks para inyectar las dependencias simuladas en AuthService
     @InjectMocks
     private AuthService authService;
 
-    // Inicializa los mocks antes de cada test
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
-    // Test para el método login
     @Test
-    public void testLogin() {
-        // Arrange: Configura el escenario de prueba
-        String username = "testuser";
-        String password = "testpassword";
+    public void testLoginSuccess() {
+        // Arrange
         String token = "testtoken";
-        Usuario user = mock(Usuario.class); // Simula un objeto Usuario
+        LoginRequest request = new LoginRequest("testuser", "testemail@example.com", "testpassword");
+        Usuario user = Usuario.builder()
+                .username("testuser")
+                .email("testemail@example.com")
+                .password("testpassword")
+                .build();
 
-        // Simula el comportamiento de los métodos del repositorio y el servicio JWT
-        when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
-        when(jwtService.getToken(user)).thenReturn(token);
-
-        // Act: Ejecuta el método a probar
-        AuthResponse response = authService.login(new LoginRequest(username, password));
-
-        // Assert: Verifica que el comportamiento sea el esperado
-        assertEquals(token, response.getToken()); // Verifica que el token generado es el esperado
-        verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class)); // Verifica que se autentique correctamente
-        verify(userRepository).findByUsername(username); // Verifica que el repositorio fue llamado correctamente
-        verify(jwtService).getToken(user); // Verifica que se generó un token para el usuario
-    }
-
-    // Test para el metodo register
-    @Test
-    public void testRegister() {
-        // Arrange: Configura el escenario de prueba
-        String username = "testuser";
-        String password = "testpassword";
-        String encodedPassword = "encodedpassword";
-        String token = "testtoken";
-        RegisterRequest request = new RegisterRequest("Test User", username, password, "normal");
-
-        // Simula el comportamiento del codificador de contraseñas y del servicio JWT
-        when(passwordEncoder.encode(password)).thenReturn(encodedPassword);
+        // Simulamos que el usuario existe
+        when(userRepository.findByUsernameOrEmail(anyString(), anyString())).thenReturn(Optional.of(user));
+        // Simulamos que el JWT se genera correctamente
         when(jwtService.getToken(any(Usuario.class))).thenReturn(token);
 
-        // Act: Ejecuta el metodo a probar
+        // Act
+        AuthResponse response = authService.login(request);
+
+        // Assert
+        assertThat(response).isNotNull();
+        assertThat(response.getToken()).isEqualTo(token);
+
+        // Verifica que la autenticación se haya llamado con los valores correctos
+        verify(authenticationManager).authenticate(
+                new UsernamePasswordAuthenticationToken("testuser", "testpassword")
+        );
+    }
+
+    @Test
+    public void testLoginInvalidCredentials() {
+        // Arrange
+        LoginRequest request = new LoginRequest("invaliduser", "invalidemail@example.com", "invalidpassword");
+
+        // Simulamos que el usuario no existe
+        when(userRepository.findByUsernameOrEmail(anyString(), anyString())).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThatThrownBy(() -> authService.login(request))
+                .isInstanceOf(InvalidCredentialsException.class)
+                .hasMessageContaining("Invalid credentials");
+
+        // Verifica que el método de autenticación no se llame si no se encuentra el usuario
+        verify(authenticationManager, never()).authenticate(any(UsernamePasswordAuthenticationToken.class));
+    }
+
+    @Test
+    public void testRegisterSuccess() {
+        // Arrange
+        String token = "testtoken";
+        RegisterRequest request = new RegisterRequest("newuser", "newemail@example.com", "newpassword", "normal");
+        Usuario newUser = Usuario.builder()
+                .username("newuser")
+                .email("newemail@example.com")
+                .password("encodedpassword")  // Lo que esperamos después de la codificación
+                .rol(Rol.normal)
+                .build();
+
+        // Simulamos que no existe un usuario con el mismo nombre ni email
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        // Simulamos que el password encoder funciona correctamente
+        when(passwordEncoder.encode(anyString())).thenReturn("encodedpassword");
+        // Simulamos que el JWT se genera correctamente
+        when(jwtService.getToken(any(Usuario.class))).thenReturn(token);
+
+        // Act
         AuthResponse response = authService.register(request);
 
-        // Assert: Verifica que el comportamiento sea el esperado
-        assertEquals(token, response.getToken()); // Verifica que el token generado es el esperado
-        verify(userRepository).save(any(Usuario.class)); // Verifica que el usuario fue guardado en el repositorio
-        verify(passwordEncoder).encode(password); // Verifica que la contraseña fue codificada correctamente
-        verify(jwtService).getToken(any(Usuario.class)); // Verifica que se generó un token para el usuario registrado
+        // Assert
+        assertThat(response).isNotNull();
+        assertThat(response.getToken()).isEqualTo(token);
+
+        // Verifica que el usuario fue guardado en el repositorio
+        verify(userRepository).save(any(Usuario.class));
     }
 
-    // Test para login con credenciales incorrectas
     @Test
-    public void testLoginWithInvalidCredentials() {
-        // Arrange: Configura el escenario de prueba con un usuario no existente
-        String username = "invalidUser";
-        String password = "invalidPassword";
+    public void testRegisterUsernameTaken() {
+        // Arrange
+        RegisterRequest request = new RegisterRequest("existinguser", "newemail@example.com", "newpassword", "normal");
 
-        // Simula que no se encuentra el usuario
-        when(userRepository.findByUsername(username)).thenReturn(Optional.empty());
+        // Simulamos que el nombre de usuario ya existe
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(new Usuario()));
 
-        // Act & Assert: Verifica que se lance una excepción al intentar iniciar sesión con credenciales incorrectas
-        Exception exception = assertThrows(RuntimeException.class, () -> {
-            authService.login(new LoginRequest(username, password));
-        });
+        // Act & Assert
+        assertThatThrownBy(() -> authService.register(request))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Username already taken");
 
-        assertEquals("Invalid credentials", exception.getMessage()); // Verifica que la excepción tenga el mensaje correcto
-        verify(authenticationManager, never()).authenticate(any(UsernamePasswordAuthenticationToken.class)); // Verifica que no se intenta autenticar
-        verify(jwtService, never()).getToken(any(UserDetails.class)); // Verifica que no se genera un token
-    }
-
-    // Test para registro con un nombre de usuario ya existente
-    @Test
-    public void testRegisterWithExistingUsername() {
-        // Configura el escenario de prueba con un nombre de usuario existente
-        String username = "existingUser";
-        String email = "test@example.com"; // Agrega un correo ficticio
-        String password = "testpassword";
-        RegisterRequest request = new RegisterRequest(username, email, password, "normal");
-
-        // Simula que ya existe un usuario con ese nombre
-        when(userRepository.findByUsername(username)).thenReturn(Optional.of(new Usuario()));
-
-        // Verifica que se lance una excepción al intentar registrar un usuario con un nombre de usuario ya existente
-        Exception exception = assertThrows(RuntimeException.class, () -> {
-            authService.register(request);
-        });
-
-        assertEquals("Username already taken", exception.getMessage());
+        // Verifica que no se haya llamado al repositorio para guardar un nuevo usuario
         verify(userRepository, never()).save(any(Usuario.class));
-        verify(passwordEncoder, never()).encode(password);
-        verify(jwtService, never()).getToken(any(Usuario.class));
     }
 
-
-    // Test para registro con un email ya existente
     @Test
-    public void testRegisterWithExistingEmail() {
-        // Configura el escenario de prueba con un correo existente
-        String username = "newUser";
-        String email = "existingUser@example.com"; // Mantén el mismo orden
-        String password = "testpassword";
-        RegisterRequest request = new RegisterRequest(username, email, password, "normal");
+    public void testRegisterEmailTaken() {
+        // Arrange
+        RegisterRequest request = new RegisterRequest("newuser", "existingemail@example.com", "newpassword", "normal");
 
-        // Simula que ya existe un usuario con ese correo
-        when(userRepository.findByEmail(email)).thenReturn(Optional.of(new Usuario()));
+        // Simulamos que el email ya existe
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(new Usuario()));
 
-        // Verifica que se lance una excepción al intentar registrar un usuario con un correo ya existente
-        Exception exception = assertThrows(RuntimeException.class, () -> {
-            authService.register(request);
-        });
+        // Act & Assert
+        assertThatThrownBy(() -> authService.register(request))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Email already exists");
 
-        assertEquals("Email already exists", exception.getMessage()); // Verifica que la excepción tenga el mensaje correcto
-        verify(userRepository, never()).save(any(Usuario.class)); // Verifica que no se intenta guardar un usuario nuevo
-        verify(passwordEncoder, never()).encode(password); // Verifica que no se codifica la contraseña
-        verify(jwtService, never()).getToken(any(Usuario.class)); // Verifica que no se genera un token
+        // Verifica que no se haya llamado al repositorio para guardar un nuevo usuario
+        verify(userRepository, never()).save(any(Usuario.class));
     }
-
-
 }

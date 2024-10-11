@@ -1,5 +1,10 @@
 package com.nextstep.nextstepBackEnd.auth;
 
+import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.*;
+
+import com.nextstep.nextstepBackEnd.exception.InvalidCredentialsException;
+import com.nextstep.nextstepBackEnd.exception.UserAlreadyExistsException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -8,89 +13,118 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
 public class AuthControllerTest {
 
     @Mock
-    private AuthService authService;  // Servicio simulado para pruebas
+    private AuthService authService; // Servicio simulado
 
     @InjectMocks
-    private AuthController authController;  // Controlador que se está probando
+    private AuthController authController; // Controlador que se está probando
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.openMocks(this);  // Inicializa los mocks antes de cada prueba
+        MockitoAnnotations.openMocks(this); // Inicializa los mocks antes de cada prueba
     }
 
     @Test
-    public void testLogin() {
+    public void testLoginSuccess() {
         // Arrange
         String token = "testtoken";
-        LoginRequest request = new LoginRequest("testuser", "testpassword");
+        LoginRequest request = new LoginRequest("testuser", "testemail@example.com", "testpassword");
         AuthResponse authResponse = new AuthResponse(token);
 
-        // Configura el comportamiento simulado del servicio
+        // Simula el comportamiento del servicio
         when(authService.login(any(LoginRequest.class))).thenReturn(authResponse);
 
         // Act
         ResponseEntity<AuthResponse> response = authController.login(request);
 
         // Assert
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);  // Verifica que el código de estado sea 200 OK
-        assertThat(response.getBody()).isNotNull();  // Verifica que el cuerpo de la respuesta no sea nulo
-        assertThat(response.getBody().getToken()).isEqualTo(token);  // Verifica que el token en la respuesta sea el esperado
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getToken()).isEqualTo(token);
     }
 
     @Test
-    public void testRegister() {
+    public void testLoginInvalidCredentials() {
+        // Arrange
+        LoginRequest request = new LoginRequest("wronguser", "wrongemail@example.com", "wrongpassword");
+
+        // Simula que el servicio lanza InvalidCredentialsException
+        when(authService.login(any(LoginRequest.class))).thenThrow(new InvalidCredentialsException("Credenciales inválidas"));
+
+        // Act
+        ResponseEntity<AuthResponse> response = authController.login(request);
+
+        // Assert
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(response.getBody()).isNull(); // No debería haber cuerpo en caso de error 401
+    }
+
+    @Test
+    public void testLoginUnhandledException() {
+        // Arrange
+        LoginRequest request = new LoginRequest("testuser", "testemail@example.com", "testpassword");
+
+        // Simula que el servicio lanza una excepción no controlada
+        when(authService.login(any(LoginRequest.class))).thenThrow(new RuntimeException("Error interno"));
+
+        // Act
+        ResponseEntity<AuthResponse> response = authController.login(request);
+
+        // Assert
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(response.getBody()).isNull(); // No debería haber cuerpo en caso de error 500
+    }
+
+    @Test
+    public void testRegisterSuccess() {
         // Arrange
         String token = "testtoken";
-        RegisterRequest request = new RegisterRequest("Test User", "testuser", "testpassword", "normal");
+        RegisterRequest request = new RegisterRequest("testuser", "testemail@example.com", "testpassword", "normal");
         AuthResponse authResponse = new AuthResponse(token);
 
-        // Configura el comportamiento simulado del servicio
+        // Simula el comportamiento del servicio
         when(authService.register(any(RegisterRequest.class))).thenReturn(authResponse);
 
         // Act
         ResponseEntity<AuthResponse> response = authController.register(request);
 
         // Assert
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);  // Verifica que el código de estado sea 200 OK
-        assertThat(response.getBody()).isNotNull();  // Verifica que el cuerpo de la respuesta no sea nulo
-        assertThat(response.getBody().getToken()).isEqualTo(token);  // Verifica que el token en la respuesta sea el esperado
-    }
-
-    // Prueba para casos en los que el servicio lanza una excepción
-    @Test
-    public void testLoginThrowsException() {
-        LoginRequest request = new LoginRequest("username", "password");
-
-        // Simula que el servicio lanza una excepción
-        when(authService.login(request)).thenThrow(new RuntimeException("Error en el servicio"));
-
-        ResponseEntity<AuthResponse> response = authController.login(request);
-
-        // Verifica que el código de estado sea 500
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertEquals(null, response.getBody());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getToken()).isEqualTo(token);
     }
 
     @Test
-    public void testRegisterThrowsException() {
-        // Proporciona todos los parámetros requeridos
-        RegisterRequest request = new RegisterRequest("Nombre", "username", "password", "rol");
+    public void testRegisterUserAlreadyExists() {
+        // Arrange
+        RegisterRequest request = new RegisterRequest("existinguser", "existingemail@example.com", "password", "normal");
 
-        // Simula que el servicio lanza una excepción
-        when(authService.register(request)).thenThrow(new RuntimeException("Error en el servicio"));
+        // Simula que el servicio lanza UserAlreadyExistsException
+        when(authService.register(any(RegisterRequest.class))).thenThrow(new UserAlreadyExistsException("Usuario ya existe"));
 
+        // Act
         ResponseEntity<AuthResponse> response = authController.register(request);
 
-        // Verifica que el código de estado sea 500
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertEquals(null, response.getBody());
+        // Assert
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody()).isNull(); // No debería haber cuerpo en caso de error 409
+    }
+
+    @Test
+    public void testRegisterUnhandledException() {
+        // Arrange
+        RegisterRequest request = new RegisterRequest("testuser", "testemail@example.com", "testpassword", "normal");
+
+        // Simula que el servicio lanza una excepción no controlada
+        when(authService.register(any(RegisterRequest.class))).thenThrow(new RuntimeException("Error interno"));
+
+        // Act
+        ResponseEntity<AuthResponse> response = authController.register(request);
+
+        // Assert
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(response.getBody()).isNull(); // No debería haber cuerpo en caso de error 500
     }
 }
