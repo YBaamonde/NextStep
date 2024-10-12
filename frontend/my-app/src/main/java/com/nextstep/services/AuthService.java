@@ -29,8 +29,10 @@ public class AuthService {
         this.objectMapper = new ObjectMapper(); // Se utiliza para convertir objetos Java a JSON y viceversa
     }
 
-    // Método para iniciar sesión, enviando las credenciales al backend y gestionando la respuesta
+    // Metodo para iniciar sesión, enviando las credenciales al backend y gestionando la respuesta
     public void login(String username, String password) {
+        // Prueba para ver si se llama a la función - Eliminar
+        System.out.println("Iniciando petición de login");
         try {
             // Crea un mapa con las credenciales que se enviarán en la solicitud HTTP
             Map<String, String> requestBody = new HashMap<>();
@@ -57,7 +59,7 @@ public class AuthService {
                 String token = responseMap.get("token");
 
                 // Muestra una notificación con el token (solo para demostración, no debería mostrarse al usuario)
-                Notification.show("Inicio de sesión exitoso. Token: " + token);
+                // Notification.show("Inicio de sesión exitoso. Token: " + token);
 
                 // Redirige al usuario a la vista principal después del inicio de sesión exitoso
                 UI.getCurrent().navigate(HelloWorldView.class);

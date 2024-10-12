@@ -1,5 +1,6 @@
 package com.nextstep.views;
 
+import com.nextstep.services.AuthService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
@@ -46,7 +47,15 @@ public class LoginView extends Div {
         i18n.getErrorMessage().setMessage("Por favor, verifica tu email y contraseña e intenta nuevamente.");
         loginForm.setI18n(i18n);
 
+        // Capturar el evento de login y llamar a AuthService
+        loginForm.addLoginListener(event -> {
+            // Llamar al método de login de AuthService con las credenciales ingresadas
+            AuthService authService = new AuthService();
+            authService.login(event.getUsername(), event.getPassword());
+        });
+
         layout.add(loginForm, registerButton);
         add(layout);
     }
 }
+
