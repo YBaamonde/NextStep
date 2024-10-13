@@ -21,7 +21,7 @@ public class LoginRequest {
     @NotBlank(message = "La contraseña no puede estar vacía")
     private String password;
 
-    // Método simple de validación
+    // Metodo simple de validación
     public boolean isValid() {
         return username != null && !username.trim().isEmpty() &&
                 password != null && !password.trim().isEmpty();

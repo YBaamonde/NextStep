@@ -66,17 +66,12 @@ public class AuthService {
             throw new RuntimeException("El email ya existe");
         }
 
-        // Determinar el rol del usuario
-        Rol role = Rol.normal;  // Por defecto, rol normal
-        if (request.getRol() != null && request.getRol().equalsIgnoreCase("admin")) {
-            role = Rol.admin;  // Si el rol proporcionado es admin, lo asignamos
-        }
-
+        // Crear usuario con rol "normal", ya que solo un admin puede crear admins
         Usuario usuario = Usuario.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))  // Encripta la contraseña
-                .rol(role)  // Asigna el rol basado en la solicitud
+                .rol(Rol.normal)  // Todos los usuarios que se registren tendrán el rol 'normal'
                 .build();
 
         userRepository.save(usuario);
