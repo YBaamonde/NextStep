@@ -14,6 +14,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 @Service
 public class AuthService {
@@ -30,9 +31,10 @@ public class AuthService {
     }
 
     // Metodo para iniciar sesión, enviando las credenciales al backend y gestionando la respuesta
-    public void login(String username, String password) {
-        // Prueba para ver si se llama a la función - Eliminar
+    public void login(String username, String password, Consumer<Boolean> loginCallback) {
+        // Prueba para ver si se llama a la función - Eliminar si no es necesario
         System.out.println("Iniciando petición de login");
+
         try {
             // Crea un mapa con las credenciales que se enviarán en la solicitud HTTP
             Map<String, String> requestBody = new HashMap<>();
@@ -58,22 +60,20 @@ public class AuthService {
                 Map<String, String> responseMap = objectMapper.readValue(response.body(), new TypeReference<>() {});
                 String token = responseMap.get("token");
 
-                // Muestra una notificación con el token (solo para demostración, no debería mostrarse al usuario)
-                // Notification.show("Inicio de sesión exitoso. Token: " + token);
-
-                // Redirige al usuario a la vista principal después del inicio de sesión exitoso
-                UI.getCurrent().navigate(HelloWorldView.class);
+                // Ejecuta el callback indicando éxito (true)
+                loginCallback.accept(true);
             } else {
-                // Si el código de estado es diferente a 200, muestra un mensaje de error con el estado devuelto
-                Notification.show("Error en el inicio de sesión. Estado: " + response.statusCode());
+                // Si el código de estado es diferente a 200, ejecuta el callback indicando fallo (false)
+                loginCallback.accept(false);
             }
         } catch (IOException | InterruptedException e) {
-            // Captura y muestra cualquier error que ocurra durante el proceso de inicio de sesión
-            Notification.show("Ocurrió un error durante el inicio de sesión: " + e.getMessage());
+            // En caso de error, ejecuta el callback indicando fallo (false)
+            loginCallback.accept(false);
         }
     }
 
-    // Método para registrar un nuevo usuario enviando los datos al backend
+
+    // Metodo para registrar un nuevo usuario enviando los datos al backend
     public void register(String username, String email, String password, String confirmPassword) {
         try {
             // Crea un mapa con los datos de registro del usuario
