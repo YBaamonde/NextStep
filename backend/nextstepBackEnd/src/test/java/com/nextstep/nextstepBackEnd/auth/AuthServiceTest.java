@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -150,5 +151,29 @@ public class AuthServiceTest {
 
         // Verifica que no se haya llamado al repositorio para guardar un nuevo usuario
         verify(userRepository, never()).save(any(Usuario.class));
+    }
+
+    // Test para registrar un usuario con rol admin
+    @Test
+    public void registerAdminUser() {
+        RegisterRequest request = new RegisterRequest();
+        request.setUsername("adminUser");
+        request.setEmail("admin@example.com");
+        request.setPassword("password123");
+        request.setRol("admin");
+
+        Usuario user = Usuario.builder()
+                .username(request.getUsername())
+                .email(request.getEmail())
+                .password("encodedPassword")
+                .rol(Rol.admin)
+                .build();
+
+        Mockito.when(passwordEncoder.encode(Mockito.anyString())).thenReturn("encodedPassword");
+        Mockito.when(userRepository.save(Mockito.any(Usuario.class))).thenReturn(user);
+
+        authService.register(request);
+
+        Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.argThat((Usuario u) -> u.getRol() == Rol.admin));
     }
 }
