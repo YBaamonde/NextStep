@@ -58,20 +58,25 @@ public class AuthService {
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
-        logger.info("Registering user: {}", request.getUsername());
+        logger.info("Registrando usuario: {}", request.getUsername());
 
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-            throw new RuntimeException("Username already taken");
+            throw new RuntimeException("El nombre de usuario ya existe");
+        } else if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new RuntimeException("El email ya existe");
         }
-        else if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already exists");
+
+        // Determinar el rol del usuario
+        Rol role = Rol.normal;  // Por defecto, rol normal
+        if (request.getRol() != null && request.getRol().equalsIgnoreCase("admin")) {
+            role = Rol.admin;  // Si el rol proporcionado es admin, lo asignamos
         }
 
         Usuario usuario = Usuario.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))  // Encripta la contraseña
-                .rol(Rol.normal)  // Todos los usuarios que se registren tendrán el rol 'normal', porque solo hay un admin
+                .rol(role)  // Asigna el rol basado en la solicitud
                 .build();
 
         userRepository.save(usuario);
@@ -79,6 +84,5 @@ public class AuthService {
                 .token(jwtService.getToken(usuario))
                 .build();
     }
-
 
 }

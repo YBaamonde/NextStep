@@ -27,7 +27,7 @@ public class RegisterRequest {
     @NotBlank(message = "El rol no puede estar vacío")
     private String rol;
 
-    // Método simple de validación
+    // Metodo simple de validación
     public boolean isValid() {
         return username != null && !username.trim().isEmpty() &&
                 email != null && email.length() >= 4 &&

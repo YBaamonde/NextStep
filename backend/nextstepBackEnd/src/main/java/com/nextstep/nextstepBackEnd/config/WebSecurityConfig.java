@@ -31,6 +31,7 @@ public class WebSecurityConfig {
         // Configurar las políticas de autorización
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers("/auth/**").permitAll() // Permitir libre acceso a las rutas de autenticación
+                .requestMatchers("/admin/**").hasRole("admin")  // Solo los administradores pueden acceder
                 .requestMatchers("/api/protegido/**").authenticated() // Proteger las rutas de la API
                 .requestMatchers("/").authenticated() // Bloquear la ruta raíz si no está autenticado
                 .anyRequest().authenticated() // Proteger cualquier otra ruta
