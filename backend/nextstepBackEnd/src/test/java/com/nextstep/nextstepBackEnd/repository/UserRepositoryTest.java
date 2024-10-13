@@ -21,18 +21,33 @@ public class UserRepositoryTest {
 
     @Test
     public void testFindByUsername() {
-        // Given
+
         Usuario user = new Usuario();
         user.setUsername("testUser");
+        user.setEmail("email@simulado.com");
         user.setPassword("password");
         user.setRol(Rol.normal);
         userRepository.save(user);
 
-        // When
         Optional<Usuario> foundUser = userRepository.findByUsername("testUser");
 
-        // Then
         assertTrue(foundUser.isPresent());
         assertEquals("testUser", foundUser.get().getUsername());
+    }
+
+    @Test
+    public void testFindByEmail() {
+
+        Usuario user = new Usuario();
+        user.setUsername("testUser");
+        user.setEmail("email@simulado.com");
+        user.setPassword("password");
+        user.setRol(Rol.normal);
+        userRepository.save(user);
+
+        Optional<Usuario> foundUser = userRepository.findByEmail("email@simulado.com");
+
+        assertTrue(foundUser.isPresent());
+        assertEquals("email@simulado.com", foundUser.get().getEmail());
     }
 }

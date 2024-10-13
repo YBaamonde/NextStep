@@ -1,5 +1,6 @@
 package com.nextstep.nextstepBackEnd.auth;
 
+import com.nextstep.nextstepBackEnd.exception.InvalidCredentialsException;
 import com.nextstep.nextstepBackEnd.jwt.JwtService;
 import com.nextstep.nextstepBackEnd.model.Rol;
 import com.nextstep.nextstepBackEnd.model.Usuario;
@@ -28,13 +29,19 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder; // Inyecta el PasswordEncoder
 
     public AuthResponse login(LoginRequest request) {
-        // Verifica si el usuario existe en la base de datos antes de intentar autenticar
-        UserDetails user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+        // Busca al usuario por nombre de usuario o email
+        UserDetails user = userRepository.findByUsernameOrEmail(request.getUsername(), request.getUsername())
+                .orElseThrow(() -> new InvalidCredentialsException("Invalid credentials"));
+
+        // Determina si se ingresó un email o un nombre de usuario
+        String loginIdentifier = request.getUsername();
+        if (loginIdentifier.contains("@")) {
+            loginIdentifier = user.getUsername(); // Si es un email, usa el nombre de usuario para la autenticación
+        }
 
         // Autentica al usuario usando las credenciales proporcionadas
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+                new UsernamePasswordAuthenticationToken(loginIdentifier, request.getPassword())
         );
 
         // Genera el token JWT
@@ -47,30 +54,31 @@ public class AuthService {
     }
 
 
+
+
     @Transactional
     public AuthResponse register(RegisterRequest request) {
         logger.info("Registering user: {}", request.getUsername());
 
-        // Verifica si el nombre de usuario ya existe
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-            logger.warn("Username already taken: {}", request.getUsername());
             throw new RuntimeException("Username already taken");
         }
+        else if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new RuntimeException("Email already exists");
+        }
 
-        // Crea el usuario si el nombre de usuario es único
         Usuario usuario = Usuario.builder()
-                .nombre(request.getNombre())
                 .username(request.getUsername())
-                .password(passwordEncoder.encode(request.getPassword())) // Cifra la contraseña antes de guardarla
-                .rol(Rol.valueOf(request.getRol()))
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))  // Encripta la contraseña
+                .rol(Rol.normal)  // Todos los usuarios que se registren tendrán el rol 'normal', porque solo hay un admin
                 .build();
 
         userRepository.save(usuario);
-        logger.info("User registered: {}", usuario.getUsername());
-
         return AuthResponse.builder()
                 .token(jwtService.getToken(usuario))
                 .build();
     }
+
 
 }

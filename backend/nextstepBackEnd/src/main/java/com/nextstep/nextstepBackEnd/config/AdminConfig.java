@@ -9,11 +9,18 @@ public class AdminConfig {
     @Value("${admin.username}")
     private String adminUsername;
 
+    @Value("${admin.email}")
+    private String adminEmail;
+
     @Value("${admin.password}")
     private String adminPassword;
 
     public String getAdminUsername() {
         return adminUsername;
+    }
+
+    public String getAdminEmail() {
+        return adminEmail;
     }
 
     public String getAdminPassword() {

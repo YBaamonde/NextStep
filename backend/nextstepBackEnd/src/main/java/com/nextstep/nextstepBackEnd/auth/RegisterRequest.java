@@ -13,12 +13,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class RegisterRequest {
 
-    @NotBlank(message = "El nombre no puede estar vacío")
-    private String nombre;
-
     @NotBlank(message = "El nombre de usuario no puede estar vacío")
     @Size(min = 4, max = 20, message = "El nombre de usuario debe tener entre 4 y 20 caracteres")
     private String username;
+
+    @NotBlank(message = "El correo no puede estar vacío")
+    private String email;
 
     @NotBlank(message = "La contraseña no puede estar vacía")
     @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
@@ -29,8 +29,8 @@ public class RegisterRequest {
 
     // Método simple de validación
     public boolean isValid() {
-        return nombre != null && !nombre.trim().isEmpty() &&
-                username != null && username.length() >= 4 &&
+        return username != null && !username.trim().isEmpty() &&
+                email != null && email.length() >= 4 &&
                 password != null && password.length() >= 8 &&
                 rol != null && !rol.trim().isEmpty();
     }

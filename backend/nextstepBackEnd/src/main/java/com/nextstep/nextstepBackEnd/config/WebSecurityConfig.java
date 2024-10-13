@@ -1,21 +1,19 @@
 package com.nextstep.nextstepBackEnd.config;
 
 import com.nextstep.nextstepBackEnd.jwt.JwtAuthFilter;
-import com.nextstep.nextstepBackEnd.jwt.JwtAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebSecurity
@@ -27,19 +25,41 @@ public class WebSecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http.csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(authorizeRequests ->
-                        authorizeRequests
-                                .requestMatchers("/auth/**").permitAll()
-                                .requestMatchers("/api/protegido/**").authenticated()
-                                .anyRequest().authenticated()
-                )
-                .sessionManagement(sessionManagement ->
-                        sessionManagement
-                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authenticationProvider(authProvider)
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .build();
+        // Deshabilitar CSRF (para sistemas sin estado)
+        http.csrf(AbstractHttpConfigurer::disable);
+
+        // Configurar las políticas de autorización
+        http.authorizeHttpRequests(auth -> auth
+                .requestMatchers("/auth/**").permitAll() // Permitir libre acceso a las rutas de autenticación
+                .requestMatchers("/api/protegido/**").authenticated() // Proteger las rutas de la API
+                .requestMatchers("/").authenticated() // Bloquear la ruta raíz si no está autenticado
+                .anyRequest().authenticated() // Proteger cualquier otra ruta
+        );
+
+        // Establecer la política de sesiones como STATELESS (sin estado) para usar JWT
+        http.sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        );
+
+        // Configurar el proveedor de autenticación y añadir el filtro JWT
+        http.authenticationProvider(authProvider);
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
     }
 
+    // Configuración de CORS para permitir solicitudes desde el frontend
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/**")
+                        .allowedOrigins("http://localhost:8080") // Permitir solicitudes desde el frontend
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedHeaders("*")
+                        .allowCredentials(true);
+            }
+        };
+    }
 }
