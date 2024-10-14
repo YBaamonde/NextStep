@@ -1,5 +1,6 @@
 package com.nextstep.nextstepBackEnd.jwt;
 
+import com.nextstep.nextstepBackEnd.model.Usuario;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -19,20 +20,24 @@ public class JwtService {
 
     private static final String SECRET = "6qRMCxecb2htgVZQZfQX6XIqkg2ogwL0hsVSK9Akowk";
 
-    public String getToken(UserDetails usuario) {
-        return getToken(new HashMap<>(), usuario);
+    public String generateToken(UserDetails usuario) {
+        return generateToken(new HashMap<>(), usuario); // Llama al otro metodo con un mapa vacío.
     }
 
-    private String getToken(Map<String, Object> extraclaims, UserDetails usuario) {
-        return Jwts
-                .builder()
-                .setClaims(extraclaims)
-                .setSubject(usuario.getUsername())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24)) // 1 día
-                .signWith(getKey(), SignatureAlgorithm.HS256)
+    // Metodo que genera los tokens
+    public String generateToken(Map<String, Object> extraClaims, UserDetails usuario) {
+        extraClaims.put("roles", ((Usuario) usuario).getRol().name()); // Agrega el rol al token
+
+        return Jwts.builder()
+                .setClaims(extraClaims) // Añade los claims personalizados, si los hay
+                .setSubject(usuario.getUsername()) // Establece el nombre de usuario como sujeto
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 horas de expiración
+                .signWith(SignatureAlgorithm.HS256, SECRET)
                 .compact();
     }
+
+
 
     private Key getKey() {
         byte[] secretBytes = Decoders.BASE64.decode(SECRET);
