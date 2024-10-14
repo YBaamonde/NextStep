@@ -92,14 +92,8 @@ public class JwtService {
     }
 
     public List<String> getRolesFromToken(String token) {
-        Claims claims = Jwts.parser()
-                .setSigningKey(SECRET)
-                .parseClaimsJws(token)
-                .getBody();
-
-        // Asegúrate de obtener una lista, no un string
-        return claims.get("roles", List.class);  // Asume que los roles están almacenados como una lista en el token
+        Claims claims = getAllClaims(token);
+        return claims.get("roles", List.class);  // Extrae los roles como una lista desde el token
     }
-
 
 }

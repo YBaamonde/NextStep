@@ -37,7 +37,7 @@ public class AdminControllerTest {
 
     // Test que simula Admin creando un usuario
     @Test
-    @WithMockUser(roles = "admin")  // Simula que un usuario con rol admin hace la petición
+    @WithMockUser(authorities = "admin")  // Simula que un usuario con autoridad 'admin' hace la petición
     public void shouldCreateUserSuccessfully() throws Exception {
         AdminRegisterRequest registerRequest = new AdminRegisterRequest();
         registerRequest.setUsername("nuevoAdmin");
@@ -45,14 +45,13 @@ public class AdminControllerTest {
         registerRequest.setPassword("password123");
         registerRequest.setRol("admin");
 
-        // Simula el AuthResponse que esperas de AuthService.registerAdmin
         AuthResponse authResponse = AuthResponse.builder()
-                .token("dummyToken")  // Puedes simular cualquier valor que necesites
+                .token("dummyToken")
                 .build();
 
-        // Simular el comportamiento de AuthService (devuelve AuthResponse)
+        // Simular el comportamiento de AuthService
         Mockito.when(authService.registerAdmin(Mockito.any(AdminRegisterRequest.class)))
-                .thenReturn(authResponse);  // Devuelve el objeto AuthResponse simulado
+                .thenReturn(authResponse);
 
         mockMvc.perform(post("/admin/create-user")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -60,15 +59,13 @@ public class AdminControllerTest {
                 .andExpect(status().isOk())  // Verifica que la respuesta es 200 OK
                 .andExpect(content().string("Usuario creado exitosamente"));
 
-        // Verifica que se llamó al metodo de registro con el objeto correcto
         Mockito.verify(authService, Mockito.times(1)).registerAdmin(Mockito.any(AdminRegisterRequest.class));
     }
 
 
-
     // Test para listar todos los usuarios
     @Test
-    @WithMockUser(roles = "admin")
+    @WithMockUser(authorities = "admin")  // Simula que un usuario con autoridad 'admin' hace la petición
     public void shouldReturnListOfUsers() throws Exception {
         List<Usuario> users = Arrays.asList(
                 new Usuario(1, "adminUser", "admin@example.com", "password123", Rol.admin),
@@ -85,13 +82,13 @@ public class AdminControllerTest {
                 .andExpect(jsonPath("$[0].username").value("adminUser"))  // Verifica el nombre del primer usuario
                 .andExpect(jsonPath("$[1].username").value("normalUser"));  // Verifica el nombre del segundo usuario
 
-        // Verifica que el repositorio fue llamado una vez
         Mockito.verify(userRepository, Mockito.times(1)).findAll();
     }
 
+
     // Test para eliminar un usuario con éxito
     @Test
-    @WithMockUser(roles = "admin")
+    @WithMockUser(authorities = "admin")  // Simula que un usuario con autoridad 'admin' hace la petición
     public void shouldDeleteUserSuccessfully() throws Exception {
         // Simula el comportamiento de UserRepository al eliminar un usuario
         Mockito.doNothing().when(userRepository).deleteById(1L);
@@ -101,18 +98,17 @@ public class AdminControllerTest {
                 .andExpect(status().isOk())  // Verifica que la respuesta es 200 OK
                 .andExpect(content().string("Usuario eliminado exitosamente"));
 
-        // Verifica que el repositorio fue llamado para eliminar el usuario
         Mockito.verify(userRepository, Mockito.times(1)).deleteById(1L);
     }
 
+
     // Test para verificar acceso denegado a usuarios sin rol admin
     @Test
-    @WithMockUser(roles = "normal")
+    @WithMockUser(authorities = "normal")  // Simula que un usuario con autoridad 'normal' hace la petición
     public void shouldDenyAccessToNonAdminUser() throws Exception {
         mockMvc.perform(get("/admin/users"))
                 .andExpect(status().isForbidden());  // Verifica que el acceso es denegado
     }
-
 
 }
 
