@@ -6,6 +6,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -16,6 +18,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.http.HttpHeaders;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -27,35 +31,48 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        // Obtenemos el token del header
+        // Obtener el token desde el request
         final String token = getTokenFromReq(request);
         final String username;
 
-        // Si el token es nulo:
-        if (token == null){
-        filterChain.doFilter(request, response);
-        return;
+        // Si no hay token, continuar con el filtro
+        if (token == null) {
+            filterChain.doFilter(request, response);
+            return;
         }
 
+        // Obtener el nombre de usuario desde el token
         username = jwtService.getUsernameFromToken(token);
 
-        // Si el correo no es nulo:
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null){
+        // Si hay un usuario y aún no está autenticado
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-            if (jwtService.isTokenValid(token, userDetails)){
+            // Verificar si el token es válido
+            if (jwtService.isTokenValid(token, userDetails)) {
+                // Extraer los roles del token (si se han añadido)
+                List<String> roles = jwtService.getRolesFromToken(token);
+
+                // Crear la lista de autoridades usando los roles
+                List<SimpleGrantedAuthority> authorities = roles.stream()
+                        .map(SimpleGrantedAuthority::new)
+                        .collect(Collectors.toList());
+
+                // Crear el objeto de autenticación
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities());
+                        userDetails, null, authorities);
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
+                // Establecer el contexto de seguridad
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
 
+        // Continuar con el filtro
         filterChain.doFilter(request, response);
     }
+
+
 
     private String getTokenFromReq(HttpServletRequest request){
         final String header = request.getHeader(HttpHeaders.AUTHORIZATION);

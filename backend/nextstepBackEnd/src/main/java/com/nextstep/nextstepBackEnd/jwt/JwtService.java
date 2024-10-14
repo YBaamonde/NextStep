@@ -7,35 +7,47 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class JwtService {
 
     private static final String SECRET = "6qRMCxecb2htgVZQZfQX6XIqkg2ogwL0hsVSK9Akowk";
 
+    /*
+
     public String generateToken(UserDetails usuario) {
         return generateToken(new HashMap<>(), usuario); // Llama al otro metodo con un mapa vacío.
     }
 
+     */
+
     // Metodo que genera los tokens
-    public String generateToken(Map<String, Object> extraClaims, UserDetails usuario) {
-        extraClaims.put("roles", ((Usuario) usuario).getRol().name()); // Agrega el rol al token
+    public String generateToken(UserDetails usuario) {
+        // Crear el mapa de claims y agregar los roles
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("roles", ((Usuario) usuario).getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList())); // Asegúrate de que sea una lista de roles
 
         return Jwts.builder()
-                .setClaims(extraClaims) // Añade los claims personalizados, si los hay
-                .setSubject(usuario.getUsername()) // Establece el nombre de usuario como sujeto
-                .setIssuedAt(new Date())
+                .setClaims(claims)
+                .setSubject(usuario.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 horas de expiración
                 .signWith(SignatureAlgorithm.HS256, SECRET)
                 .compact();
     }
+
 
 
 
@@ -78,4 +90,16 @@ public class JwtService {
     {
         return getExpiration(token).before(new Date());
     }
+
+    public List<String> getRolesFromToken(String token) {
+        Claims claims = Jwts.parser()
+                .setSigningKey(SECRET)
+                .parseClaimsJws(token)
+                .getBody();
+
+        // Asegúrate de obtener una lista, no un string
+        return claims.get("roles", List.class);  // Asume que los roles están almacenados como una lista en el token
+    }
+
+
 }

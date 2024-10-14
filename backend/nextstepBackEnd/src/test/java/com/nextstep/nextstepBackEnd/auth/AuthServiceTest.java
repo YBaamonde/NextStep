@@ -56,7 +56,7 @@ public class AuthServiceTest {
         // Simulamos que el usuario existe
         when(userRepository.findByUsernameOrEmail(anyString(), anyString())).thenReturn(Optional.of(user));
         // Simulamos que el JWT se genera correctamente
-        when(jwtService.getToken(any(Usuario.class))).thenReturn(token);
+        when(jwtService.generateToken(any(Usuario.class))).thenReturn(token);
 
         // Act
         AuthResponse response = authService.login(request);
@@ -106,7 +106,7 @@ public class AuthServiceTest {
         // Simulamos que el password encoder funciona correctamente
         when(passwordEncoder.encode(anyString())).thenReturn("encodedpassword");
         // Simulamos que el JWT se genera correctamente
-        when(jwtService.getToken(any(Usuario.class))).thenReturn(token);
+        when(jwtService.generateToken(any(Usuario.class))).thenReturn(token);
 
         // Act
         AuthResponse response = authService.register(request);
@@ -175,7 +175,7 @@ public class AuthServiceTest {
         // Simulamos que el password encoder funciona correctamente
         when(passwordEncoder.encode(anyString())).thenReturn("encodedpassword");
         // Simulamos que el JWT se genera correctamente
-        when(jwtService.getToken(any(Usuario.class))).thenReturn("testtoken");
+        when(jwtService.generateToken(any(Usuario.class))).thenReturn("testtoken");
 
         // Act
         AuthResponse response = authService.registerAdmin(request);

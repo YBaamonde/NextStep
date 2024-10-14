@@ -31,7 +31,7 @@ public class JwtServiceTest {
         when(userDetails.getUsername()).thenReturn(username);
 
         // Act: Genera el token usando el JwtService
-        String token = jwtService.getToken(userDetails);
+        String token = jwtService.generateToken(userDetails);
 
         // Assert: Verifica que el token no es nulo y no está vacío
         assertTrue(token != null && !token.isEmpty());
@@ -44,7 +44,7 @@ public class JwtServiceTest {
         // Arrange: Configura el mock y genera un token para el usuario simulado
         String username = "testuser";
         when(userDetails.getUsername()).thenReturn(username);
-        String token = jwtService.getToken(userDetails);
+        String token = jwtService.generateToken(userDetails);
 
         // Act: Extrae el nombre de usuario desde el token generado
         String extractedUsername = jwtService.getUsernameFromToken(token);
@@ -59,7 +59,7 @@ public class JwtServiceTest {
         // Arrange: Configura el mock y genera un token para el usuario simulado
         String username = "testuser";
         when(userDetails.getUsername()).thenReturn(username);
-        String token = jwtService.getToken(userDetails);
+        String token = jwtService.generateToken(userDetails);
 
         // Act: Verifica la validez del token
         boolean isValid = jwtService.isTokenValid(token, userDetails);
