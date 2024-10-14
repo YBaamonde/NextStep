@@ -26,10 +26,11 @@ public class AdminController {
         this.userRepository = userRepository;
     }
 
-    // Crear un nuevo usuario
+    // Endpoint para que los administradores puedan crear usuarios con un rol específico
     @PostMapping("/create-user")
-    public ResponseEntity<String> createUser(@RequestBody RegisterRequest registerRequest) {
-        authService.register(registerRequest);
+    @PreAuthorize("hasRole('admin')")
+    public ResponseEntity<String> createUser(@RequestBody AdminRegisterRequest adminRegisterRequest) {
+        authService.registerAdmin(adminRegisterRequest);
         return ResponseEntity.ok("Usuario creado exitosamente");
     }
 

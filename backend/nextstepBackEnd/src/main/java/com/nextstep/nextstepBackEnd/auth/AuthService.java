@@ -80,4 +80,38 @@ public class AuthService {
                 .build();
     }
 
+    // Metodo que usarán los admins para registrar usuarios
+    @Transactional
+    public AuthResponse registerAdmin(AdminRegisterRequest request) {
+        logger.info("Admin registrando usuario: {}", request.getUsername());
+
+        // Validar si el rol es válido
+        Rol rol;
+        try {
+            rol = Rol.valueOf(request.getRol());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Rol inválido: " + request.getRol());
+        }
+
+        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new RuntimeException("El nombre de usuario ya existe");
+        } else if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new RuntimeException("El email ya existe");
+        }
+
+        // Crear usuario con el rol proporcionado
+        Usuario usuario = Usuario.builder()
+                .username(request.getUsername())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))  // Encripta la contraseña
+                .rol(rol)  // El administrador elige el rol
+                .build();
+
+        userRepository.save(usuario);
+        return AuthResponse.builder()
+                .token(jwtService.getToken(usuario))
+                .build();
+    }
+
+
 }

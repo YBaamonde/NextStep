@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -22,6 +23,7 @@ import java.util.List;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 public class AdminControllerTest {
 
     @Autowired
@@ -37,19 +39,19 @@ public class AdminControllerTest {
     @Test
     @WithMockUser(roles = "admin")  // Simula que un usuario con rol admin hace la petición
     public void shouldCreateUserSuccessfully() throws Exception {
-        RegisterRequest registerRequest = new RegisterRequest();
-        registerRequest.setUsername("nuevoUsuario");
-        registerRequest.setEmail("nuevoUsuario@example.com");
+        AdminRegisterRequest registerRequest = new AdminRegisterRequest();
+        registerRequest.setUsername("nuevoAdmin");
+        registerRequest.setEmail("nuevoAdmin@example.com");
         registerRequest.setPassword("password123");
-        registerRequest.setRol("normal");
+        registerRequest.setRol("admin");
 
-        // Simula el AuthResponse que esperas de AuthService.register
+        // Simula el AuthResponse que esperas de AuthService.registerAdmin
         AuthResponse authResponse = AuthResponse.builder()
                 .token("dummyToken")  // Puedes simular cualquier valor que necesites
                 .build();
 
         // Simular el comportamiento de AuthService (devuelve AuthResponse)
-        Mockito.when(authService.register(Mockito.any(RegisterRequest.class)))
+        Mockito.when(authService.registerAdmin(Mockito.any(AdminRegisterRequest.class)))
                 .thenReturn(authResponse);  // Devuelve el objeto AuthResponse simulado
 
         mockMvc.perform(post("/admin/create-user")
@@ -58,8 +60,8 @@ public class AdminControllerTest {
                 .andExpect(status().isOk())  // Verifica que la respuesta es 200 OK
                 .andExpect(content().string("Usuario creado exitosamente"));
 
-        // Verifica que se llamó al método de registro con el objeto correcto
-        Mockito.verify(authService, Mockito.times(1)).register(Mockito.any(RegisterRequest.class));
+        // Verifica que se llamó al metodo de registro con el objeto correcto
+        Mockito.verify(authService, Mockito.times(1)).registerAdmin(Mockito.any(AdminRegisterRequest.class));
     }
 
 
