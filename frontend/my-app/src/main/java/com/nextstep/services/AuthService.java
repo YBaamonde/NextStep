@@ -3,6 +3,7 @@ package com.nextstep.services;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nextstep.views.helloworld.HelloWorldView;
+import com.vaadin.base.devserver.DevToolsInterface;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.notification.Notification;
 import org.springframework.stereotype.Service;
@@ -32,7 +33,6 @@ public class AuthService {
 
     // Metodo para iniciar sesión, enviando las credenciales al backend y gestionando la respuesta
     public void login(String username, String password, Consumer<Boolean> loginCallback) {
-        // Prueba para ver si se llama a la función - Eliminar si no es necesario
         System.out.println("Iniciando petición de login");
 
         try {
@@ -60,6 +60,9 @@ public class AuthService {
                 Map<String, String> responseMap = objectMapper.readValue(response.body(), new TypeReference<>() {});
                 String token = responseMap.get("token");
 
+                // Almacenar el token en la sesión de Vaadin
+                UI.getCurrent().getSession().setAttribute("authToken", token);
+
                 // Ejecuta el callback indicando éxito (true)
                 loginCallback.accept(true);
             } else {
@@ -71,6 +74,8 @@ public class AuthService {
             loginCallback.accept(false);
         }
     }
+
+
 
 
     // Metodo para registrar un nuevo usuario enviando los datos al backend
@@ -110,4 +115,22 @@ public class AuthService {
             Notification.show("Ocurrió un error durante el registro: " + e.getMessage());
         }
     }
+
+    // Metodo para crear solicitudes autenticadas con el token JWT
+    public HttpRequest createAuthenticatedRequest(String endpoint) {
+        // Recupera el token JWT de la sesión
+        String token = (String) UI.getCurrent().getSession().getAttribute("authToken");
+
+        return HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + endpoint))
+                .header("Authorization", "Bearer " + token) // Envía el token en el header de autorización
+                .build();
+    }
+
+
+    // Metodo para obtener el HttpClient
+    public HttpClient getClient() {
+        return this.client;
+    }
+
 }

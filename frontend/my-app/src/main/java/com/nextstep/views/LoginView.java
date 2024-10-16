@@ -17,7 +17,10 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 @Route("login")
 public class LoginView extends Div {
 
-    public LoginView() {
+    private final AuthService authService;
+
+    public LoginView(AuthService authService) {  // Inyectar AuthService
+        this.authService = authService;
 
         addClassName("login-view");
 
@@ -55,8 +58,6 @@ public class LoginView extends Div {
             // Deshabilitar el formulario durante el proceso de autenticación
             loginForm.setEnabled(false);
 
-            // Llamar al metodo de login de AuthService con las credenciales ingresadas
-            AuthService authService = new AuthService();
             authService.login(event.getUsername(), event.getPassword(), success -> {
                 if (success) {
                     // Redirigir a la página principal si el login es exitoso
