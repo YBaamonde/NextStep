@@ -35,6 +35,7 @@ public class WebSecurityConfig {
                 .requestMatchers("/api/protegido/**").authenticated() // Proteger las rutas de la API
                 .requestMatchers("/").authenticated() // Bloquear la ruta raíz si no está autenticado
                 .anyRequest().authenticated() // Proteger cualquier otra ruta
+                //.anyRequest().permitAll() // Deshabilitar la protección de rutas para probar
         );
 
         // Establecer la política de sesiones como STATELESS (sin estado) para usar JWT

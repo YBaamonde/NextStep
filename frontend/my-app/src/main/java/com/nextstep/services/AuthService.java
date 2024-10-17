@@ -60,6 +60,9 @@ public class AuthService {
                 Map<String, String> responseMap = objectMapper.readValue(response.body(), new TypeReference<>() {});
                 String token = responseMap.get("token");
 
+                // Imprimir el token en la consola - Depuración
+                System.out.println("Token JWT recibido: " + token);
+
                 // Almacenar el token en la sesión de Vaadin
                 UI.getCurrent().getSession().setAttribute("authToken", token);
 

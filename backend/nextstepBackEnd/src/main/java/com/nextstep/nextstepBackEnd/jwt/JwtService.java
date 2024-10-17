@@ -32,21 +32,21 @@ public class JwtService {
      */
 
     // Metodo que genera los tokens
-    public String generateToken(UserDetails usuario) {
-        // Crear el mapa de claims y agregar los roles
+    public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("roles", ((Usuario) usuario).getAuthorities().stream()
+        claims.put("roles", userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList())); // Asegúrate de que sea una lista de roles
+                .collect(Collectors.toList()));
 
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(usuario.getUsername())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 horas de expiración
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 horas
                 .signWith(SignatureAlgorithm.HS256, SECRET)
                 .compact();
     }
+
 
 
 
@@ -62,8 +62,10 @@ public class JwtService {
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = getUsernameFromToken(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        final List<String> roles = getRolesFromToken(token);
+        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token) && roles.contains("admin"));
     }
+
 
     private Claims getAllClaims(String token)
     {
