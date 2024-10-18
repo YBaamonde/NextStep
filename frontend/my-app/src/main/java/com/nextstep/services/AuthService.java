@@ -13,8 +13,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 @Service
@@ -122,5 +121,96 @@ public class AuthService {
     public HttpClient getClient() {
         return this.client;
     }
+
+
+
+    // Métodos para recopilar info de Usuarios desde el back
+
+    public List<Map<String, String>> getAllUsers() {
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(baseUrl + "/admin/users"))
+                    .header("Authorization", "Bearer " + getToken())
+                    .header("Content-Type", "application/json")
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                // Deserializa la respuesta a una lista de mapas
+                ObjectMapper mapper = new ObjectMapper();
+                List<Map<String, Object>> users = mapper.readValue(response.body(), new TypeReference<>() {});
+
+                // Convierte cada usuario en un Map de String a String para que sea compatible con el Grid
+                List<Map<String, String>> formattedUsers = new ArrayList<>();
+                for (Map<String, Object> user : users) {
+                    Map<String, String> formattedUser = new HashMap<>();
+                    formattedUser.put("username", (String) user.get("username"));
+                    formattedUser.put("email", (String) user.get("email"));
+                    formattedUser.put("rol", (String) user.get("rol"));
+
+                    formattedUsers.add(formattedUser);
+                }
+
+                return formattedUsers;
+            } else {
+                Notification.show("Error al cargar los usuarios: " + response.statusCode());
+            }
+        } catch (IOException | InterruptedException e) {
+            Notification.show("Error al cargar los usuarios: " + e.getMessage());
+        }
+
+        return Collections.emptyList();
+    }
+
+    public boolean deleteUser(Long userId) {
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(baseUrl + "/admin/delete-user/" + userId))
+                    .header("Authorization", "Bearer " + getToken())
+                    .DELETE()
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            return response.statusCode() == 200;
+        } catch (IOException | InterruptedException e) {
+            Notification.show("Error al eliminar usuario: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean createUser(String username, String email, String password, String role) {
+        try {
+            Map<String, String> requestBody = new HashMap<>();
+            requestBody.put("username", username);
+            requestBody.put("email", email);
+            requestBody.put("password", password);
+            requestBody.put("rol", role);
+
+            String requestBodyJson = objectMapper.writeValueAsString(requestBody);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(baseUrl + "/admin/create-user"))
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", "Bearer " + getToken())
+                    .POST(HttpRequest.BodyPublishers.ofString(requestBodyJson))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            return response.statusCode() == 200;
+        } catch (IOException | InterruptedException e) {
+            Notification.show("Error al crear usuario: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // Metodo auxiliar para obtener el token desde la sesión
+    private String getToken() {
+        return (String) UI.getCurrent().getSession().getAttribute("authToken");
+    }
+
 
 }
