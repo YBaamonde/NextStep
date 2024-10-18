@@ -22,7 +22,7 @@ import java.util.Map;
 @Route("admin")
 public class AdminView extends VerticalLayout {
 
-    private Grid<Map<String, String>> userGrid = new Grid<>();
+    private Grid<Map<String, Object>> userGrid = new Grid<>();
     private AuthService authService = new AuthService();
 
     public AdminView() {
@@ -39,30 +39,26 @@ public class AdminView extends VerticalLayout {
         Button refreshButton = new Button("Refrescar", e -> refreshUserGrid());
         Button addUserButton = new Button("Agregar Usuario", e -> openCreateUserDialog());
 
-        userGrid.addColumn(user -> user.get("username")).setHeader("Username");
-        userGrid.addColumn(user -> user.get("email")).setHeader("Email");
-        userGrid.addColumn(user -> user.get("rol")).setHeader("Role");
+        userGrid.addColumn(user -> user.get("username").toString()).setHeader("Username");
+        userGrid.addColumn(user -> user.get("email").toString()).setHeader("Email");
+        userGrid.addColumn(user -> user.get("rol").toString()).setHeader("Role");
 
         userGrid.addComponentColumn(user -> {
             Button deleteButton = new Button("Eliminar", event -> {
                 // Obtener el ID del usuario y verificar que no sea nulo
                 Object idObject = user.get("id");
-                if (idObject == null) {
+                if (idObject == null || !(idObject instanceof Number)) {
                     Notification.show("ID de usuario no encontrado");
                     return;
                 }
 
-                try {
-                    Long userId = Long.valueOf(idObject.toString());
-                    boolean success = authService.deleteUser(userId);
-                    if (success) {
-                        Notification.show("Usuario eliminado con éxito");
-                        refreshUserGrid();
-                    } else {
-                        Notification.show("Error al eliminar el usuario");
-                    }
-                } catch (NumberFormatException e) {
-                    Notification.show("ID de usuario inválido");
+                Long userId = ((Number) idObject).longValue();
+                boolean success = authService.deleteUser(userId);
+                if (success) {
+                    Notification.show("Usuario eliminado con éxito");
+                    refreshUserGrid();
+                } else {
+                    Notification.show("Error al eliminar el usuario");
                 }
             });
             deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
@@ -75,7 +71,7 @@ public class AdminView extends VerticalLayout {
     }
 
     private void refreshUserGrid() {
-        List<Map<String, String>> users = authService.getAllUsers();
+        List<Map<String, Object>> users = authService.getAllUsers();
         userGrid.setItems(users);
     }
 

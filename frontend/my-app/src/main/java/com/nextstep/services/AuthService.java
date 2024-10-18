@@ -126,7 +126,7 @@ public class AuthService {
 
     // Métodos para recopilar info de Usuarios desde el back
 
-    public List<Map<String, String>> getAllUsers() {
+    public List<Map<String, Object>> getAllUsers() {
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(baseUrl + "/admin/users"))
@@ -142,18 +142,8 @@ public class AuthService {
                 ObjectMapper mapper = new ObjectMapper();
                 List<Map<String, Object>> users = mapper.readValue(response.body(), new TypeReference<>() {});
 
-                // Convierte cada usuario en un Map de String a String para que sea compatible con el Grid
-                List<Map<String, String>> formattedUsers = new ArrayList<>();
-                for (Map<String, Object> user : users) {
-                    Map<String, String> formattedUser = new HashMap<>();
-                    formattedUser.put("username", (String) user.get("username"));
-                    formattedUser.put("email", (String) user.get("email"));
-                    formattedUser.put("rol", (String) user.get("rol"));
-
-                    formattedUsers.add(formattedUser);
-                }
-
-                return formattedUsers;
+                // Devuelve la lista de usuarios deserializada
+                return users;
             } else {
                 Notification.show("Error al cargar los usuarios: " + response.statusCode());
             }
@@ -163,6 +153,7 @@ public class AuthService {
 
         return Collections.emptyList();
     }
+
 
     public boolean deleteUser(Long userId) {
         try {
