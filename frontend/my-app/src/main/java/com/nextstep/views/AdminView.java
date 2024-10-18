@@ -1,36 +1,30 @@
 package com.nextstep.views;
 
 import com.nextstep.config.SecurityUtils;
-import com.nextstep.services.AuthService;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.charts.model.Label;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
-import jakarta.annotation.security.PermitAll;
-import org.springframework.security.access.annotation.Secured;
-
-import java.io.IOException;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 
 @Route("admin")
-@Secured("admin")
 public class AdminView extends VerticalLayout {
 
     public AdminView() {
+        // Obtener el token almacenado en la sesión
+        String token = (String) UI.getCurrent().getSession().getAttribute("authToken");
 
-        // Verificar si el usuario tiene el rol de admin
-        if (!SecurityUtils.hasRole("admin")) {
+        // Verificar si el token existe y si el usuario tiene el rol "admin"
+        if (token == null || !SecurityUtils.hasRole("admin", token)) {
             UI.getCurrent().navigate("login");
-            return; // Salir del constructor si no es admin
+            //UI.getCurrent().getPage().reload(); // Recargar la página para asegurar la navegación
+            return;
         }
 
+        // Si el usuario tiene el rol "admin", mostrar el contenido de la vista
+        Span adminLabel = new Span("Bienvenido a la vista de administrador");
+        add(adminLabel); // Añadir el Span al layout
 
-        // Continuar con el código de la vista admin...
-        add(new H1("Bienvenido, Admin"));
+        // Aquí puedes añadir más componentes o lógica para el contenido de la vista de admin
     }
 }
-

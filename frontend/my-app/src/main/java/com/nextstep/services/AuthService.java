@@ -33,50 +33,37 @@ public class AuthService {
 
     // Metodo para iniciar sesión, enviando las credenciales al backend y gestionando la respuesta
     public void login(String username, String password, Consumer<Boolean> loginCallback) {
-        System.out.println("Iniciando petición de login");
-
         try {
-            // Crea un mapa con las credenciales que se enviarán en la solicitud HTTP
             Map<String, String> requestBody = new HashMap<>();
             requestBody.put("username", username);
             requestBody.put("password", password);
 
-            // Convierte el mapa de credenciales a formato JSON
             String requestBodyJson = objectMapper.writeValueAsString(requestBody);
 
-            // Construye la solicitud HTTP para el login
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(baseUrl + "/auth/login")) // Establece la URL de login en el backend
-                    .header("Content-Type", "application/json") // Establece el tipo de contenido de la solicitud como JSON
-                    .POST(HttpRequest.BodyPublishers.ofString(requestBodyJson)) // Agrega el cuerpo de la solicitud con las credenciales en formato JSON
+                    .uri(URI.create(baseUrl + "/auth/login"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(requestBodyJson))
                     .build();
 
-            // Envía la solicitud al servidor y obtiene la respuesta
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            // Si el código de estado HTTP es 200, significa que el login fue exitoso
             if (response.statusCode() == 200) {
-                // Convierte la respuesta JSON a un mapa y extrae el token JWT
                 Map<String, String> responseMap = objectMapper.readValue(response.body(), new TypeReference<>() {});
                 String token = responseMap.get("token");
 
-                // Imprimir el token en la consola - Depuración
-                System.out.println("Token JWT recibido: " + token);
-
-                // Almacenar el token en la sesión de Vaadin
+                // Almacenar el token en localStorage para usarlo en otras vistas
                 UI.getCurrent().getSession().setAttribute("authToken", token);
 
-                // Ejecuta el callback indicando éxito (true)
                 loginCallback.accept(true);
             } else {
-                // Si el código de estado es diferente a 200, ejecuta el callback indicando fallo (false)
                 loginCallback.accept(false);
             }
         } catch (IOException | InterruptedException e) {
-            // En caso de error, ejecuta el callback indicando fallo (false)
             loginCallback.accept(false);
         }
     }
+
 
 
 
