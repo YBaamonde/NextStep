@@ -8,6 +8,7 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -35,7 +36,7 @@ public class AdminView extends VerticalLayout {
             return;
         }
 
-        Span adminLabel = new Span("Bienvenido a la vista de administrador");
+        H1 adminLabel = new H1("Bienvenido a la vista de administrador");
         Button refreshButton = new Button("Refrescar", e -> refreshUserGrid());
         Button addUserButton = new Button("Agregar Usuario", e -> openCreateUserDialog());
 
