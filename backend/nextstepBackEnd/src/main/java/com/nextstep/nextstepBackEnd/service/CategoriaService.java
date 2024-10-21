@@ -45,12 +45,12 @@ public class CategoriaService {
     }
 
     // Metodo para eliminar una categoría
-    public boolean deleteCategoria(Integer categoriaId) {
-        Optional<Categoria> categoria = categoriaRepository.findById(categoriaId);
-        if (categoria.isPresent()) {
+    public void deleteCategoria(Integer categoriaId) {
+        if (categoriaRepository.existsById(categoriaId)) {
             categoriaRepository.deleteById(categoriaId);
-            return true;  // Retorna true si la categoría fue eliminada con éxito
+        } else {
+            throw new IllegalArgumentException("Categoría no encontrada.");
         }
-        return false;  // Retorna false si no se encontró la categoría
     }
+
 }

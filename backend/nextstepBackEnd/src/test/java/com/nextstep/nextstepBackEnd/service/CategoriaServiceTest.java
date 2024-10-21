@@ -110,17 +110,15 @@ public class CategoriaServiceTest {
     @Test
     public void testDeleteCategoria() {
         // Simular la existencia de una categoría en el repositorio
-        when(categoriaRepository.findById(1)).thenReturn(Optional.of(mockCategoria));
+        when(categoriaRepository.existsById(1)).thenReturn(true);
 
         // Ejecutar el metodo de eliminación
-        boolean result = categoriaService.deleteCategoria(1);
-
-        // Verificar que el resultado es true (la categoría fue eliminada con éxito)
-        assertTrue(result, "La eliminación debería haber sido exitosa");
+        categoriaService.deleteCategoria(1);
 
         // Verificar que el metodo deleteById del repositorio se llamó una vez
         verify(categoriaRepository, times(1)).deleteById(1);
     }
+
 
 
     @Test
