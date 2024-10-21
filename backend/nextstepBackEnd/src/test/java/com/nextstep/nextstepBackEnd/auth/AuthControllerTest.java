@@ -3,6 +3,7 @@ package com.nextstep.nextstepBackEnd.auth;
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.*;
 
+import com.nextstep.nextstepBackEnd.controller.AuthController;
 import com.nextstep.nextstepBackEnd.exception.InvalidCredentialsException;
 import com.nextstep.nextstepBackEnd.exception.UserAlreadyExistsException;
 import com.nextstep.nextstepBackEnd.service.AuthService;

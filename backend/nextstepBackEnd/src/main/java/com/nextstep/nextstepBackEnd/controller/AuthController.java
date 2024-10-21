@@ -1,5 +1,8 @@
-package com.nextstep.nextstepBackEnd.auth;
+package com.nextstep.nextstepBackEnd.controller;
 
+import com.nextstep.nextstepBackEnd.auth.AuthResponse;
+import com.nextstep.nextstepBackEnd.auth.LoginRequest;
+import com.nextstep.nextstepBackEnd.auth.RegisterRequest;
 import com.nextstep.nextstepBackEnd.exception.InvalidCredentialsException;
 import com.nextstep.nextstepBackEnd.exception.UserAlreadyExistsException;
 import com.nextstep.nextstepBackEnd.service.AuthService;

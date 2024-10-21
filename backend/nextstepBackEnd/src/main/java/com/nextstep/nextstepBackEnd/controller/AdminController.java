@@ -1,5 +1,6 @@
-package com.nextstep.nextstepBackEnd.auth;
+package com.nextstep.nextstepBackEnd.controller;
 
+import com.nextstep.nextstepBackEnd.auth.AdminRegisterRequest;
 import com.nextstep.nextstepBackEnd.model.Usuario;
 import com.nextstep.nextstepBackEnd.repository.UserRepository;
 import com.nextstep.nextstepBackEnd.service.AuthService;

@@ -1,6 +1,6 @@
 package com.nextstep.nextstepBackEnd.config;
 
-import com.nextstep.nextstepBackEnd.auth.AuthController; // Importa tu controlador existente
+import com.nextstep.nextstepBackEnd.controller.AuthController; // Importa tu controlador existente
 import com.nextstep.nextstepBackEnd.service.AuthService; // Importa tu servicio
 import com.nextstep.nextstepBackEnd.authTest.TestController;
 import com.nextstep.nextstepBackEnd.jwt.JwtAuthFilter;
