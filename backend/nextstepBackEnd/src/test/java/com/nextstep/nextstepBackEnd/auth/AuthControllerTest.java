@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import com.nextstep.nextstepBackEnd.exception.InvalidCredentialsException;
 import com.nextstep.nextstepBackEnd.exception.UserAlreadyExistsException;
+import com.nextstep.nextstepBackEnd.service.AuthService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

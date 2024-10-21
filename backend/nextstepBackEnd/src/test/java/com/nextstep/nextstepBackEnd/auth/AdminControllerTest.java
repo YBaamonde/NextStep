@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nextstep.nextstepBackEnd.model.Rol;
 import com.nextstep.nextstepBackEnd.model.Usuario;
 import com.nextstep.nextstepBackEnd.repository.UserRepository;
+import com.nextstep.nextstepBackEnd.service.AuthService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
