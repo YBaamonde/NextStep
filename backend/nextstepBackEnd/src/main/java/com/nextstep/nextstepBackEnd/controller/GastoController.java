@@ -2,7 +2,6 @@ package com.nextstep.nextstepBackEnd.controller;
 
 import com.nextstep.nextstepBackEnd.model.Gasto;
 import com.nextstep.nextstepBackEnd.service.GastoService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,36 +9,32 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/gastos")
-@RequiredArgsConstructor
 public class GastoController {
 
     private final GastoService gastoService;
 
-    // Endpoint para obtener todos los gastos de un usuario
-    @GetMapping
-    public ResponseEntity<List<Gasto>> getAllGastos(@RequestParam("usuarioId") Integer usuarioId) {
-        List<Gasto> gastos = gastoService.findAllByUsuarioId(usuarioId);
-        return ResponseEntity.ok(gastos);
+    public GastoController(GastoService gastoService) {
+        this.gastoService = gastoService;
     }
 
-    // Endpoint para crear un nuevo gasto
-    @PostMapping
-    public ResponseEntity<Gasto> createGasto(@RequestBody Gasto gasto) {
-        Gasto newGasto = gastoService.createGasto(gasto);
-        return ResponseEntity.ok(newGasto);
+    @GetMapping("/{usuarioId}")
+    public List<Gasto> getGastosByUsuario(@PathVariable Integer usuarioId) {
+        return gastoService.getGastosByUsuarioId(usuarioId);
     }
 
-    // Endpoint para actualizar un gasto existente
-    @PutMapping("/{id}")
-    public ResponseEntity<Gasto> updateGasto(@PathVariable Integer id, @RequestBody Gasto gasto) {
-        Gasto updatedGasto = gastoService.updateGasto(id, gasto);
-        return ResponseEntity.ok(updatedGasto);
+    @PostMapping("/{usuarioId}/{categoriaId}")
+    public Gasto createGasto(@PathVariable Integer usuarioId, @PathVariable Integer categoriaId, @RequestBody Gasto gasto) {
+        return gastoService.createGasto(usuarioId, categoriaId, gasto);
     }
 
-    // Endpoint para eliminar un gasto
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteGasto(@PathVariable Integer id) {
-        gastoService.deleteGasto(id);
-        return ResponseEntity.noContent().build();
+    @PutMapping("/{gastoId}")
+    public Gasto updateGasto(@PathVariable Integer gastoId, @RequestBody Gasto gasto) {
+        return gastoService.updateGasto(gastoId, gasto);
+    }
+
+    @DeleteMapping("/{gastoId}")
+    public ResponseEntity<Void> deleteGasto(@PathVariable Integer gastoId) {
+        gastoService.deleteGasto(gastoId);
+        return ResponseEntity.ok().build();
     }
 }

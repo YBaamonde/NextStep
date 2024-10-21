@@ -10,44 +10,32 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/categorias")
-@RequiredArgsConstructor
 public class CategoriaController {
 
     private final CategoriaService categoriaService;
 
-    // Endpoint para obtener todas las categorías de un usuario
-    @GetMapping
-    public ResponseEntity<List<Categoria>> getAllCategorias(@RequestParam("usuarioId") Integer usuarioId) {
-        List<Categoria> categorias = categoriaService.findAllByUsuarioId(usuarioId);
-        return ResponseEntity.ok(categorias);
+    public CategoriaController(CategoriaService categoriaService) {
+        this.categoriaService = categoriaService;
     }
 
-    // Endpoint para crear una nueva categoría
-    @PostMapping
-    public ResponseEntity<?> createCategoria(@RequestBody Categoria categoria) {
-        if (categoriaService.countByUsuarioId(categoria.getUsuario().getId()) >= 15) {
-            return ResponseEntity.badRequest().body("No se pueden crear más de 15 categorías.");
-        }
-
-        Categoria newCategoria = categoriaService.createCategoria(categoria);
-        return ResponseEntity.ok(newCategoria);
+    @GetMapping("/{usuarioId}")
+    public List<Categoria> getCategoriasByUsuario(@PathVariable Integer usuarioId) {
+        return categoriaService.getCategoriasByUsuarioId(usuarioId);
     }
 
-    // Endpoint para actualizar una categoría existente
-    @PutMapping("/{id}")
-    public ResponseEntity<Categoria> updateCategoria(@PathVariable Integer id, @RequestBody Categoria categoria) {
-        Categoria updatedCategoria = categoriaService.updateCategoria(id, categoria);
-        return ResponseEntity.ok(updatedCategoria);
+    @PostMapping("/{usuarioId}")
+    public Categoria createCategoria(@PathVariable Integer usuarioId, @RequestBody Categoria categoria) {
+        return categoriaService.createCategoria(usuarioId, categoria);
     }
 
-    // Endpoint para eliminar una categoría
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteCategoria(@PathVariable Integer id) {
-        if (categoriaService.countAll() <= 1) {
-            return ResponseEntity.badRequest().body("Debe haber al menos una categoría.");
-        }
+    @PutMapping("/{categoriaId}")
+    public Categoria updateCategoria(@PathVariable Integer categoriaId, @RequestBody Categoria categoria) {
+        return categoriaService.updateCategoria(categoriaId, categoria);
+    }
 
-        categoriaService.deleteCategoria(id);
-        return ResponseEntity.noContent().build();
+    @DeleteMapping("/{categoriaId}")
+    public ResponseEntity<Void> deleteCategoria(@PathVariable Integer categoriaId) {
+        categoriaService.deleteCategoria(categoriaId);
+        return ResponseEntity.ok().build();
     }
 }
