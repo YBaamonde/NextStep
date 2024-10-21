@@ -13,4 +13,3 @@ public interface GastoRepository extends JpaRepository<Gasto, Integer> {
     List<Gasto> findByUsuario(Usuario usuario);
     List<Gasto> findByCategoria(Categoria categoria);
 }
-
