@@ -18,7 +18,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 public class LoginView extends Div {
 
     public LoginView() {
-
         addClassName("login-view");
 
         // Crear un layout para centrar el formulario
@@ -50,15 +49,21 @@ public class LoginView extends Div {
         i18n.getErrorMessage().setMessage("Por favor, verifica tu email y contraseña e intenta nuevamente.");
         loginForm.setI18n(i18n);
 
+        // Crear instancia de AuthService
+        AuthService authService = new AuthService();
+
         // Capturar el evento de login y llamar a AuthService
         loginForm.addLoginListener(event -> {
+            System.out.println("Evento de login detectado"); // Debug
+
             // Deshabilitar el formulario durante el proceso de autenticación
             loginForm.setEnabled(false);
 
             // Llamar al metodo de login de AuthService con las credenciales ingresadas
-            AuthService authService = new AuthService();
+            //AuthService authService = new AuthService();
             authService.login(event.getUsername(), event.getPassword(), success -> {
                 if (success) {
+                    System.out.println("Login exitoso, redirigiendo..."); // Debug
                     // Redirigir a la página principal si el login es exitoso
                     UI.getCurrent().navigate(HelloWorldView.class);
                 } else {
@@ -69,6 +74,7 @@ public class LoginView extends Div {
                 }
             });
         });
+
 
         layout.add(loginForm, registerButton);
         add(layout);

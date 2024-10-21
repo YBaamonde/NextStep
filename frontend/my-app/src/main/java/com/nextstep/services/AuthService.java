@@ -3,6 +3,7 @@ package com.nextstep.services;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nextstep.views.helloworld.HelloWorldView;
+import com.vaadin.base.devserver.DevToolsInterface;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.notification.Notification;
 import org.springframework.stereotype.Service;
@@ -12,8 +13,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 @Service
@@ -32,45 +32,39 @@ public class AuthService {
 
     // Metodo para iniciar sesión, enviando las credenciales al backend y gestionando la respuesta
     public void login(String username, String password, Consumer<Boolean> loginCallback) {
-        // Prueba para ver si se llama a la función - Eliminar si no es necesario
-        System.out.println("Iniciando petición de login");
-
         try {
-            // Crea un mapa con las credenciales que se enviarán en la solicitud HTTP
             Map<String, String> requestBody = new HashMap<>();
             requestBody.put("username", username);
             requestBody.put("password", password);
 
-            // Convierte el mapa de credenciales a formato JSON
             String requestBodyJson = objectMapper.writeValueAsString(requestBody);
 
-            // Construye la solicitud HTTP para el login
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(baseUrl + "/auth/login")) // Establece la URL de login en el backend
-                    .header("Content-Type", "application/json") // Establece el tipo de contenido de la solicitud como JSON
-                    .POST(HttpRequest.BodyPublishers.ofString(requestBodyJson)) // Agrega el cuerpo de la solicitud con las credenciales en formato JSON
+                    .uri(URI.create(baseUrl + "/auth/login"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(requestBodyJson))
                     .build();
 
-            // Envía la solicitud al servidor y obtiene la respuesta
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            // Si el código de estado HTTP es 200, significa que el login fue exitoso
             if (response.statusCode() == 200) {
-                // Convierte la respuesta JSON a un mapa y extrae el token JWT
                 Map<String, String> responseMap = objectMapper.readValue(response.body(), new TypeReference<>() {});
                 String token = responseMap.get("token");
 
-                // Ejecuta el callback indicando éxito (true)
+                // Almacenar el token en localStorage para usarlo en otras vistas
+                UI.getCurrent().getSession().setAttribute("authToken", token);
+
                 loginCallback.accept(true);
             } else {
-                // Si el código de estado es diferente a 200, ejecuta el callback indicando fallo (false)
                 loginCallback.accept(false);
             }
         } catch (IOException | InterruptedException e) {
-            // En caso de error, ejecuta el callback indicando fallo (false)
             loginCallback.accept(false);
         }
     }
+
+
+
 
 
     // Metodo para registrar un nuevo usuario enviando los datos al backend
@@ -110,4 +104,104 @@ public class AuthService {
             Notification.show("Ocurrió un error durante el registro: " + e.getMessage());
         }
     }
+
+    // Metodo para crear solicitudes autenticadas con el token JWT
+    public HttpRequest createAuthenticatedRequest(String endpoint) {
+        // Recupera el token JWT de la sesión
+        String token = (String) UI.getCurrent().getSession().getAttribute("authToken");
+
+        return HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + endpoint))
+                .header("Authorization", "Bearer " + token) // Envía el token en el header de autorización
+                .build();
+    }
+
+
+    // Metodo para obtener el HttpClient
+    public HttpClient getClient() {
+        return this.client;
+    }
+
+
+
+    // Métodos para recopilar info de Usuarios desde el back
+
+    public List<Map<String, Object>> getAllUsers() {
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(baseUrl + "/admin/users"))
+                    .header("Authorization", "Bearer " + getToken())
+                    .header("Content-Type", "application/json")
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                // Deserializa la respuesta a una lista de mapas
+                ObjectMapper mapper = new ObjectMapper();
+                List<Map<String, Object>> users = mapper.readValue(response.body(), new TypeReference<>() {});
+
+                // Devuelve la lista de usuarios deserializada
+                return users;
+            } else {
+                Notification.show("Error al cargar los usuarios: " + response.statusCode());
+            }
+        } catch (IOException | InterruptedException e) {
+            Notification.show("Error al cargar los usuarios: " + e.getMessage());
+        }
+
+        return Collections.emptyList();
+    }
+
+
+    public boolean deleteUser(Long userId) {
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(baseUrl + "/admin/delete-user/" + userId))
+                    .header("Authorization", "Bearer " + getToken())
+                    .DELETE()
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            return response.statusCode() == 200;
+        } catch (IOException | InterruptedException e) {
+            Notification.show("Error al eliminar usuario: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean createUser(String username, String email, String password, String role) {
+        try {
+            Map<String, String> requestBody = new HashMap<>();
+            requestBody.put("username", username);
+            requestBody.put("email", email);
+            requestBody.put("password", password);
+            requestBody.put("rol", role);
+
+            String requestBodyJson = objectMapper.writeValueAsString(requestBody);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(baseUrl + "/admin/create-user"))
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", "Bearer " + getToken())
+                    .POST(HttpRequest.BodyPublishers.ofString(requestBodyJson))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            return response.statusCode() == 200;
+        } catch (IOException | InterruptedException e) {
+            Notification.show("Error al crear usuario: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // Metodo auxiliar para obtener el token desde la sesión
+    private String getToken() {
+        return (String) UI.getCurrent().getSession().getAttribute("authToken");
+    }
+
+
 }

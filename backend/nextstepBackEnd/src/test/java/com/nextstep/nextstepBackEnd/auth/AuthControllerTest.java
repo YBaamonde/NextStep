@@ -81,7 +81,7 @@ public class AuthControllerTest {
     public void testRegisterSuccess() {
         // Arrange
         String token = "testtoken";
-        RegisterRequest request = new RegisterRequest("testuser", "testemail@example.com", "testpassword", "normal");
+        RegisterRequest request = new RegisterRequest("testuser", "testemail@example.com", "testpassword");
         AuthResponse authResponse = new AuthResponse(token);
 
         // Simula el comportamiento del servicio
@@ -99,7 +99,7 @@ public class AuthControllerTest {
     @Test
     public void testRegisterUserAlreadyExists() {
         // Arrange
-        RegisterRequest request = new RegisterRequest("existinguser", "existingemail@example.com", "password", "normal");
+        RegisterRequest request = new RegisterRequest("existinguser", "existingemail@example.com", "password");
 
         // Simula que el servicio lanza UserAlreadyExistsException
         when(authService.register(any(RegisterRequest.class))).thenThrow(new UserAlreadyExistsException("Usuario ya existe"));
@@ -115,7 +115,7 @@ public class AuthControllerTest {
     @Test
     public void testRegisterUnhandledException() {
         // Arrange
-        RegisterRequest request = new RegisterRequest("testuser", "testemail@example.com", "testpassword", "normal");
+        RegisterRequest request = new RegisterRequest("testuser", "testemail@example.com", "testpassword");
 
         // Simula que el servicio lanza una excepción no controlada
         when(authService.register(any(RegisterRequest.class))).thenThrow(new RuntimeException("Error interno"));

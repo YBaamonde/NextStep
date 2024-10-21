@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -55,7 +56,7 @@ public class AuthServiceTest {
         // Simulamos que el usuario existe
         when(userRepository.findByUsernameOrEmail(anyString(), anyString())).thenReturn(Optional.of(user));
         // Simulamos que el JWT se genera correctamente
-        when(jwtService.getToken(any(Usuario.class))).thenReturn(token);
+        when(jwtService.generateToken(any(Usuario.class))).thenReturn(token);
 
         // Act
         AuthResponse response = authService.login(request);
@@ -83,7 +84,7 @@ public class AuthServiceTest {
                 .isInstanceOf(InvalidCredentialsException.class)
                 .hasMessageContaining("Invalid credentials");
 
-        // Verifica que el método de autenticación no se llame si no se encuentra el usuario
+        // Verifica que el metodo de autenticación no se llame si no se encuentra el usuario
         verify(authenticationManager, never()).authenticate(any(UsernamePasswordAuthenticationToken.class));
     }
 
@@ -91,7 +92,7 @@ public class AuthServiceTest {
     public void testRegisterSuccess() {
         // Arrange
         String token = "testtoken";
-        RegisterRequest request = new RegisterRequest("newuser", "newemail@example.com", "newpassword", "normal");
+        RegisterRequest request = new RegisterRequest("newuser", "newemail@example.com", "newpassword");
         Usuario newUser = Usuario.builder()
                 .username("newuser")
                 .email("newemail@example.com")
@@ -105,7 +106,7 @@ public class AuthServiceTest {
         // Simulamos que el password encoder funciona correctamente
         when(passwordEncoder.encode(anyString())).thenReturn("encodedpassword");
         // Simulamos que el JWT se genera correctamente
-        when(jwtService.getToken(any(Usuario.class))).thenReturn(token);
+        when(jwtService.generateToken(any(Usuario.class))).thenReturn(token);
 
         // Act
         AuthResponse response = authService.register(request);
@@ -121,7 +122,7 @@ public class AuthServiceTest {
     @Test
     public void testRegisterUsernameTaken() {
         // Arrange
-        RegisterRequest request = new RegisterRequest("existinguser", "newemail@example.com", "newpassword", "normal");
+        RegisterRequest request = new RegisterRequest("existinguser", "newemail@example.com", "newpassword");
 
         // Simulamos que el nombre de usuario ya existe
         when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(new Usuario()));
@@ -129,7 +130,7 @@ public class AuthServiceTest {
         // Act & Assert
         assertThatThrownBy(() -> authService.register(request))
                 .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("Username already taken");
+                .hasMessageContaining("El nombre de usuario ya existe");
 
         // Verifica que no se haya llamado al repositorio para guardar un nuevo usuario
         verify(userRepository, never()).save(any(Usuario.class));
@@ -138,7 +139,7 @@ public class AuthServiceTest {
     @Test
     public void testRegisterEmailTaken() {
         // Arrange
-        RegisterRequest request = new RegisterRequest("newuser", "existingemail@example.com", "newpassword", "normal");
+        RegisterRequest request = new RegisterRequest("newuser", "existingemail@example.com", "newpassword");
 
         // Simulamos que el email ya existe
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(new Usuario()));
@@ -146,9 +147,44 @@ public class AuthServiceTest {
         // Act & Assert
         assertThatThrownBy(() -> authService.register(request))
                 .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("Email already exists");
+                .hasMessageContaining("El email ya existe");
 
         // Verifica que no se haya llamado al repositorio para guardar un nuevo usuario
         verify(userRepository, never()).save(any(Usuario.class));
+    }
+
+    // Test para registrar un usuario admin
+    @Test
+    public void testRegisterAdminSuccess() {
+        AdminRegisterRequest request = new AdminRegisterRequest();
+        request.setUsername("adminUser");
+        request.setEmail("admin@example.com");
+        request.setPassword("password123");
+        request.setRol("admin");
+
+        Usuario newUser = Usuario.builder()
+                .username(request.getUsername())
+                .email(request.getEmail())
+                .password("encodedpassword")  // Lo que esperamos después de la codificación
+                .rol(Rol.admin)
+                .build();
+
+        // Simulamos que no existe un usuario con el mismo nombre ni email
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        // Simulamos que el password encoder funciona correctamente
+        when(passwordEncoder.encode(anyString())).thenReturn("encodedpassword");
+        // Simulamos que el JWT se genera correctamente
+        when(jwtService.generateToken(any(Usuario.class))).thenReturn("testtoken");
+
+        // Act
+        AuthResponse response = authService.registerAdmin(request);
+
+        // Assert
+        assertThat(response).isNotNull();
+        assertThat(response.getToken()).isEqualTo("testtoken");
+
+        // Verifica que el usuario fue guardado en el repositorio con el rol admin
+        verify(userRepository).save(any(Usuario.class));
     }
 }

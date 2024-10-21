@@ -24,19 +24,19 @@ public class AuthService {
     private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
     private final UserRepository userRepository;
-    private final JwtService jwtService;
+    private final JwtService jwtService;  // Asegúrate de tener esta referencia al servicio de JWT
     private final AuthenticationManager authenticationManager;
-    private final PasswordEncoder passwordEncoder; // Inyecta el PasswordEncoder
+    private final PasswordEncoder passwordEncoder;
 
     public AuthResponse login(LoginRequest request) {
         // Busca al usuario por nombre de usuario o email
-        UserDetails user = userRepository.findByUsernameOrEmail(request.getUsername(), request.getUsername())
+        UserDetails userDetails = userRepository.findByUsernameOrEmail(request.getUsername(), request.getUsername())
                 .orElseThrow(() -> new InvalidCredentialsException("Invalid credentials"));
 
         // Determina si se ingresó un email o un nombre de usuario
         String loginIdentifier = request.getUsername();
         if (loginIdentifier.contains("@")) {
-            loginIdentifier = user.getUsername(); // Si es un email, usa el nombre de usuario para la autenticación
+            loginIdentifier = userDetails.getUsername(); // Si es un email, usa el nombre de usuario para la autenticación
         }
 
         // Autentica al usuario usando las credenciales proporcionadas
@@ -44,12 +44,12 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(loginIdentifier, request.getPassword())
         );
 
-        // Genera el token JWT
-        String token = jwtService.getToken(user);
+        // *** Genera el token JWT después de que la autenticación haya sido exitosa ***
+        String token = jwtService.generateToken(userDetails);
 
         // Devuelve la respuesta con el token
         return AuthResponse.builder()
-                .token(token)
+                .token(token) // Aquí es donde devuelves el token generado
                 .build();
     }
 
@@ -58,25 +58,58 @@ public class AuthService {
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
-        logger.info("Registering user: {}", request.getUsername());
+        logger.info("Registrando usuario: {}", request.getUsername());
 
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-            throw new RuntimeException("Username already taken");
-        }
-        else if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already exists");
+            throw new RuntimeException("El nombre de usuario ya existe");
+        } else if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new RuntimeException("El email ya existe");
         }
 
+        // Crear usuario con rol "normal", ya que solo un admin puede crear admins
         Usuario usuario = Usuario.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))  // Encripta la contraseña
-                .rol(Rol.normal)  // Todos los usuarios que se registren tendrán el rol 'normal', porque solo hay un admin
+                .rol(Rol.normal)  // Todos los usuarios que se registren tendrán el rol 'normal'
                 .build();
 
         userRepository.save(usuario);
         return AuthResponse.builder()
-                .token(jwtService.getToken(usuario))
+                .token(jwtService.generateToken(usuario))
+                .build();
+    }
+
+    // Metodo que usarán los admins para registrar usuarios
+    @Transactional
+    public AuthResponse registerAdmin(AdminRegisterRequest request) {
+        logger.info("Admin registrando usuario: {}", request.getUsername());
+
+        // Validar si el rol es válido
+        Rol rol;
+        try {
+            rol = Rol.valueOf(request.getRol());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Rol inválido: " + request.getRol());
+        }
+
+        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new RuntimeException("El nombre de usuario ya existe");
+        } else if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new RuntimeException("El email ya existe");
+        }
+
+        // Crear usuario con el rol proporcionado
+        Usuario usuario = Usuario.builder()
+                .username(request.getUsername())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))  // Encripta la contraseña
+                .rol(rol)  // El administrador elige el rol
+                .build();
+
+        userRepository.save(usuario);
+        return AuthResponse.builder()
+                .token(jwtService.generateToken(usuario))
                 .build();
     }
 

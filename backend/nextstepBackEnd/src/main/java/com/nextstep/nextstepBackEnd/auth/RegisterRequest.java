@@ -24,14 +24,14 @@ public class RegisterRequest {
     @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
     private String password;
 
-    @NotBlank(message = "El rol no puede estar vacío")
-    private String rol;
+    //@NotBlank(message = "El rol no puede estar vacío")
+    //private String rol;
 
-    // Método simple de validación
+    // Metodo simple de validación
     public boolean isValid() {
         return username != null && !username.trim().isEmpty() &&
                 email != null && email.length() >= 4 &&
-                password != null && password.length() >= 8 &&
-                rol != null && !rol.trim().isEmpty();
+                password != null && password.length() >= 8; // &&
+                // rol != null && !rol.trim().isEmpty();
     }
 }
