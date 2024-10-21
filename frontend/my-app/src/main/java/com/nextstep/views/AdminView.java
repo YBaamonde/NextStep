@@ -83,26 +83,41 @@ public class AdminView extends VerticalLayout {
         TextField usernameField = new TextField("Username");
         TextField emailField = new TextField("Email");
         PasswordField passwordField = new PasswordField("Password");
+        PasswordField confirmPasswordField = new PasswordField("Confirm Password");
         ComboBox<String> roleComboBox = new ComboBox<>("Role");
         roleComboBox.setItems("admin", "normal");
 
         Button saveButton = new Button("Guardar", event -> {
-            boolean success = authService.createUser(
-                    usernameField.getValue(),
-                    emailField.getValue(),
-                    passwordField.getValue(),
-                    roleComboBox.getValue()
-            );
-            if (success) {
-                Notification.show("Usuario creado con éxito");
-                refreshUserGrid();
-                dialog.close();
+            String username = usernameField.getValue();
+            String email = emailField.getValue();
+            String password = passwordField.getValue();
+            String confirmPassword = confirmPasswordField.getValue();
+            String role = roleComboBox.getValue();
+
+            // Verificar los parámetros
+            if (username.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty() || role == null) {
+                Notification.show("Todos los campos son obligatorios", 3000, Notification.Position.MIDDLE);
+            } else if (!password.equals(confirmPassword)) {
+                Notification.show("Las contraseñas no coinciden", 3000, Notification.Position.MIDDLE);
+            } else if (!email.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
+                Notification.show("Formato de correo electrónico inválido", 3000, Notification.Position.MIDDLE);
+            } else if (password.length() < 8) {
+                Notification.show("La contraseña debe tener al menos 8 caracteres", 3000, Notification.Position.MIDDLE);
             } else {
-                Notification.show("Error al crear el usuario");
+                // Intentar crear el usuario si todas las validaciones pasan
+                boolean success = authService.createUser(username, email, password, role);
+                if (success) {
+                    Notification.show("Usuario creado con éxito");
+                    refreshUserGrid();
+                    dialog.close();
+                } else {
+                    Notification.show("Error al crear el usuario");
+                }
             }
         });
 
-        dialog.add(usernameField, emailField, passwordField, roleComboBox, saveButton);
+        dialog.add(usernameField, emailField, passwordField, confirmPasswordField, roleComboBox, saveButton);
         dialog.open();
     }
+
 }

@@ -101,10 +101,9 @@ public class AdminService {
         }
     }
 
-    // Metodo auxiliar para obtener el token de autorización (este puede cambiar según cómo lo gestiones)
+    // Metodo auxiliar para obtener el token de autorización
     private String getAuthToken() {
-        // Suponiendo que has guardado el token en la sesión, podrías obtenerlo de allí
-        // Por ejemplo, podrías guardarlo como un atributo de sesión en el login
+        // Atributo de sesión en el login
         return (String) UI.getCurrent().getSession().getAttribute("authToken");
     }
 }
