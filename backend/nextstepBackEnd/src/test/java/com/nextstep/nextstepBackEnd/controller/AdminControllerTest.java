@@ -1,6 +1,8 @@
-package com.nextstep.nextstepBackEnd.auth;
+package com.nextstep.nextstepBackEnd.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nextstep.nextstepBackEnd.auth.AdminRegisterRequest;
+import com.nextstep.nextstepBackEnd.auth.AuthResponse;
 import com.nextstep.nextstepBackEnd.model.Rol;
 import com.nextstep.nextstepBackEnd.model.Usuario;
 import com.nextstep.nextstepBackEnd.repository.UserRepository;
@@ -92,14 +94,14 @@ public class AdminControllerTest {
     @WithMockUser(authorities = "admin")  // Simula que un usuario con autoridad 'admin' hace la petición
     public void shouldDeleteUserSuccessfully() throws Exception {
         // Simula el comportamiento de UserRepository al eliminar un usuario
-        Mockito.doNothing().when(userRepository).deleteById(1L);
+        Mockito.doNothing().when(userRepository).deleteById(1);
 
         mockMvc.perform(delete("/admin/delete-user/1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())  // Verifica que la respuesta es 200 OK
                 .andExpect(content().string("Usuario eliminado exitosamente"));
 
-        Mockito.verify(userRepository, Mockito.times(1)).deleteById(1L);
+        Mockito.verify(userRepository, Mockito.times(1)).deleteById(1);
     }
 
 

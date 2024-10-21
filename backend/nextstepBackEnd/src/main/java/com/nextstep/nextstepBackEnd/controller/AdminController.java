@@ -42,7 +42,7 @@ public class AdminController {
 
     // Eliminar un usuario
     @DeleteMapping("/delete-user/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<String> deleteUser(@PathVariable Integer id) {
         userRepository.deleteById(id);
         return ResponseEntity.ok("Usuario eliminado exitosamente");
     }

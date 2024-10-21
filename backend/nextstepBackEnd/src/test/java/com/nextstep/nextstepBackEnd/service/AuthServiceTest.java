@@ -1,14 +1,17 @@
-package com.nextstep.nextstepBackEnd.auth;
+package com.nextstep.nextstepBackEnd.service;
 
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.*;
 
+import com.nextstep.nextstepBackEnd.auth.AdminRegisterRequest;
+import com.nextstep.nextstepBackEnd.auth.AuthResponse;
+import com.nextstep.nextstepBackEnd.auth.LoginRequest;
+import com.nextstep.nextstepBackEnd.auth.RegisterRequest;
 import com.nextstep.nextstepBackEnd.exception.InvalidCredentialsException;
 import com.nextstep.nextstepBackEnd.jwt.JwtService;
 import com.nextstep.nextstepBackEnd.model.Rol;
 import com.nextstep.nextstepBackEnd.model.Usuario;
 import com.nextstep.nextstepBackEnd.repository.UserRepository;
-import com.nextstep.nextstepBackEnd.service.AuthService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
