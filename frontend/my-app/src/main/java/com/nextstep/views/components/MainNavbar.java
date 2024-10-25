@@ -4,19 +4,38 @@ import com.nextstep.views.GastosView;
 import com.nextstep.views.temp.InicioView;
 import com.nextstep.views.temp.PagosView;
 import com.nextstep.views.temp.SimulacionView;
-import com.vaadin.flow.component.applayout.AppLayout;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.RouterLink;
 
-public class MainNavbar extends AppLayout {
+@CssImport("./themes/nextstepfrontend/navbar.css")
+public class MainNavbar extends VerticalLayout {
 
     public MainNavbar() {
-        // Logo y título
+        setPadding(false);
+        setSpacing(false);
+        setWidthFull();
+        setAlignItems(Alignment.CENTER);
+
+        // Crear la navbar para pantallas grandes
+        HorizontalLayout navbar = createNavbar();
+        navbar.setClassName("navbar");
+
+        // Crear el menú inferior para dispositivos móviles
+        HorizontalLayout mobileNavbar = createMobileNavbar();
+        mobileNavbar.setClassName("mobile-navbar");
+
+        // Añadir ambos elementos
+        add(navbar, mobileNavbar);
+    }
+
+    private HorizontalLayout createNavbar() {
         H1 logo = new H1("NextStep");
-        logo.getStyle().set("font-size", "var(--lumo-font-size-xl)")
-                .set("font-weight", "bold").set("margin", "0 var(--lumo-space-m)");
+        logo.getStyle().set("font-weight", "bold");
 
         // Enlaces de navegación
         RouterLink homeLink = new RouterLink("Inicio", InicioView.class);
@@ -24,18 +43,34 @@ public class MainNavbar extends AppLayout {
         RouterLink pagosLink = new RouterLink("Pagos", PagosView.class);
         RouterLink simulacionLink = new RouterLink("Simulación", SimulacionView.class);
 
-        HorizontalLayout navLinks = new HorizontalLayout(homeLink, gastosLink, pagosLink, simulacionLink);
-        navLinks.setSpacing(true);
+        HorizontalLayout links = new HorizontalLayout(homeLink, gastosLink, pagosLink, simulacionLink);
+        links.addClassName("nav-links");
+        links.setJustifyContentMode(JustifyContentMode.CENTER);
+        links.setSpacing(true);
 
-        HorizontalLayout navbar = new HorizontalLayout(logo, navLinks);
-        navbar.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
+        HorizontalLayout navbar = new HorizontalLayout(logo, links);
+        navbar.setAlignItems(Alignment.CENTER);
+        navbar.setJustifyContentMode(JustifyContentMode.BETWEEN);
         navbar.setWidthFull();
-        navbar.getStyle().set("background-color", "white")
-                .set("padding", "var(--lumo-space-s)")
-                .set("box-shadow", "0 2px 10px rgba(0, 0, 0, 0.1)")
-                .set("border-radius", "12px")
-                .set("margin", "var(--lumo-space-m) auto");
+        return navbar;
+    }
 
-        addToNavbar(navbar);
+    private HorizontalLayout createMobileNavbar() {
+        Button homeButton = new Button(VaadinIcon.HOME.create());
+        Button gastosButton = new Button(VaadinIcon.WALLET.create());
+        Button pagosButton = new Button(VaadinIcon.CREDIT_CARD.create());
+        Button simulacionButton = new Button(VaadinIcon.LINE_BAR_CHART.create());
+
+        // Establecer navegaciones
+        homeButton.addClickListener(e -> homeButton.getUI().ifPresent(ui -> ui.navigate(InicioView.class)));
+        gastosButton.addClickListener(e -> gastosButton.getUI().ifPresent(ui -> ui.navigate(GastosView.class)));
+        pagosButton.addClickListener(e -> pagosButton.getUI().ifPresent(ui -> ui.navigate(PagosView.class)));
+        simulacionButton.addClickListener(e -> simulacionButton.getUI().ifPresent(ui -> ui.navigate(SimulacionView.class)));
+
+        HorizontalLayout mobileNavbar = new HorizontalLayout(homeButton, gastosButton, pagosButton, simulacionButton);
+        mobileNavbar.setWidthFull();
+        mobileNavbar.setJustifyContentMode(JustifyContentMode.AROUND);
+        mobileNavbar.setAlignItems(Alignment.CENTER);
+        return mobileNavbar;
     }
 }
