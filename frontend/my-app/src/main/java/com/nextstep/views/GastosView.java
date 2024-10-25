@@ -3,125 +3,99 @@ package com.nextstep.views;
 import com.nextstep.views.temp.InicioView;
 import com.nextstep.views.temp.PagosView;
 import com.nextstep.views.temp.SimulacionView;
-import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
 
-@PageTitle("Gastos - NextStep")
 @Route("gastos")
+@PageTitle("Gastos | NextStep")
 @CssImport("./themes/nextstepfrontend/gastos-view.css")
 public class GastosView extends VerticalLayout {
 
     public GastosView() {
-        // Configurar la barra de navegación
-        HorizontalLayout navbar = createNavbar();
+        setClassName("gastos-container");
+        setSizeFull();
+        setPadding(false);
+        setSpacing(false);
+
+        // Navbar
+        FlexLayout navbar = createNavbar();
         navbar.addClassName("navbar");
 
-        // Crear el contenido principal
-        VerticalLayout mainContent = createMainContent();
+        // Panel izquierdo (Agregar Gasto)
+        Div leftPanel = new Div();
+        leftPanel.addClassName("panel");
+        leftPanel.addClassName("acrilico");
+        Button addGastoButton = new Button("Añadir Gasto");
+        addGastoButton.addClassName("action-button");
+        leftPanel.add(addGastoButton);
 
-        // Configurar la vista
-        setSizeFull();
-        add(navbar, mainContent);
-        setClassName("gastos-view");
+        // Panel central (Gastos registrados)
+        Div centerPanel = new Div();
+        centerPanel.addClassName("panel");
+        centerPanel.addClassName("acrilico");
+        H2 gastosLabel = new H2("Gastos registrados");
+        gastosLabel.addClassName("section-title");
+
+        // Ejemplo de gasto (en la práctica, este se generaría dinámicamente)
+        Div gastoItem = new Div();
+        gastoItem.addClassName("gasto-item");
+        Span gastoName = new Span("Transporte: 50€");
+        Button editButton = new Button("Editar");
+        Button deleteButton = new Button("Eliminar");
+        editButton.addClassName("action-button");
+        deleteButton.addClassName("action-button");
+
+        Div actions = new Div(editButton, deleteButton);
+        gastoItem.add(gastoName, actions);
+        centerPanel.add(gastosLabel, gastoItem);
+
+        // Panel derecho (Categorías)
+        Div rightPanel = new Div();
+        rightPanel.addClassName("panel");
+        rightPanel.addClassName("acrilico");
+        H2 categoriesLabel = new H2("Categorías");
+        categoriesLabel.addClassName("section-title");
+
+        // Ejemplo de categoría (en la práctica, este se generaría dinámicamente)
+        Button categoryButton = new Button("Alimentación");
+        categoryButton.addClassName("action-button");
+        Button addCategoryButton = new Button("Agregar Categoría");
+        addCategoryButton.addClassName("action-button");
+
+        rightPanel.add(categoriesLabel, categoryButton, addCategoryButton);
+
+        // Agregar los paneles al layout principal
+        add(navbar, leftPanel, centerPanel, rightPanel);
     }
 
-    private HorizontalLayout createNavbar() {
-        HorizontalLayout navbar = new HorizontalLayout();
-        navbar.setWidth("80%");
-        navbar.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
-        navbar.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-        navbar.addClassName("navbar");
-
-        // Logo
-        Span logo = new Span("NextStep");
-        logo.addClassName("navbar-logo");
+    private FlexLayout createNavbar() {
+        FlexLayout navbar = new FlexLayout();
+        navbar.setWidthFull();
+        navbar.setJustifyContentMode(FlexLayout.JustifyContentMode.BETWEEN);
+        navbar.setAlignItems(Alignment.CENTER);
 
         // Enlaces de navegación
-        RouterLink inicioLink = new RouterLink("Inicio", InicioView.class);
+        RouterLink homeLink = new RouterLink("Inicio", InicioView.class);
         RouterLink gastosLink = new RouterLink("Gastos", GastosView.class);
         RouterLink pagosLink = new RouterLink("Pagos", PagosView.class);
         RouterLink simulacionLink = new RouterLink("Simulación", SimulacionView.class);
 
-        gastosLink.addClassName("active");
+        // Logo de la aplicación
+        H1 logo = new H1("NextStep");
+        logo.getStyle().set("margin", "0");
 
-        // Sección de enlaces
-        HorizontalLayout links = new HorizontalLayout(inicioLink, gastosLink, pagosLink, simulacionLink);
-        links.addClassName("navbar-links");
-
-        // Icono de usuario
-        Icon bellIcon = new Icon(VaadinIcon.BELL);
-        bellIcon.addClassName("navbar-icon");
-
-        Span userIcon = new Span("CL");
-        userIcon.addClassName("navbar-user-icon");
-
-        HorizontalLayout userSection = new HorizontalLayout(bellIcon, userIcon);
-        userSection.setSpacing(true);
-        userSection.addClassName("navbar-user-section");
-
-        // Agregar a la barra de navegación
-        navbar.add(logo, links, userSection);
-
+        // Añadir elementos a la navbar
+        navbar.add(logo, homeLink, gastosLink, pagosLink, simulacionLink);
         return navbar;
-    }
-
-    private VerticalLayout createMainContent() {
-        VerticalLayout mainContentLayout = new VerticalLayout();
-        mainContentLayout.addClassName("main-content");
-
-        // Panel izquierdo para "Añadir Gasto"
-        VerticalLayout leftPanel = new VerticalLayout();
-        leftPanel.addClassName("left-panel");
-        Div addGastoButton = new Div(new Text("Añadir Gasto"));
-        addGastoButton.addClassName("add-button");
-        leftPanel.add(addGastoButton);
-
-        // Panel central para los gastos
-        VerticalLayout centerPanel = new VerticalLayout();
-        centerPanel.addClassName("center-panel");
-        Div gastosLabel = new Div(new Text("Gastos registrados"));
-        gastosLabel.addClassName("section-title");
-        centerPanel.add(gastosLabel);
-
-        // Ejemplo de un gasto
-        Div gastoItem = new Div();
-        Span gastoName = new Span("Transporte: 50€");
-        HorizontalLayout actions = new HorizontalLayout(new Div(new Text("Editar")), new Div(new Text("Eliminar")));
-        actions.addClassName("gasto-actions");
-        gastoItem.add(gastoName, actions);
-        centerPanel.add(gastoItem);
-
-        // Panel derecho para las categorías
-        VerticalLayout rightPanel = new VerticalLayout();
-        rightPanel.addClassName("right-panel");
-        Div categoriesLabel = new Div(new Text("Categorías"));
-        categoriesLabel.addClassName("section-title");
-        rightPanel.add(categoriesLabel);
-
-        // Ejemplo de una categoría
-        Span categoryChip = new Span("Alimentación");
-        categoryChip.addClassName("category-chip");
-        rightPanel.add(categoryChip);
-
-        Div addCategoryButton = new Div(new Text("Agregar Categoría"));
-        addCategoryButton.addClassName("add-button");
-        rightPanel.add(addCategoryButton);
-
-        // Añadir los paneles al layout principal
-        HorizontalLayout panelsLayout = new HorizontalLayout(leftPanel, centerPanel, rightPanel);
-        panelsLayout.addClassName("panels-layout");
-
-        mainContentLayout.add(panelsLayout);
-        return mainContentLayout;
     }
 }

@@ -1,113 +1,171 @@
-/* gastos-view.css */
-
-/* Estilos generales para la vista de gastos */
-.gastos-view {
+/* Estilos generales para la vista */
+.gastos-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: url('../../../resources/media/escalonesGastos.jpg') no-repeat center center fixed;
+    justify-content: flex-start;
+    height: 100vh;
+    background-image: url('../../../resources/media/escalonesGastos.jpg');
     background-size: cover;
-    padding-top: 50px;
+    background-position: center;
+    background-repeat: no-repeat;
+    padding: 20px;
+    overflow: hidden;
 }
 
-/* Estilos para la barra de navegación */
+/* Estilo de la navbar */
 .navbar {
+    width: 70% !important;
     background-color: white;
-    width: 80%;
-    height: 50px;
-    border-radius: 20px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 40px;
+    padding: 5px 50px;
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    padding: 0 20px;
-    margin-bottom: 30px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 10;
 }
 
-.navbar-logo {
+/* Estilo para el logo */
+.navbar .logo {
+    font-size: 24px;
+    font-weight: bolder;
+    color: #FF5722;
+    text-decoration: none;
+}
+
+/* Estilo para los links de la navbar */
+.navbar a {
+    color: black;
+    font-size: 18px;
+    text-decoration: none;
+    padding: 10px;
+    border-radius: 8px;
+    transition: background-color 0.3s;
+}
+
+.navbar a:hover {
+    background-color: #FF5722;
+    color: white;
+}
+
+.navbar a.active {
+    color: #FF5722;
+    font-weight: bold;
+}
+
+/* Responsive adjustments - Desplegable para pantallas pequeñas */
+.navbar-menu {
+    display: flex;
+    gap: 15px;
+}
+
+.navbar-toggle {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+}
+
+.navbar-toggle span {
+    width: 25px;
+    height: 3px;
+    background-color: black;
+    margin: 4px;
+    transition: all 0.3s ease;
+}
+
+/* Ajustes responsive */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 10px;
+    }
+
+    .navbar-menu {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .navbar-menu a {
+        font-size: 16px;
+        padding: 10px 0;
+    }
+
+    .navbar-menu.open {
+        display: flex;
+    }
+
+    .navbar-toggle {
+        display: flex;
+    }
+
+    .navbar .logo {
+        margin-bottom: 10px;
+    }
+}
+
+/* Estilo para los paneles principales */
+.panel {
+    width: 100%;
+    max-width: 300px;
+    padding: 15px;
+    margin: 10px;
+    border-radius: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Clase acrílico para el efecto de cristal translúcido */
+.acrilico {
+    background: rgba(255, 255, 255, 0.22);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(6.1px);
+    -webkit-backdrop-filter: blur(6.1px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Estilo para los botones de acción */
+.action-button {
+    background-color: #FF5722;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-weight: bold;
+}
+
+.action-button:hover {
+    background-color: #e64a19;
+}
+
+/* Estilo para los elementos de sección como títulos */
+.section-title {
     font-size: 18px;
     font-weight: bold;
-    color: #FF5722;
-}
-
-.navbar-links a {
-    text-decoration: none;
-    color: black;
-    font-size: 14px;
-    padding: 0 10px;
-}
-
-.navbar-links a.active {
-    color: #FF5722;
-    font-weight: bold;
-}
-
-.navbar-user-section {
-    display: flex;
-    align-items: center;
-}
-
-.navbar-icon {
-    font-size: 20px;
-    margin-right: 10px;
-}
-
-.navbar-user-icon {
-    background-color: #FF5722;
-    color: white;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-}
-
-/* Estilos para el contenido principal */
-.main-content {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-}
-
-.panels-layout {
-    display: flex;
-    width: 80%;
-}
-
-.left-panel, .center-panel, .right-panel {
-    background-color: rgba(255, 255, 255, 0.9);
-    border-radius: 10px;
-    padding: 20px;
-    margin: 0 10px;
-    flex: 1;
-}
-
-.add-button {
-    background-color: #FF5722;
-    color: white;
-    padding: 10px;
-    border-radius: 5px;
-    text-align: center;
-    cursor: pointer;
-}
-
-.section-title {
-    font-size: 16px;
-    font-weight: bold;
     margin-bottom: 10px;
 }
 
-.gasto-actions div {
-    cursor: pointer;
-    margin-left: 10px;
-}
-
-.category-chip {
+/* Estilo para las categorías como botones */
+.category-button {
     background-color: #FF5722;
     color: white;
-    padding: 5px 10px;
-    border-radius: 15px;
-    display: inline-block;
-    margin-bottom: 10px;
+    border: none;
+    padding: 5px 15px;
+    border-radius: 12px;
+    cursor: pointer;
+    margin: 5px 0;
+    transition: background-color 0.3s;
+    font-weight: bold;
+}
+
+.category-button:hover {
+    background-color: #e64a19;
 }
