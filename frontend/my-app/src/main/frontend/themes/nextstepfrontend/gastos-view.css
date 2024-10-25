@@ -1,59 +1,50 @@
-/* Estilos generales */
-body, html {
-    margin: 0;
-    padding: 0;
-    font-family: 'Lato', sans-serif;
-    background: url('../../../resources/media/escalonesGastos.jpg') no-repeat center center fixed;
+/* Estilo general */
+body, .gastos-container {
+    background-image: url('../../../resources/media/escalonesGastos.jpg');
     background-size: cover;
-}
-
-/* Estilos para la navbar */
-.navbar {
+    background-attachment: fixed;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background-color: white;
-    padding: 0.5rem 2rem;
-    border-radius: 12px;
-    margin: 1rem auto;
-    width: 90%;
-    max-width: 1200px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    flex-direction: column;
+    padding: 0;
+    margin: 0;
+    min-height: 100vh;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-.navbar h1 {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #FF5722;
-    margin: 0;
+/* Estilo de la navbar */
+.navbar {
+    width: 70% !important;
+    max-width: 1200px;
+    background: white;
+    border-radius: 40px;
+    padding: 10px 20px;
+    margin: 50px auto;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .navbar a {
-    margin: 0 1rem;
+    font-size: 1.2rem;
+    margin: 0 15px;
+    color: #333;
     text-decoration: none;
-    color: black;
-    font-size: 1rem;
 }
 
 .navbar a:hover {
+    color: #0074DB;
+}
+
+.navbar h1 {
+    font-weight: bold;
+    font-size: 1.8rem;
+    margin: 0;
     color: #FF5722;
 }
 
-/* Estilos para pantallas pequeñas */
-@media (max-width: 768px) {
-    .navbar {
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 1rem;
-    }
-
-    .navbar a {
-        margin: 0.5rem 0;
-        font-size: 1.2rem;
-    }
-}
-
-/* Estilos para los paneles */
+/* Estilo de los paneles */
 .panel {
     background: rgba(255, 255, 255, 0.22);
     border-radius: 16px;
@@ -61,42 +52,80 @@ body, html {
     backdrop-filter: blur(6.1px);
     -webkit-backdrop-filter: blur(6.1px);
     border: 1px solid rgba(255, 255, 255, 0.3);
-    padding: 2rem;
-    margin: 1rem;
-    width: 100%;
+    padding: 20px;
+    margin: 10px auto;
+    width: 90%;
+    max-width: 350px;
 }
 
+/* Estilo específico para los paneles en pantallas grandes */
+@media (min-width: 768px) {
+    .gastos-container {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        align-items: flex-start;
+        padding-top: 20px;
+    }
+    .panel {
+        width: 30%;
+        max-width: 350px;
+    }
+
+    /* Oculta la mobile-navbar en pantallas grandes */
+    .mobile-navbar {
+        display: none !important;
+    }
+}
+
+/* Estilo del cajón de navegación para dispositivos móviles */
+@media (max-width: 767px) {
+    .navbar {
+        display: none !important; /* Oculta la navbar en pantallas pequeñas */
+    }
+
+    .mobile-navbar {
+        display: flex;
+        justify-content: space-around;
+        width: 100%;
+        position: fixed;
+        bottom: 0;
+        background-color: white;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        padding: 10px;
+        z-index: 1000;
+    }
+
+    .mobile-navbar button {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+    }
+
+    .gastos-container {
+        justify-content: center; /* Centramos los paneles verticalmente */
+        align-items: center; /* Centramos los paneles horizontalmente */
+    }
+
+    .panel {
+        width: 80%;
+        margin: 10px auto;
+    }
+}
+
+/* Estilo del botón de acción */
 .action-button {
     background-color: #FF5722;
     color: white;
     border: none;
-    padding: 0.5rem 1rem;
     border-radius: 8px;
+    padding: 10px 20px;
     cursor: pointer;
     transition: background-color 0.3s;
 }
 
 .action-button:hover {
     background-color: #e64a19;
-}
-
-.section-title {
-    font-size: 1.2rem;
-    font-weight: bold;
-    margin-bottom: 1rem;
-}
-
-/* Clase acrílico */
-.acrilico {
-    background: rgba(255, 255, 255, 0.22);
-    border-radius: 16px;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(6.1px);
-    -webkit-backdrop-filter: blur(6.1px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-/* Estilo de los botones en la categoría */
-.gasto-item button, .category-item button {
-    margin-left: 0.5rem;
 }
