@@ -1,126 +1,92 @@
-/* Estilos generales para la vista */
-.gastos-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    height: 100vh;
-    background-image: url('../../../resources/media/escalonesGastos.jpg');
+/* Estilos generales */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Lato', sans-serif;
+    background: url('../../../resources/media/escalonesGastos.jpg') no-repeat center center fixed;
     background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    padding: 20px;
-    overflow: hidden;
 }
 
-/* Estilo de la navbar */
+/* Estilos para la navbar */
 .navbar {
-    width: 70% !important;
-    background-color: white;
-    border-radius: 40px;
-    padding: 5px 50px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-    margin-bottom: 20px;
-    transition: all 0.3s ease;
-    position: relative;
-    z-index: 10;
+    justify-content: space-between;
+    background-color: white;
+    padding: 0.5rem 2rem;
+    border-radius: 12px;
+    margin: 1rem auto;
+    width: 90%;
+    max-width: 1200px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Estilo para el logo */
-.navbar .logo {
-    font-size: 24px;
-    font-weight: bolder;
+.navbar h1 {
+    font-size: 1.5rem;
+    font-weight: bold;
     color: #FF5722;
-    text-decoration: none;
+    margin: 0;
 }
 
-/* Estilo para los links de la navbar */
 .navbar a {
-    color: black;
-    font-size: 18px;
+    margin: 0 1rem;
     text-decoration: none;
-    padding: 10px;
-    border-radius: 8px;
-    transition: background-color 0.3s;
+    color: black;
+    font-size: 1rem;
 }
 
 .navbar a:hover {
-    background-color: #FF5722;
-    color: white;
-}
-
-.navbar a.active {
     color: #FF5722;
-    font-weight: bold;
 }
 
-/* Responsive adjustments - Desplegable para pantallas pequeñas */
-.navbar-menu {
-    display: flex;
-    gap: 15px;
-}
-
-.navbar-toggle {
-    display: none;
-    flex-direction: column;
-    cursor: pointer;
-}
-
-.navbar-toggle span {
-    width: 25px;
-    height: 3px;
-    background-color: black;
-    margin: 4px;
-    transition: all 0.3s ease;
-}
-
-/* Ajustes responsive */
+/* Estilos para pantallas pequeñas */
 @media (max-width: 768px) {
     .navbar {
         flex-direction: column;
         align-items: flex-start;
-        padding: 10px;
+        padding: 1rem;
     }
 
-    .navbar-menu {
-        display: none;
-        flex-direction: column;
-        width: 100%;
-        margin-top: 10px;
-    }
-
-    .navbar-menu a {
-        font-size: 16px;
-        padding: 10px 0;
-    }
-
-    .navbar-menu.open {
-        display: flex;
-    }
-
-    .navbar-toggle {
-        display: flex;
-    }
-
-    .navbar .logo {
-        margin-bottom: 10px;
+    .navbar a {
+        margin: 0.5rem 0;
+        font-size: 1.2rem;
     }
 }
 
-/* Estilo para los paneles principales */
+/* Estilos para los paneles */
 .panel {
+    background: rgba(255, 255, 255, 0.22);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(6.1px);
+    -webkit-backdrop-filter: blur(6.1px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 2rem;
+    margin: 1rem;
     width: 100%;
-    max-width: 300px;
-    padding: 15px;
-    margin: 10px;
-    border-radius: 15px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-/* Clase acrílico para el efecto de cristal translúcido */
+.action-button {
+    background-color: #FF5722;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.action-button:hover {
+    background-color: #e64a19;
+}
+
+.section-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+/* Clase acrílico */
 .acrilico {
     background: rgba(255, 255, 255, 0.22);
     border-radius: 16px;
@@ -130,42 +96,7 @@
     border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-/* Estilo para los botones de acción */
-.action-button {
-    background-color: #FF5722;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    font-weight: bold;
-}
-
-.action-button:hover {
-    background-color: #e64a19;
-}
-
-/* Estilo para los elementos de sección como títulos */
-.section-title {
-    font-size: 18px;
-    font-weight: bold;
-    margin-bottom: 10px;
-}
-
-/* Estilo para las categorías como botones */
-.category-button {
-    background-color: #FF5722;
-    color: white;
-    border: none;
-    padding: 5px 15px;
-    border-radius: 12px;
-    cursor: pointer;
-    margin: 5px 0;
-    transition: background-color 0.3s;
-    font-weight: bold;
-}
-
-.category-button:hover {
-    background-color: #e64a19;
+/* Estilo de los botones en la categoría */
+.gasto-item button, .category-item button {
+    margin-left: 0.5rem;
 }
