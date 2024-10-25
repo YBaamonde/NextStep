@@ -7,8 +7,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
@@ -28,26 +26,24 @@ public class GastosView extends VerticalLayout {
         setPadding(false);
         setSpacing(false);
 
-        // Navbar
+        // Navbar principal para pantallas grandes
         FlexLayout navbar = createNavbar();
         navbar.addClassName("navbar");
 
-        // Panel izquierdo (Agregar Gasto)
-        Div leftPanel = createPanel("Añadir Gasto", "Añadir Gasto");
-
-        // Panel central (Gastos registrados)
-        Div centerPanel = createGastoPanel();
-
-        // Panel derecho (Categorías)
-        Div rightPanel = createPanel("Categorías", "Agregar Categoría");
-
-        // Agregar los paneles al layout principal
-        add(navbar, leftPanel, centerPanel, rightPanel);
-
-        // Cajón de navegación para móviles
+        // Mobile navbar para pantallas pequeñas
         FlexLayout mobileNavbar = createMobileNavbar();
         mobileNavbar.addClassName("mobile-navbar");
-        add(mobileNavbar);
+
+        // Paneles para las categorías
+        FlexLayout panelContainer = createPanelContainer();
+        panelContainer.addClassName("panel-container");
+
+        // Botón para agregar categoría
+        Button addCategoryButton = new Button("Agregar Categoría");
+        addCategoryButton.addClassName("categoria-button");
+
+        // Agregar todos los elementos al layout
+        add(navbar, panelContainer, addCategoryButton, mobileNavbar);
     }
 
     private FlexLayout createNavbar() {
@@ -64,7 +60,7 @@ public class GastosView extends VerticalLayout {
 
         // Logo de la aplicación
         H1 logo = new H1("NextStep");
-        logo.getStyle().set("margin", "0").set("font-weight", "bold").set("color", "#FF5722");
+        logo.getStyle().set("margin", "0");
 
         // Añadir elementos a la navbar
         navbar.add(logo, homeLink, gastosLink, pagosLink, simulacionLink);
@@ -73,56 +69,36 @@ public class GastosView extends VerticalLayout {
 
     private FlexLayout createMobileNavbar() {
         FlexLayout mobileNavbar = new FlexLayout();
+        mobileNavbar.setWidthFull();
         mobileNavbar.setJustifyContentMode(FlexLayout.JustifyContentMode.AROUND);
+        mobileNavbar.setAlignItems(Alignment.CENTER);
 
+        // Iconos para la navegación en móviles
         Button homeButton = new Button(new Icon(VaadinIcon.HOME));
-        Button gastosButton = new Button(new Icon(VaadinIcon.WALLET));
-        Button pagosButton = new Button(new Icon(VaadinIcon.CREDIT_CARD));
+        Button gastosButton = new Button(new Icon(VaadinIcon.CREDIT_CARD));
+        Button pagosButton = new Button(new Icon(VaadinIcon.MONEY));
         Button simulacionButton = new Button(new Icon(VaadinIcon.LINE_CHART));
-
-        homeButton.addClickListener(e -> homeButton.getUI().ifPresent(ui -> ui.navigate(InicioView.class)));
-        gastosButton.addClickListener(e -> gastosButton.getUI().ifPresent(ui -> ui.navigate(GastosView.class)));
-        pagosButton.addClickListener(e -> pagosButton.getUI().ifPresent(ui -> ui.navigate(PagosView.class)));
-        simulacionButton.addClickListener(e -> simulacionButton.getUI().ifPresent(ui -> ui.navigate(SimulacionView.class)));
 
         mobileNavbar.add(homeButton, gastosButton, pagosButton, simulacionButton);
         return mobileNavbar;
     }
 
-    private Div createPanel(String titleText, String buttonText) {
-        Div panel = new Div();
-        panel.addClassName("panel");
-        panel.addClassName("acrilico");
+    private FlexLayout createPanelContainer() {
+        FlexLayout panelContainer = new FlexLayout();
+        panelContainer.setFlexDirection(FlexLayout.FlexDirection.ROW);
+        panelContainer.setFlexWrap(FlexLayout.FlexWrap.WRAP);
+        panelContainer.setJustifyContentMode(FlexLayout.JustifyContentMode.AROUND);
+        panelContainer.setAlignItems(FlexLayout.Alignment.CENTER);
 
-        H2 title = new H2(titleText);
-        title.addClassName("section-title");
-        Button actionButton = new Button(buttonText);
-        actionButton.addClassName("action-button");
+        // Ejemplo de paneles
+        for (int i = 0; i < 3; i++) {
+            Div panel = new Div();
+            panel.addClassName("panel");
+            panel.setText("Categoría " + (i + 1));
+            panelContainer.add(panel);
+        }
 
-        panel.add(title, actionButton);
-        return panel;
+        return panelContainer;
     }
 
-    private Div createGastoPanel() {
-        Div panel = new Div();
-        panel.addClassName("panel");
-        panel.addClassName("acrilico");
-
-        H2 title = new H2("Gastos registrados");
-        title.addClassName("section-title");
-
-        Div gastoItem = new Div();
-        gastoItem.addClassName("gasto-item");
-        Span gastoName = new Span("Transporte: 50€");
-        Button editButton = new Button("Editar");
-        Button deleteButton = new Button("Eliminar");
-        editButton.addClassName("action-button");
-        deleteButton.addClassName("action-button");
-
-        Div actions = new Div(editButton, deleteButton);
-        gastoItem.add(gastoName, actions);
-
-        panel.add(title, gastoItem);
-        return panel;
-    }
 }

@@ -25,23 +25,28 @@ body, .gastos-container {
     justify-content: space-between;
     align-items: center;
 }
-
-.navbar a {
-    font-size: 1.2rem;
-    margin: 0 15px;
-    color: #333;
-    text-decoration: none;
-}
-
-.navbar a:hover {
-    color: #0074DB;
-}
-
 .navbar h1 {
     font-weight: bold;
     font-size: 1.8rem;
     margin: 0;
     color: #FF5722;
+}
+.navbar a {
+    color: black;
+}
+.navbar a:hover {
+    color: #0074db;
+    text-decoration: none;
+}
+
+/* Contenedor de categorías */
+.categories-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 20px;
 }
 
 /* Estilo de los paneles */
@@ -53,35 +58,54 @@ body, .gastos-container {
     -webkit-backdrop-filter: blur(6.1px);
     border: 1px solid rgba(255, 255, 255, 0.3);
     padding: 20px;
-    margin: 10px auto;
-    width: 90%;
+    margin: 10px;
+    width: 100%;
     max-width: 350px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-/* Estilo específico para los paneles en pantallas grandes */
+/* Estilo en pantallas grandes */
 @media (min-width: 768px) {
-    .gastos-container {
-        flex-direction: row;
-        flex-wrap: wrap;
+    .categories-container {
         justify-content: space-around;
-        align-items: flex-start;
         padding-top: 20px;
     }
     .panel {
         width: 30%;
-        max-width: 350px;
     }
 
-    /* Oculta la mobile-navbar en pantallas grandes */
     .mobile-navbar {
         display: none !important;
     }
+
+    .categoria-button {
+        background-color: #FF5722;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 20px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        width: 30% !important;
+        align-self: center;
+        position: fixed;
+        bottom: 50px; /* Distancia desde el fondo de la pantalla */
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+
+    .categoria-button:hover {
+        background-color: #e64a19;
+    }
 }
 
-/* Estilo del cajón de navegación para dispositivos móviles */
+/* Estilo para dispositivos móviles */
 @media (max-width: 767px) {
     .navbar {
-        display: none !important; /* Oculta la navbar en pantallas pequeñas */
+        display: none !important;
     }
 
     .mobile-navbar {
@@ -105,13 +129,30 @@ body, .gastos-container {
     }
 
     .gastos-container {
-        justify-content: center; /* Centramos los paneles verticalmente */
-        align-items: center; /* Centramos los paneles horizontalmente */
+        justify-content: center;
+        align-items: center;
     }
 
     .panel {
         width: 80%;
         margin: 10px auto;
+    }
+
+    .categoria-button {
+        width: 70% !important;
+        background-color: #FF5722;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 20px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        align-self: center;
+        position: fixed;
+        bottom: 100px; /* Distancia desde el fondo de la pantalla */
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
     }
 }
 
@@ -127,5 +168,9 @@ body, .gastos-container {
 }
 
 .action-button:hover {
+    background-color: #e64a19;
+}
+
+.categoria-button :hover {
     background-color: #e64a19;
 }
