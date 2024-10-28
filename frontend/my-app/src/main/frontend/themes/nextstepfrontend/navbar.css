@@ -22,6 +22,17 @@
     color: #FF5722;
 }
 
+.custom-avatar {
+    font-size: 1.2em;
+    color: #FFFFFF;
+    background-color: #FF5722;
+}
+.custom-avatar:hover {
+    cursor: pointer;
+    zoom: 1.1;
+}
+
+
 /* Mobile Navbar */
 .mobile-navbar {
     display: none;

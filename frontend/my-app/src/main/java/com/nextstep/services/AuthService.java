@@ -204,7 +204,7 @@ public class AuthService {
     }
 
     // Metodo para obtener el nombre de usuario desde la sesión
-    private String getUsername() {
+    public String getUsername() {
         return (String) UI.getCurrent().getSession().getAttribute("username");
     }
 

@@ -1,5 +1,6 @@
 package com.nextstep.views;
 
+import com.nextstep.services.AuthService;
 import com.nextstep.views.components.MainNavbar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
@@ -18,48 +19,59 @@ import com.vaadin.flow.router.Route;
 @CssImport("./themes/nextstepfrontend/gastos-view.css")
 public class GastosView extends VerticalLayout {
 
+    private final AuthService authService; // Agregar AuthService como dependencia
+    private final FlexLayout categoriesContainer; // Contenedor de categorías
+
     public GastosView() {
         setClassName("gastos-container");
         setSizeFull();
         setPadding(false);
         setSpacing(false);
 
+        this.authService = new AuthService();
+
         // Agregar navbar reutilizable
-        MainNavbar navbar = new MainNavbar();
+        MainNavbar navbar = new MainNavbar(authService);
         add(navbar);
 
         // Contenedor de categorías
-        FlexLayout categoriesContainer = new FlexLayout();
+        categoriesContainer = new FlexLayout();
         categoriesContainer.setClassName("categories-container");
         categoriesContainer.setFlexWrap(FlexLayout.FlexWrap.WRAP);
         categoriesContainer.setJustifyContentMode(JustifyContentMode.BETWEEN);
 
-        // Paneles de categorías (temporalmente con datos de ejemplo)
-        for (int i = 1; i <= 3; i++) {
-            Div categoryPanel = createCategoryPanel("Categoría " + i);
-            categoriesContainer.add(categoryPanel);
-        }
+        // Agregar contenedor de categorías a la vista
+        add(categoriesContainer);
 
         // Botón para agregar una nueva categoría
         Button addCategoryButton = new Button("Agregar Categoría");
         addCategoryButton.setClassName("categoria-button");
-        add(addCategoryButton);
+        addCategoryButton.addClickListener(e -> addNewCategoryPanel());
 
-        // Agregar contenedor de categorías a la vista
-        add(categoriesContainer);
+        // Agregar el botón de agregar categoría al final de la vista
+        add(addCategoryButton);
+    }
+
+    // Metodo para crear y agregar un nuevo panel de categoría
+    private void addNewCategoryPanel() {
+        String categoryName = "Categoría " + (categoriesContainer.getComponentCount() + 1);
+        Div categoryPanel = createCategoryPanel(categoryName);
+        categoriesContainer.add(categoryPanel);
     }
 
     private Div createCategoryPanel(String categoryName) {
         Div panel = new Div();
         panel.setClassName("panel");
 
+        // Título de la categoría
         H2 title = new H2(categoryName);
         title.setClassName("category-title");
 
+        // Botón para agregar gasto
         Button addGastoButton = new Button("Añadir Gasto");
         addGastoButton.setClassName("action-button");
 
-        // Menú de contexto (tres puntos)
+        // Menú de contexto (tres puntos) para editar y eliminar
         Icon menuIcon = new Icon(VaadinIcon.ELLIPSIS_DOTS_V);
         ContextMenu contextMenu = new ContextMenu();
         contextMenu.setTarget(menuIcon);
@@ -68,9 +80,10 @@ public class GastosView extends VerticalLayout {
         });
         contextMenu.addItem("Eliminar", event -> {
             // Lógica para eliminar la categoría
+            categoriesContainer.remove(panel);
         });
 
-        // Añadir elementos al panel
+        // Añadir elementos al panel de categoría
         panel.add(title, addGastoButton, menuIcon);
 
         return panel;

@@ -31,8 +31,8 @@ body, .gastos-container {
     -webkit-backdrop-filter: blur(6.1px);
     border: 1px solid rgba(255, 255, 255, 0.3);
     padding: 20px;
-    width: 100%;
-    max-width: 350px;
+    max-width: 300px;
+    flex: 1 1 250px; /* Ajuste flexible de ancho mínimo */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -42,11 +42,25 @@ body, .gastos-container {
 /* Estilo en pantallas grandes */
 @media (min-width: 768px) {
     .categories-container {
-        justify-content: space-around;
+        justify-content: flex-start;
         padding-top: 20px;
     }
     .panel {
-        width: 30%;
+        flex: 1 1 30%; /* Ocupa un 30% del ancho disponible */
+        max-width: 350px; /* Limita el ancho máximo */
+    }
+
+    .categoria-button {
+        width: 200px; /* Ancho fijo para pantallas grandes */
+        position: static; /* No posición fija en pantallas grandes */
+        margin-top: 20px;
+        align-self: center;
+        background-color: #FF5722;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s;
     }
 }
 
@@ -75,13 +89,13 @@ body, .gastos-container {
     }
 
     .categoria-button {
-        background-color: #FF5722;
         width: 70% !important;
         position: fixed;
         bottom: 100px;
         left: 50%;
         transform: translateX(-50%);
         z-index: 1000;
+        background-color: #FF5722;
         color: white;
         border: none;
         border-radius: 8px;
@@ -89,35 +103,4 @@ body, .gastos-container {
         transition: background-color 0.3s;
         align-self: center;
     }
-}
-
-/* Estilo del botón de acción */
-.action-button {
-    background-color: #FF5722;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 20px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.action-button:hover, .categoria-button:hover {
-    background-color: #e64a19;
-}
-
-.categoria-button {
-    background-color: #FF5722;
-    width: 30%;
-    position: fixed;
-    bottom: 100px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    align-self: center;
 }

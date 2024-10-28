@@ -1,8 +1,10 @@
 package com.nextstep.views.components;
 
+import com.nextstep.services.AuthService;
 import com.nextstep.views.GastosView;
 import com.nextstep.views.temp.InicioView;
 import com.nextstep.views.temp.PagosView;
+import com.nextstep.views.temp.PerfilView;
 import com.nextstep.views.temp.SimulacionView;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
@@ -13,10 +15,16 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.RouterLink;
 
+import java.util.stream.Collectors;
+
 @CssImport("./themes/nextstepfrontend/navbar.css")
 public class MainNavbar extends VerticalLayout {
 
-    public MainNavbar() {
+    private final AuthService authService; // Inyección de dependencia para AuthService
+    private Avatar profileAvatar;
+
+    public MainNavbar(AuthService authService) {
+        this.authService = authService;
         setPadding(false);
         setSpacing(false);
         setWidthFull();
@@ -32,6 +40,9 @@ public class MainNavbar extends VerticalLayout {
 
         // Añadir ambos elementos
         add(navbar, mobileNavbar);
+
+        // Configurar avatar con las iniciales del usuario
+        setAvatarWithUsername();
     }
 
     private HorizontalLayout createNavbar() {
@@ -49,11 +60,13 @@ public class MainNavbar extends VerticalLayout {
         links.setJustifyContentMode(JustifyContentMode.CENTER);
         links.setSpacing(true);
 
-        // Avatar para perfil
-        Avatar profileAvatar = new Avatar("CL");
+        // Avatar para perfil (inicialmente sin iniciales)
+        profileAvatar = new Avatar();
         Button avatarButton = new Button(profileAvatar);
         avatarButton.addClickListener(e -> avatarButton.getUI().ifPresent(ui -> ui.navigate("perfil")));
         avatarButton.getStyle().set("border", "none").set("background", "none").set("padding", "0");
+        profileAvatar.addClassName("custom-avatar");
+
 
         HorizontalLayout navbar = new HorizontalLayout(logo, links, avatarButton);
         navbar.setAlignItems(Alignment.CENTER);
@@ -67,17 +80,32 @@ public class MainNavbar extends VerticalLayout {
         Button gastosButton = new Button(VaadinIcon.WALLET.create());
         Button pagosButton = new Button(VaadinIcon.CREDIT_CARD.create());
         Button simulacionButton = new Button(VaadinIcon.LINE_BAR_CHART.create());
+        Button perfilButton = new Button(VaadinIcon.USER.create());
 
         // Establecer navegaciones
         homeButton.addClickListener(e -> homeButton.getUI().ifPresent(ui -> ui.navigate(InicioView.class)));
         gastosButton.addClickListener(e -> gastosButton.getUI().ifPresent(ui -> ui.navigate(GastosView.class)));
         pagosButton.addClickListener(e -> pagosButton.getUI().ifPresent(ui -> ui.navigate(PagosView.class)));
         simulacionButton.addClickListener(e -> simulacionButton.getUI().ifPresent(ui -> ui.navigate(SimulacionView.class)));
+        perfilButton.addClickListener(e -> perfilButton.getUI().ifPresent(ui -> ui.navigate(PerfilView.class)));
 
-        HorizontalLayout mobileNavbar = new HorizontalLayout(homeButton, gastosButton, pagosButton, simulacionButton);
+        HorizontalLayout mobileNavbar = new HorizontalLayout(homeButton, gastosButton, pagosButton, simulacionButton, perfilButton);
         mobileNavbar.setWidthFull();
         mobileNavbar.setJustifyContentMode(JustifyContentMode.AROUND);
         mobileNavbar.setAlignItems(Alignment.CENTER);
         return mobileNavbar;
     }
+
+    private void setAvatarWithUsername() {
+        String username = authService.getUsername();
+        String initials = username.chars()
+                .filter(Character::isUpperCase)
+                .mapToObj(c -> String.valueOf((char) c))
+                .collect(Collectors.joining());
+
+        // Configurar ambas propiedades
+        profileAvatar.setAbbreviation(initials);
+        profileAvatar.setName(username.toUpperCase());
+    }
+
 }
