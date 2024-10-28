@@ -4,6 +4,7 @@ import com.nextstep.views.GastosView;
 import com.nextstep.views.temp.InicioView;
 import com.nextstep.views.temp.PagosView;
 import com.nextstep.views.temp.SimulacionView;
+import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.H1;
@@ -48,7 +49,13 @@ public class MainNavbar extends VerticalLayout {
         links.setJustifyContentMode(JustifyContentMode.CENTER);
         links.setSpacing(true);
 
-        HorizontalLayout navbar = new HorizontalLayout(logo, links);
+        // Avatar para perfil
+        Avatar profileAvatar = new Avatar("CL");
+        Button avatarButton = new Button(profileAvatar);
+        avatarButton.addClickListener(e -> avatarButton.getUI().ifPresent(ui -> ui.navigate("perfil")));
+        avatarButton.getStyle().set("border", "none").set("background", "none").set("padding", "0");
+
+        HorizontalLayout navbar = new HorizontalLayout(logo, links, avatarButton);
         navbar.setAlignItems(Alignment.CENTER);
         navbar.setJustifyContentMode(JustifyContentMode.BETWEEN);
         navbar.setWidthFull();

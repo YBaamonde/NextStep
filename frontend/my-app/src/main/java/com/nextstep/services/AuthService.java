@@ -51,8 +51,11 @@ public class AuthService {
                 Map<String, String> responseMap = objectMapper.readValue(response.body(), new TypeReference<>() {});
                 String token = responseMap.get("token");
 
-                // Almacenar el token en localStorage para usarlo en otras vistas
+                // Almacenar el token en la sesión
                 UI.getCurrent().getSession().setAttribute("authToken", token);
+
+                // Almacenar el nombre de usuario en la sesión
+                UI.getCurrent().getSession().setAttribute("username", username);
 
                 loginCallback.accept(true);
             } else {
@@ -62,9 +65,6 @@ public class AuthService {
             loginCallback.accept(false);
         }
     }
-
-
-
 
 
     // Metodo para registrar un nuevo usuario enviando los datos al backend
@@ -203,5 +203,9 @@ public class AuthService {
         return (String) UI.getCurrent().getSession().getAttribute("authToken");
     }
 
+    // Metodo para obtener el nombre de usuario desde la sesión
+    private String getUsername() {
+        return (String) UI.getCurrent().getSession().getAttribute("username");
+    }
 
 }
