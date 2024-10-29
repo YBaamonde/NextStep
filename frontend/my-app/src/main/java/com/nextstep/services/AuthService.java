@@ -48,11 +48,15 @@ public class AuthService {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() == 200) {
-                Map<String, String> responseMap = objectMapper.readValue(response.body(), new TypeReference<>() {});
-                String token = responseMap.get("token");
+                Map<String, Object> responseMap = objectMapper.readValue(response.body(), new TypeReference<>() {});
+                String token = (String) responseMap.get("token");
+                Integer userId = (Integer) responseMap.get("userId"); // Obtener el userId de la respuesta
 
                 // Almacenar el token en la sesión
                 UI.getCurrent().getSession().setAttribute("authToken", token);
+
+                // Almacenar el userId en la sesión
+                UI.getCurrent().getSession().setAttribute("userId", userId);
 
                 // Almacenar el nombre de usuario en la sesión
                 UI.getCurrent().getSession().setAttribute("username", username);
@@ -65,6 +69,7 @@ public class AuthService {
             loginCallback.accept(false);
         }
     }
+
 
 
     // Metodo para registrar un nuevo usuario enviando los datos al backend
@@ -208,4 +213,36 @@ public class AuthService {
         return (String) UI.getCurrent().getSession().getAttribute("username");
     }
 
+    /*
+    // Metodo para obtener el ID del usuario desde el backend
+    public Integer fetchUserId() {
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(baseUrl + "/auth/user"))
+                    .header("Authorization", "Bearer " + getToken())
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                // Parsear la respuesta JSON para obtener el userId
+                Map<String, Object> userInfo = objectMapper.readValue(response.body(), new TypeReference<>() {});
+                Integer userId = (Integer) userInfo.get("userId");
+
+                // Almacenar el userId en la sesión para futuros accesos
+                UI.getCurrent().getSession().setAttribute("userId", userId);
+                System.out.println("El ID del usuario actual es: " + userId);
+
+                return userId;
+            } else {
+                Notification.show("Error al obtener el ID de usuario: " + response.statusCode());
+            }
+        } catch (IOException | InterruptedException e) {
+            Notification.show("Error al obtener el ID de usuario: " + e.getMessage());
+        }
+
+        return null; // Devuelve null si no se pudo obtener el ID
+    }
+    */
 }

@@ -1,7 +1,9 @@
 package com.nextstep.views;
 
 import com.nextstep.services.AuthService;
+import com.nextstep.services.CategoriaService;
 import com.nextstep.views.components.MainNavbar;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -9,18 +11,25 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+
+import java.util.List;
+import java.util.Map;
 
 @Route("gastos")
 @PageTitle("Gastos | NextStep")
 @CssImport("./themes/nextstepfrontend/gastos-view.css")
 public class GastosView extends VerticalLayout {
 
-    private final AuthService authService; // Agregar AuthService como dependencia
-    private final FlexLayout categoriesContainer; // Contenedor de categorías
+    private static final int MAX_CATEGORIES = 15; // Máximo de categorías permitidas
+    private final CategoriaService categoriaService;
+    private final FlexLayout categoriesContainer; // Inicializamos categoriesContainer de inmediato
+    private final Integer usuarioId; // Identificador del usuario
+    private int categoriaCount;
 
     public GastosView() {
         setClassName("gastos-container");
@@ -28,46 +37,76 @@ public class GastosView extends VerticalLayout {
         setPadding(false);
         setSpacing(false);
 
-        this.authService = new AuthService();
+        AuthService authService = new AuthService();
+        this.categoriaService = new CategoriaService();
+
+        // Inicializar el contenedor de categorías antes de la verificación de userId
+        categoriesContainer = new FlexLayout();
+        categoriesContainer.setClassName("categories-container");
+        categoriesContainer.setFlexWrap(FlexLayout.FlexWrap.WRAP);
+        categoriesContainer.setJustifyContentMode(JustifyContentMode.BETWEEN);
+        add(categoriesContainer); // Agregarlo a la vista de inmediato
+
+        // Obtener el userId del usuario actual desde la sesión
+        usuarioId = (Integer) UI.getCurrent().getSession().getAttribute("userId");
+        System.out.println("El ID del usuario actual es: " + usuarioId); // Debug - correcto
+        if (usuarioId == null) {
+            Notification.show("Error: No se pudo obtener el ID de usuario. Por favor, inicia sesión de nuevo.");
+            return; // Salir si el ID de usuario no está disponible
+        }
 
         // Agregar navbar reutilizable
         MainNavbar navbar = new MainNavbar(authService);
         add(navbar);
 
-        // Contenedor de categorías
-        categoriesContainer = new FlexLayout();
-        categoriesContainer.setClassName("categories-container");
-        categoriesContainer.setFlexWrap(FlexLayout.FlexWrap.WRAP);
-        categoriesContainer.setJustifyContentMode(JustifyContentMode.BETWEEN);
-
-        // Agregar contenedor de categorías a la vista
-        add(categoriesContainer);
+        // Cargar categorías existentes desde la base de datos
+        cargarCategorias();
 
         // Botón para agregar una nueva categoría
         Button addCategoryButton = new Button("Agregar Categoría");
         addCategoryButton.setClassName("categoria-button");
-        addCategoryButton.addClickListener(e -> addNewCategoryPanel());
-
-        // Agregar el botón de agregar categoría al final de la vista
+        addCategoryButton.addClickListener(e -> agregarNuevaCategoria());
         add(addCategoryButton);
     }
 
-    // Metodo para crear y agregar un nuevo panel de categoría
-    private void addNewCategoryPanel() {
-        String categoryName = "Categoría " + (categoriesContainer.getComponentCount() + 1);
-        Div categoryPanel = createCategoryPanel(categoryName);
-        categoriesContainer.add(categoryPanel);
+    private void cargarCategorias() {
+        List<Map<String, Object>> categorias = categoriaService.getCategoriasPorUsuario(usuarioId);
+        categoriaCount = categorias.size();
+
+        for (Map<String, Object> categoria : categorias) {
+            String nombreCategoria = (String) categoria.get("nombre");
+            int categoriaId = (Integer) categoria.get("id");
+            Div categoryPanel = createCategoryPanel(nombreCategoria, categoriaId);
+            categoriesContainer.add(categoryPanel);
+        }
     }
 
-    private Div createCategoryPanel(String categoryName) {
+    private void agregarNuevaCategoria() {
+        if (categoriaCount >= MAX_CATEGORIES) {
+            Notification.show("Has alcanzado el límite de 15 categorías.");
+            return;
+        }
+
+        // Crear el objeto de la nueva categoría
+        Map<String, Object> nuevaCategoria = Map.of("nombre", "Nueva Categoría", "usuarioId", usuarioId);
+        boolean success = categoriaService.createCategoria(usuarioId, nuevaCategoria);
+
+        if (success) {
+            categoriaCount++;
+            Div categoryPanel = createCategoryPanel("Nueva Categoría", categoriaCount);
+            categoriesContainer.add(categoryPanel);
+        } else {
+            Notification.show("Error al agregar la categoría. Inténtalo nuevamente.");
+        }
+    }
+
+    private Div createCategoryPanel(String categoryName, int categoriaId) {
         Div panel = new Div();
         panel.setClassName("panel");
 
-        // Título de la categoría
         H2 title = new H2(categoryName);
         title.setClassName("category-title");
 
-        // Botón para agregar gasto
         Button addGastoButton = new Button("Añadir Gasto");
         addGastoButton.setClassName("action-button");
 
@@ -78,14 +117,21 @@ public class GastosView extends VerticalLayout {
         contextMenu.addItem("Editar", event -> {
             // Lógica para editar la categoría
         });
-        contextMenu.addItem("Eliminar", event -> {
-            // Lógica para eliminar la categoría
-            categoriesContainer.remove(panel);
-        });
+        contextMenu.addItem("Eliminar", event -> eliminarCategoria(panel, categoriaId));
 
-        // Añadir elementos al panel de categoría
+        // Añadir elementos al panel
         panel.add(title, addGastoButton, menuIcon);
-
         return panel;
+    }
+
+    private void eliminarCategoria(Div panel, int categoriaId) {
+        boolean success = categoriaService.deleteCategoria(categoriaId);
+
+        if (success) {
+            categoriesContainer.remove(panel);
+            categoriaCount--;
+        } else {
+            Notification.show("Error al eliminar la categoría.");
+        }
     }
 }

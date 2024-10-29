@@ -9,7 +9,11 @@ import com.nextstep.nextstepBackEnd.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
@@ -47,4 +51,14 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
+    /*
+    // Obtener el ID del usuario actual
+    @GetMapping("/user")
+    public ResponseEntity<Map<String, Object>> getUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Map<String, Object> userId = Map.of("userId", authentication.getPrincipal());
+        return ResponseEntity.ok(userId);
+    }
+     */
 }

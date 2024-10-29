@@ -33,14 +33,14 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
 
     public AuthResponse login(LoginRequest request) {
-        // Busca al usuario por nombre de usuario o email
-        UserDetails userDetails = userRepository.findByUsernameOrEmail(request.getUsername(), request.getUsername())
+        // Busca al usuario por nombre de usuario o email en el repositorio
+        Usuario usuario = userRepository.findByUsernameOrEmail(request.getUsername(), request.getUsername())
                 .orElseThrow(() -> new InvalidCredentialsException("Invalid credentials"));
 
         // Determina si se ingresó un email o un nombre de usuario
         String loginIdentifier = request.getUsername();
         if (loginIdentifier.contains("@")) {
-            loginIdentifier = userDetails.getUsername(); // Si es un email, usa el nombre de usuario para la autenticación
+            loginIdentifier = usuario.getUsername(); // Si es un email, usa el nombre de usuario para la autenticación
         }
 
         // Autentica al usuario usando las credenciales proporcionadas
@@ -48,14 +48,19 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(loginIdentifier, request.getPassword())
         );
 
-        // *** Genera el token JWT después de que la autenticación haya sido exitosa ***
-        String token = jwtService.generateToken(userDetails);
+        // Genera el token JWT después de la autenticación
+        String token = jwtService.generateToken(usuario);
 
-        // Devuelve la respuesta con el token
+        // Obtiene el ID del usuario directamente desde la entidad User
+        Integer userId = usuario.getId();
+
+        // Devuelve la respuesta con el token y el userId
         return AuthResponse.builder()
-                .token(token) // Aquí es donde devuelves el token generado
+                .token(token)
+                .userId(userId) // Agrega el userId a la respuesta
                 .build();
     }
+
 
 
 
