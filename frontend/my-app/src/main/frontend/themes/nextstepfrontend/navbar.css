@@ -7,9 +7,10 @@
     max-width: 1200px;
     background: white;
     border-radius: 40px;
-    padding: 5px 20px;
+    padding: 0px 20px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    margin: 20px auto;
+    position: sticky;
+    margin: 2em
 }
 
 .navbar a {

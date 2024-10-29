@@ -30,7 +30,8 @@ public class CategoriaService {
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(baseUrl + "/categorias/" + usuarioId))
-                    .header("Authorization", "Bearer " + getToken())
+                    .header("Authorization", "Bearer " + getToken()) // Asegúrate de que el token se envía
+                    .header("Content-Type", "application/json")
                     .GET()
                     .build();
 
@@ -47,6 +48,7 @@ public class CategoriaService {
 
         return Collections.emptyList();
     }
+
 
     // Crear una nueva categoría
     public boolean createCategoria(int usuarioId, Map<String, Object> categoria) {

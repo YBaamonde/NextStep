@@ -25,10 +25,10 @@ import java.util.Map;
 @CssImport("./themes/nextstepfrontend/gastos-view.css")
 public class GastosView extends VerticalLayout {
 
-    private static final int MAX_CATEGORIES = 15; // Máximo de categorías permitidas
+    private static final int MAX_CATEGORIES = 15;
     private final CategoriaService categoriaService;
-    private final FlexLayout categoriesContainer; // Inicializamos categoriesContainer de inmediato
-    private final Integer usuarioId; // Identificador del usuario
+    private final FlexLayout categoriesContainer;
+    private final Integer usuarioId;
     private int categoriaCount;
 
     public GastosView() {
@@ -40,24 +40,23 @@ public class GastosView extends VerticalLayout {
         AuthService authService = new AuthService();
         this.categoriaService = new CategoriaService();
 
-        // Inicializar el contenedor de categorías antes de la verificación de userId
+        // Agregar navbar en la parte superior
+        MainNavbar navbar = new MainNavbar(authService);
+        add(navbar);
+
+        // Inicializar el contenedor de categorías
         categoriesContainer = new FlexLayout();
         categoriesContainer.setClassName("categories-container");
         categoriesContainer.setFlexWrap(FlexLayout.FlexWrap.WRAP);
         categoriesContainer.setJustifyContentMode(JustifyContentMode.BETWEEN);
-        add(categoriesContainer); // Agregarlo a la vista de inmediato
+        add(categoriesContainer); // Agregarlo después de la navbar
 
         // Obtener el userId del usuario actual desde la sesión
         usuarioId = (Integer) UI.getCurrent().getSession().getAttribute("userId");
-        System.out.println("El ID del usuario actual es: " + usuarioId); // Debug - correcto
         if (usuarioId == null) {
             Notification.show("Error: No se pudo obtener el ID de usuario. Por favor, inicia sesión de nuevo.");
-            return; // Salir si el ID de usuario no está disponible
+            return;
         }
-
-        // Agregar navbar reutilizable
-        MainNavbar navbar = new MainNavbar(authService);
-        add(navbar);
 
         // Cargar categorías existentes desde la base de datos
         cargarCategorias();
