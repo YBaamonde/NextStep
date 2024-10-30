@@ -62,6 +62,7 @@ public class CategoriaService {
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println("Create Categoria Response Code: " + response.statusCode()); // Debug
             return response.statusCode() == 200;
         } catch (IOException | InterruptedException e) {
             Notification.show("Error al crear la categoría: " + e.getMessage());
@@ -79,6 +80,7 @@ public class CategoriaService {
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println("Delete Categoria Response Code: " + response.statusCode()); // Debug
             return response.statusCode() == 200;
         } catch (IOException | InterruptedException e) {
             Notification.show("Error al eliminar la categoría: " + e.getMessage());
@@ -89,14 +91,12 @@ public class CategoriaService {
     // Actualizar o editar categoría
     public boolean updateCategoria(int categoriaId, String nuevoNombre, String nuevaDescripcion) {
         try {
-            // Crear el objeto JSON con los campos actualizados
             Map<String, Object> categoriaActualizada = Map.of(
                     "nombre", nuevoNombre,
                     "descripcion", nuevaDescripcion
             );
             String json = objectMapper.writeValueAsString(categoriaActualizada);
 
-            // Construir la solicitud de actualización
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(baseUrl + "/categorias/" + categoriaId))
                     .header("Authorization", "Bearer " + getToken())
@@ -104,14 +104,25 @@ public class CategoriaService {
                     .PUT(HttpRequest.BodyPublishers.ofString(json))
                     .build();
 
-            // Enviar la solicitud y manejar la respuesta
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return response.statusCode() == 200;
+            System.out.println("Update Categoria Response Code: " + response.statusCode()); // Debug
+            System.out.println("Update Categoria Response Body: " + response.body()); // Debug
+
+            if (response.statusCode() == 200) {
+                Notification.show("Categoría actualizada con éxito");
+                return true;
+            } else {
+                Notification.show("Error al actualizar la categoría: " + response.statusCode());
+                return false;
+            }
         } catch (IOException | InterruptedException e) {
             Notification.show("Error al actualizar la categoría: " + e.getMessage());
+            return false;
         }
-        return false;
     }
+
+
+
 
 
 
