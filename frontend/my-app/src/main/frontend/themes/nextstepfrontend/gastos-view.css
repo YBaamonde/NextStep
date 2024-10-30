@@ -58,11 +58,18 @@ body, #outlet {
     transition: background-color 0.3s;
 }
 
-/* Estilo del menú contextual al hacer hover */
-.context-menu:hover {
+/* Estilo del menú contextual */
+.context-menu {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 0.6rem;
     cursor: pointer;
 }
 
+.category-title {
+    margin: 1rem;
+}
 
 /* Estilo en pantallas grandes */
 @media (min-width: 768px) {
@@ -113,6 +120,7 @@ body, #outlet {
         z-index: 1000;
     }
 
+    /*
     .categoria-button {
         width: 70% !important;
         position: fixed;
@@ -127,5 +135,29 @@ body, #outlet {
         cursor: pointer;
         transition: background-color 0.3s;
         align-self: center;
+    }
+     */
+    .categoria-button {
+        width: 50px; /* Tamaño cuadrado */
+        height: 50px;
+        border-radius: 50%; /* Bordes redondeados para darle forma circular */
+        position: fixed;
+        bottom: 80px; /* Posición sobre el menú inferior */
+        left: 20px;
+        background-color: #FF5722;
+        color: white;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem; /* Tamaño del icono de suma */
+        z-index: 1000;
+        cursor: pointer;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        transition: background-color 0.3s;
+    }
+
+    .categoria-button:hover {
+        background-color: #e64a19;
     }
 }

@@ -66,7 +66,7 @@ public class GastosView extends VerticalLayout {
         cargarCategorias();
 
         // Botón para agregar una nueva categoría
-        Button addCategoryButton = new Button("Agregar Categoría");
+        Button addCategoryButton = new Button(new Icon(VaadinIcon.PLUS));
         addCategoryButton.setClassName("categoria-button");
         addCategoryButton.addClickListener(e -> agregarNuevaCategoria());
         add(addCategoryButton);
@@ -106,6 +106,7 @@ public class GastosView extends VerticalLayout {
     private Div createCategoryPanel(String categoryName, int categoriaId) {
         Div panel = new Div();
         panel.setClassName("panel");
+        panel.getStyle().set("position", "relative"); // Permite posicionar el icono en la esquina
 
         H2 title = new H2(categoryName);
         title.setClassName("category-title");
@@ -115,24 +116,19 @@ public class GastosView extends VerticalLayout {
 
         // Menú de contexto (tres puntos) para editar y eliminar
         Icon menuIcon = new Icon(VaadinIcon.ELLIPSIS_DOTS_V);
+        menuIcon.addClassName("context-menu");
         ContextMenu contextMenu = new ContextMenu();
         contextMenu.setTarget(menuIcon);
-
-        // Configura el menú para abrirse con un click izquierdo
         contextMenu.setOpenOnClick(true);
-        // El estilo del puntero del ratón cambiará cuando se pase el ratón por encima del menú
-        menuIcon.setClassName("context-menu");
 
-        // Opción de editar categoría
         contextMenu.addItem("Editar", event -> openEditCategoryDialog(categoryName, categoriaId, title));
-
-        // Opción de eliminar categoría
         contextMenu.addItem("Eliminar", event -> eliminarCategoria(panel, categoriaId));
 
         // Añadir elementos al panel
-        panel.add(title, addGastoButton, menuIcon);
+        panel.add(menuIcon, title, addGastoButton);
         return panel;
     }
+
 
 
     private void openEditCategoryDialog(String categoryName, int categoriaId, H2 title) {
