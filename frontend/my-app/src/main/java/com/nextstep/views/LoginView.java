@@ -12,6 +12,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.server.VaadinSession;
 
 @CssImport("./themes/nextstepfrontend/login-view.css")
 @Route("login")
@@ -19,6 +20,17 @@ public class LoginView extends Div {
 
     public LoginView() {
         addClassName("login-view");
+
+        // Verificar si ya existe una sesión
+        String token = (String) VaadinSession.getCurrent().getAttribute("authToken");
+
+        if (token != null) {
+            // Si existe un token, significa que el usuario está autenticado
+            VaadinSession.getCurrent().getSession().invalidate(); // Invalidar la sesión actual
+            VaadinSession.getCurrent().close();  // Cerrar la sesión
+            UI.getCurrent().getPage().reload(); // Recargar la página para iniciar una sesión limpia
+        }
+
 
         // Crear un layout para centrar el formulario
         VerticalLayout layout = new VerticalLayout();

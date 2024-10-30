@@ -1,5 +1,6 @@
 package com.nextstep.views;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
@@ -11,6 +12,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.nextstep.services.AuthService;
+import com.vaadin.flow.server.VaadinSession;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @CssImport("./themes/nextstepfrontend/login-view.css")
@@ -24,6 +26,17 @@ public class RegisterView extends Div {
         this.authService = authService;
 
         addClassName("login-view");
+
+        // Verificar si ya existe una sesión
+        String token = (String) VaadinSession.getCurrent().getAttribute("authToken");
+
+        if (token != null) {
+            // Si existe un token, significa que el usuario está autenticado
+            VaadinSession.getCurrent().getSession().invalidate(); // Invalidar la sesión actual
+            VaadinSession.getCurrent().close();  // Cerrar la sesión
+            UI.getCurrent().getPage().reload(); // Recargar la página para iniciar una sesión limpia
+        }
+
 
         // Crear un layout para centrar el formulario
         VerticalLayout layout = new VerticalLayout();
