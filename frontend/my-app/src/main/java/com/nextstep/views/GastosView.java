@@ -34,6 +34,7 @@ public class GastosView extends VerticalLayout {
     private final FlexLayout categoriesContainer;
     private final Integer usuarioId;
     private int categoriaCount;
+    private final Div spacer;
 
     public GastosView() {
         setClassName("gastos-container");
@@ -53,7 +54,13 @@ public class GastosView extends VerticalLayout {
         categoriesContainer.setClassName("categories-container");
         categoriesContainer.setFlexWrap(FlexLayout.FlexWrap.WRAP);
         categoriesContainer.setJustifyContentMode(JustifyContentMode.BETWEEN);
+
         add(categoriesContainer); // Agregarlo después de la navbar
+
+        // Crear el espaciador y añadirlo al contenedor
+        spacer = new Div();
+        spacer.addClassName("category-spacer");
+        categoriesContainer.add(spacer);
 
         // Obtener el userId del usuario actual desde la sesión
         usuarioId = (Integer) VaadinSession.getCurrent().getAttribute("userId");
@@ -61,6 +68,7 @@ public class GastosView extends VerticalLayout {
             Notification.show("Error: No se pudo obtener el ID de usuario. Por favor, inicia sesión de nuevo.");
             return;
         }
+
 
         // Cargar categorías existentes desde la base de datos
         cargarCategorias();
@@ -80,7 +88,9 @@ public class GastosView extends VerticalLayout {
             String nombreCategoria = (String) categoria.get("nombre");
             int categoriaId = (Integer) categoria.get("id");
             Div categoryPanel = createCategoryPanel(nombreCategoria, categoriaId);
-            categoriesContainer.add(categoryPanel);
+
+            // Añadir la nueva categoría antes del espaciador
+            categoriesContainer.addComponentAtIndex(categoriesContainer.getComponentCount() - 1, categoryPanel);
         }
     }
 
@@ -90,18 +100,20 @@ public class GastosView extends VerticalLayout {
             return;
         }
 
-        // Crear el objeto de la nueva categoría
         Map<String, Object> nuevaCategoria = Map.of("nombre", "Nueva Categoría", "usuarioId", usuarioId);
         boolean success = categoriaService.createCategoria(usuarioId, nuevaCategoria);
 
         if (success) {
             categoriaCount++;
             Div categoryPanel = createCategoryPanel("Nueva Categoría", categoriaCount);
-            categoriesContainer.add(categoryPanel);
+
+            // Añadir la nueva categoría antes del espaciador
+            categoriesContainer.addComponentAtIndex(categoriesContainer.getComponentCount() - 1, categoryPanel);
         } else {
             Notification.show("Error al agregar la categoría. Inténtalo nuevamente.");
         }
     }
+
 
     private Div createCategoryPanel(String categoryName, int categoriaId) {
         Div panel = new Div();

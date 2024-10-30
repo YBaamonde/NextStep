@@ -71,6 +71,14 @@ body, #outlet {
     margin: 1rem;
 }
 
+/* Espaciador al final del contenedor de categorías */
+.category-spacer {
+    width: 100%;       /* Ocupa el ancho del contenedor */
+    height: 100px;     /* Ajusta este valor para controlar el espacio extra */
+    flex-shrink: 0;    /* Evita que el espaciador se reduzca en tamaño */
+}
+
+
 /* Estilo en pantallas grandes */
 @media (min-width: 768px) {
     .categories-container {
@@ -86,6 +94,7 @@ body, #outlet {
         width: 200px; /* Ancho fijo para pantallas grandes */
         position: static; /* No posición fija en pantallas grandes */
         margin-top: 20px;
+        margin-bottom: 20px;
         align-self: center;
         background-color: #FF5722;
         color: white;
@@ -120,23 +129,6 @@ body, #outlet {
         z-index: 1000;
     }
 
-    /*
-    .categoria-button {
-        width: 70% !important;
-        position: fixed;
-        bottom: 100px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 1000;
-        background-color: #FF5722;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-        align-self: center;
-    }
-     */
     .categoria-button {
         width: 50px; /* Tamaño cuadrado */
         height: 50px;
