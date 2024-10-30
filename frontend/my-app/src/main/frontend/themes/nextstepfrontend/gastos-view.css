@@ -58,6 +58,12 @@ body, #outlet {
     transition: background-color 0.3s;
 }
 
+/* Estilo del menú contextual al hacer hover */
+.context-menu:hover {
+    cursor: pointer;
+}
+
+
 /* Estilo en pantallas grandes */
 @media (min-width: 768px) {
     .categories-container {

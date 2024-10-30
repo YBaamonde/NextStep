@@ -34,7 +34,7 @@ public class RegisterView extends Div {
             // Si existe un token, significa que el usuario está autenticado
             VaadinSession.getCurrent().getSession().invalidate(); // Invalidar la sesión actual
             VaadinSession.getCurrent().close();  // Cerrar la sesión
-            UI.getCurrent().getPage().reload(); // Recargar la página para iniciar una sesión limpia
+             UI.getCurrent().getPage().reload(); // Recargar la página para iniciar una sesión limpia
         }
 
 
