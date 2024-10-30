@@ -6,8 +6,12 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+
+import com.nextstep.config.SecureRouteAccessControl;
 
 @PageTitle("Hello World")
 @Route(value = "", layout = MainLayout.class)
@@ -32,5 +36,4 @@ public class HelloWorldView extends HorizontalLayout {
 
 
     }
-
 }
