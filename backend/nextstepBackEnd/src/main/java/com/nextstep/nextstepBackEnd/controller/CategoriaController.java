@@ -30,10 +30,10 @@ public class CategoriaController {
 
     @PutMapping("/{categoriaId}")
     public Categoria updateCategoria(@PathVariable Integer categoriaId, @RequestBody Categoria categoria) {
-        System.out.println("Actualización de categoría solicitada para ID: " + categoriaId); // Depuración
+        //System.out.println("Actualización de categoría solicitada para ID: " + categoriaId); // Depuración
 
         // Confirmar los detalles de la categoría antes de actualizar
-        System.out.println("Detalles de la categoría para actualizar: Nombre: " + categoria.getNombre() + ", Descripción: " + categoria.getDescripcion());
+        //System.out.println("Detalles de la categoría para actualizar: Nombre: " + categoria.getNombre() + ", Descripción: " + categoria.getDescripcion());
 
         return categoriaService.updateCategoria(categoriaId, categoria);
     }

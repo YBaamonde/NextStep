@@ -105,8 +105,8 @@ public class CategoriaService {
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println("Update Categoria Response Code: " + response.statusCode()); // Debug
-            System.out.println("Update Categoria Response Body: " + response.body()); // Debug
+            //System.out.println("Update Categoria Response Code: " + response.statusCode()); // Debug
+            //System.out.println("Update Categoria Response Body: " + response.body()); // Debug
 
             if (response.statusCode() == 200) {
                 Notification.show("Categoría actualizada con éxito");

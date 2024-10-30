@@ -40,11 +40,11 @@ public class CategoriaService {
         System.out.println("Buscando categoría para actualizar con ID: " + categoriaId); // Depuración
 
         return categoriaRepository.findById(categoriaId).map(categoria -> {
-            System.out.println("Categoría encontrada, actualizando nombre y descripción"); // Confirmar que encontró la categoría
+            //System.out.println("Categoría encontrada, actualizando nombre y descripción"); // Confirmar que encontró la categoría
 
             // Mostrar el cambio antes de guardar (Debug)
-            System.out.println("Nuevo Nombre: " + categoriaDetails.getNombre());
-            System.out.println("Nueva Descripción: " + categoriaDetails.getDescripcion());
+            //System.out.println("Nuevo Nombre: " + categoriaDetails.getNombre());
+            //System.out.println("Nueva Descripción: " + categoriaDetails.getDescripcion());
 
             categoria.setNombre(categoriaDetails.getNombre());
             categoria.setDescripcion(categoriaDetails.getDescripcion());
