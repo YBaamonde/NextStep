@@ -23,6 +23,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Route("gastos")
 @PageTitle("Gastos | NextStep")
@@ -100,19 +101,29 @@ public class GastosView extends VerticalLayout {
             return;
         }
 
+        // Crear el objeto de la nueva categoría
         Map<String, Object> nuevaCategoria = Map.of("nombre", "Nueva Categoría", "usuarioId", usuarioId);
-        boolean success = categoriaService.createCategoria(usuarioId, nuevaCategoria);
+        Optional<Map<String, Object>> createdCategoria = categoriaService.createCategoria(usuarioId, nuevaCategoria);
 
-        if (success) {
+        if (createdCategoria.isPresent()) {
             categoriaCount++;
-            Div categoryPanel = createCategoryPanel("Nueva Categoría", categoriaCount);
+            String nombreCategoria = (String) createdCategoria.get().get("nombre");
+            int categoriaId = (Integer) createdCategoria.get().get("id");
 
-            // Añadir la nueva categoría antes del espaciador
-            categoriesContainer.addComponentAtIndex(categoriesContainer.getComponentCount() - 1, categoryPanel);
+            // Create the new category panel
+            Div categoryPanel = createCategoryPanel(nombreCategoria, categoriaId);
+
+            // Append the new panel to the end of the categoriesContainer
+            categoriesContainer.add(categoryPanel);
+
+            Notification.show("Categoría creada con éxito.");
         } else {
             Notification.show("Error al agregar la categoría. Inténtalo nuevamente.");
         }
     }
+
+
+
 
 
     private Div createCategoryPanel(String categoryName, int categoriaId) {

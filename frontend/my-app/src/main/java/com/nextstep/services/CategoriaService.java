@@ -13,6 +13,7 @@ import java.net.http.HttpResponse;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class CategoriaService {
     private final String baseUrl;
@@ -51,7 +52,7 @@ public class CategoriaService {
 
 
     // Crear una nueva categoría
-    public boolean createCategoria(int usuarioId, Map<String, Object> categoria) {
+    public Optional<Map<String, Object>> createCategoria(int usuarioId, Map<String, Object> categoria) {
         try {
             String json = objectMapper.writeValueAsString(categoria);
             HttpRequest request = HttpRequest.newBuilder()
@@ -62,13 +63,20 @@ public class CategoriaService {
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println("Create Categoria Response Code: " + response.statusCode()); // Debug
-            return response.statusCode() == 200;
+
+            if (response.statusCode() == 200) {
+                // Parse the response JSON into a Map and return it
+                Map<String, Object> createdCategoria = objectMapper.readValue(response.body(), new TypeReference<>() {});
+                return Optional.of(createdCategoria);
+            } else {
+                Notification.show("Error al crear la categoría: " + response.statusCode());
+            }
         } catch (IOException | InterruptedException e) {
             Notification.show("Error al crear la categoría: " + e.getMessage());
         }
-        return false;
+        return Optional.empty();
     }
+
 
     // Eliminar una categoría
     public boolean deleteCategoria(int categoriaId) {
