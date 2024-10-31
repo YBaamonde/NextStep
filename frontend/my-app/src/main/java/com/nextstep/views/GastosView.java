@@ -11,16 +11,20 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
+
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -36,6 +40,8 @@ public class GastosView extends VerticalLayout {
     private final Integer usuarioId;
     private int categoriaCount;
     private final Div spacer;
+    private final Map<Integer, Span> descriptionRefs = new HashMap<>();
+
 
     public GastosView() {
         setClassName("gastos-container");
@@ -87,13 +93,20 @@ public class GastosView extends VerticalLayout {
 
         for (Map<String, Object> categoria : categorias) {
             String nombreCategoria = (String) categoria.get("nombre");
+            String descripcionCategoria = (String) categoria.get("descripcion");
             int categoriaId = (Integer) categoria.get("id");
-            Div categoryPanel = createCategoryPanel(nombreCategoria, categoriaId);
+
+            // Crear el panel de categoría con el mapa descriptionRefs
+            Div categoryPanel = createCategoryPanel(nombreCategoria, descripcionCategoria, categoriaId, descriptionRefs);
 
             // Añadir la nueva categoría antes del espaciador
             categoriesContainer.addComponentAtIndex(categoriesContainer.getComponentCount() - 1, categoryPanel);
         }
     }
+
+
+
+
 
     private void agregarNuevaCategoria() {
         if (categoriaCount >= MAX_CATEGORIES) {
@@ -108,13 +121,14 @@ public class GastosView extends VerticalLayout {
         if (createdCategoria.isPresent()) {
             categoriaCount++;
             String nombreCategoria = (String) createdCategoria.get().get("nombre");
+            String descripcionCategoria = (String) createdCategoria.get().get("descripcion");
             int categoriaId = (Integer) createdCategoria.get().get("id");
 
-            // Create the new category panel
-            Div categoryPanel = createCategoryPanel(nombreCategoria, categoriaId);
+            // Crear el panel de la nueva categoría y pasar descriptionRefs
+            Div categoryPanel = createCategoryPanel(nombreCategoria, descripcionCategoria, categoriaId, descriptionRefs);
 
-            // Append the new panel to the end of the categoriesContainer
-            categoriesContainer.add(categoryPanel);
+            // Agregar el nuevo panel al final de categoriesContainer
+            categoriesContainer.addComponentAtIndex(categoriesContainer.getComponentCount() - 1, categoryPanel);
 
             Notification.show("Categoría creada con éxito.");
         } else {
@@ -126,66 +140,86 @@ public class GastosView extends VerticalLayout {
 
 
 
-    private Div createCategoryPanel(String categoryName, int categoriaId) {
+
+
+    private Div createCategoryPanel(String categoryName, String categoryDescription, int categoriaId, Map<Integer, Span> descriptionRefs) {
         Div panel = new Div();
         panel.setClassName("panel");
-        panel.getStyle().set("position", "relative"); // Permite posicionar el icono en la esquina
 
         H2 title = new H2(categoryName);
         title.setClassName("category-title");
 
-        Button addGastoButton = new Button("Añadir Gasto");
-        addGastoButton.setClassName("action-button");
+        Span description = new Span(categoryDescription != null ? categoryDescription : "Sin descripción");
+        description.setClassName("category-description");
+        descriptionRefs.put(categoriaId, description); // Guardar referencia a la descripción
 
-        // Menú de contexto (tres puntos) para editar y eliminar
         Icon menuIcon = new Icon(VaadinIcon.ELLIPSIS_DOTS_V);
-        menuIcon.addClassName("context-menu");
+        menuIcon.setClassName("context-menu-icon");
+
         ContextMenu contextMenu = new ContextMenu();
         contextMenu.setTarget(menuIcon);
         contextMenu.setOpenOnClick(true);
-
-        contextMenu.addItem("Editar", event -> openEditCategoryDialog(categoryName, categoriaId, title));
+        contextMenu.addItem("Editar", event -> openEditCategoryDialog(categoriaId, title, description));
         contextMenu.addItem("Eliminar", event -> eliminarCategoria(panel, categoriaId));
+        contextMenu.addClassName("context-menu");
 
-        // Añadir elementos al panel
-        panel.add(menuIcon, title, addGastoButton);
+        // Botón para añadir gasto
+        Button addGastoButton = new Button("Añadir Gasto");
+        addGastoButton.setClassName("action-button");
+
+        panel.add(title, description, menuIcon, addGastoButton);
         return panel;
     }
 
 
 
-    private void openEditCategoryDialog(String categoryName, int categoriaId, H2 title) {
+
+
+    private void openEditCategoryDialog(int categoriaId, H2 title, Span description) {
         Dialog editDialog = new Dialog();
         editDialog.setHeaderTitle("Editar Categoría");
 
-        FormLayout formLayout = new FormLayout();
-        TextField nameField = new TextField("Nombre de la Categoría");
-        nameField.setValue(categoryName);
+        TextField nameField = new TextField("Nombre");
+        nameField.setValue(title.getText());
 
         TextArea descriptionField = new TextArea("Descripción");
-        descriptionField.setValue("Descripción actual...");
+        descriptionField.setValue(description.getText());
 
-        formLayout.add(nameField, descriptionField);
-
+        // Crear botones de guardar y cancelar
         Button saveButton = new Button("Guardar", event -> {
             String newName = nameField.getValue();
             String newDescription = descriptionField.getValue();
-            boolean success = categoriaService.updateCategoria(categoriaId, newName, newDescription);
 
+            boolean success = categoriaService.updateCategoria(categoriaId, newName, newDescription);
             if (success) {
-                Notification.show("Categoría actualizada exitosamente");
-                title.setText(newName);  // Actualiza el título en el panel
+                Notification.show("Categoría actualizada con éxito.");
                 editDialog.close();
+
+                // Actualizar los textos directamente en el panel
+                title.setText(newName);
+                description.setText(newDescription);
             } else {
-                Notification.show("Error al actualizar la categoría");
+                Notification.show("Error al actualizar la categoría.");
             }
         });
+        saveButton.getStyle().set("margin-right", "10px");
 
         Button cancelButton = new Button("Cancelar", event -> editDialog.close());
-        editDialog.getFooter().add(cancelButton, saveButton);
-        editDialog.add(formLayout);
+        cancelButton.addClassName("cancel-button");
+
+        // Crear un layout para los botones y añadirles algo de espacio
+        HorizontalLayout buttonsLayout = new HorizontalLayout(saveButton, cancelButton);
+
+        // Añadir en un layout vertical dentro del diálogo
+        VerticalLayout dialogLayout = new VerticalLayout(nameField, descriptionField, buttonsLayout);
+        dialogLayout.setSpacing(true);
+        dialogLayout.setPadding(true);
+
+        editDialog.add(dialogLayout);
         editDialog.open();
     }
+
+
 
 
     private void eliminarCategoria(Div panel, int categoriaId) {

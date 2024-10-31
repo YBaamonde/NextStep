@@ -58,8 +58,8 @@ body, #outlet {
     transition: background-color 0.3s;
 }
 
-/* Estilo del menú contextual */
-.context-menu {
+/* Estilo del icono del menú contextual */
+.context-menu-icon {
     position: absolute;
     top: 10px;
     right: 10px;
@@ -76,6 +76,13 @@ body, #outlet {
     width: 100%;       /* Ocupa el ancho del contenedor */
     height: 100px;     /* Ajusta este valor para controlar el espacio extra */
     flex-shrink: 0;    /* Evita que el espaciador se reduzca en tamaño */
+}
+
+.category-description {
+    font-size: 0.9em;
+    margin-bottom: 5px;
+    margin-top: -5px;
+    text-align: center;
 }
 
 
@@ -152,4 +159,13 @@ body, #outlet {
     .categoria-button:hover {
         background-color: #e64a19;
     }
+
+    .context-menu {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 0.6rem;
+        cursor: pointer;
+    }
 }
+
