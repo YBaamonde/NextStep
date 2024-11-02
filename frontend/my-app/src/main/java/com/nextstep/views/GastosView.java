@@ -3,7 +3,9 @@ package com.nextstep.views;
 import com.nextstep.services.AuthService;
 import com.nextstep.services.CategoriaService;
 import com.nextstep.views.components.MainNavbar;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.charts.model.Cursor;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -137,11 +139,6 @@ public class GastosView extends VerticalLayout {
     }
 
 
-
-
-
-
-
     private Div createCategoryPanel(String categoryName, String categoryDescription, int categoriaId, Map<Integer, Span> descriptionRefs) {
         Div panel = new Div();
         panel.setClassName("panel");
@@ -151,25 +148,45 @@ public class GastosView extends VerticalLayout {
 
         Span description = new Span(categoryDescription != null ? categoryDescription : "Sin descripción");
         description.setClassName("category-description");
-        descriptionRefs.put(categoriaId, description); // Guardar referencia a la descripción
+        descriptionRefs.put(categoriaId, description);
 
-        Icon menuIcon = new Icon(VaadinIcon.ELLIPSIS_DOTS_V);
-        menuIcon.setClassName("context-menu-icon");
-
-        ContextMenu contextMenu = new ContextMenu();
-        contextMenu.setTarget(menuIcon);
-        contextMenu.setOpenOnClick(true);
-        contextMenu.addItem("Editar", event -> openEditCategoryDialog(categoriaId, title, description));
-        contextMenu.addItem("Eliminar", event -> eliminarCategoria(panel, categoriaId));
-        contextMenu.addClassName("context-menu");
-
-        // Botón para añadir gasto
         Button addGastoButton = new Button("Añadir Gasto");
         addGastoButton.setClassName("action-button");
 
-        panel.add(title, description, menuIcon, addGastoButton);
+        // Crear el diálogo de opciones de categoría
+        Dialog optionsDialog = new Dialog();
+        optionsDialog.setHeaderTitle("Opciones de Categoría");
+
+        // Botón para editar
+        Button editButton = new Button("Editar", event -> {
+            optionsDialog.close();
+            openEditCategoryDialog(categoriaId, title, description);
+        });
+        editButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+
+        // Botón para eliminar
+        Button deleteButton = new Button("Eliminar", event -> {
+            optionsDialog.close();
+            eliminarCategoria(panel, categoriaId);
+        });
+        deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
+
+        // Añadir botones al diálogo
+        HorizontalLayout buttonsLayout = new HorizontalLayout(editButton, deleteButton);
+        optionsDialog.add(buttonsLayout);
+
+        // Icono de menú para abrir el diálogo
+        Icon menuIcon = new Icon(VaadinIcon.ELLIPSIS_DOTS_V);
+        menuIcon.setClassName("context-menu-icon");
+        menuIcon.getStyle().set("cursor", "pointer");
+        menuIcon.addClickListener(event -> optionsDialog.open());
+
+        // Añadir elementos al panel
+        panel.add(title, description, addGastoButton, menuIcon);
         return panel;
     }
+
+
 
 
 
@@ -220,17 +237,19 @@ public class GastosView extends VerticalLayout {
     }
 
 
-
-
     private void eliminarCategoria(Div panel, int categoriaId) {
         boolean success = categoriaService.deleteCategoria(categoriaId);
 
         if (success) {
             categoriesContainer.remove(panel);
             categoriaCount--;
-            Notification.show("Categoría eliminada exitosamente.");
+            Notification.show("Categoría eliminada con éxito.");
         } else {
             Notification.show("Error al eliminar la categoría.");
         }
     }
+
+
+
+
 }
