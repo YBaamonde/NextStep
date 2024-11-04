@@ -9,7 +9,7 @@ body, #outlet {
     overflow-x: hidden;
 }
 
-.gastos-container {
+.gastos-view {
     background-image: url('../../../resources/media/escalonesGastos.jpg');
     background-size: cover;
     background-position: center top;
@@ -85,6 +85,55 @@ body, #outlet {
     text-align: center;
 }
 
+.gastos-container {
+    padding-top: 10px;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    margin-top: 10px;
+}
+
+.gasto-item {
+    padding: 10px;
+    margin-top: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.9);
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+}
+
+.gasto-nombre {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.gasto-monto {
+    color: #ff5722;
+    font-size: 1rem;
+}
+
+.gasto-fecha {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.gasto-eliminar {
+    align-self: flex-end;
+    background-color: #ff5722;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.gasto-eliminar:hover {
+    background-color: #e64a19;
+}
+
+
+
 
 /* Estilo en pantallas grandes */
 @media (min-width: 768px) {
@@ -114,7 +163,7 @@ body, #outlet {
 
 /* Estilo para dispositivos móviles */
 @media (max-width: 767px) {
-    .gastos-container {
+    .gastos-view {
         justify-content: center;
         align-items: center;
     }

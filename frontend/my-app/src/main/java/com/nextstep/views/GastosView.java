@@ -2,16 +2,15 @@ package com.nextstep.views;
 
 import com.nextstep.services.AuthService;
 import com.nextstep.services.CategoriaService;
+import com.nextstep.services.GastoService;
 import com.nextstep.views.components.MainNavbar;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.charts.model.Cursor;
-import com.vaadin.flow.component.contextmenu.ContextMenu;
+//import com.vaadin.flow.component.charts.model.Label;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -20,12 +19,16 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.component.html.NativeLabel;
 
+
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,10 +46,12 @@ public class GastosView extends VerticalLayout {
     private int categoriaCount;
     private final Div spacer;
     private final Map<Integer, Span> descriptionRefs = new HashMap<>();
+    private final GastoService gastoService = new GastoService();
+    private final Map<Integer, Div> categoriaRefs = new HashMap<>();
 
 
     public GastosView() {
-        setClassName("gastos-container");
+        setClassName("gastos-view");
         setSizeFull();
         setPadding(false);
         setSpacing(false);
@@ -82,12 +87,17 @@ public class GastosView extends VerticalLayout {
         // Cargar categorías existentes desde la base de datos
         cargarCategorias();
 
+        // Cargar los gastos de la categoría
+        cargarGastosPorUsuario(usuarioId);
+
         // Botón para agregar una nueva categoría
         Button addCategoryButton = new Button(new Icon(VaadinIcon.PLUS));
         addCategoryButton.setClassName("categoria-button");
         addCategoryButton.addClickListener(e -> agregarNuevaCategoria());
         add(addCategoryButton);
     }
+
+    /* Metodos para categorías */
 
     private void cargarCategorias() {
         List<Map<String, Object>> categorias = categoriaService.getCategoriasPorUsuario(usuarioId);
@@ -98,16 +108,11 @@ public class GastosView extends VerticalLayout {
             String descripcionCategoria = (String) categoria.get("descripcion");
             int categoriaId = (Integer) categoria.get("id");
 
-            // Crear el panel de categoría con el mapa descriptionRefs
             Div categoryPanel = createCategoryPanel(nombreCategoria, descripcionCategoria, categoriaId, descriptionRefs);
-
-            // Añadir la nueva categoría antes del espaciador
-            categoriesContainer.addComponentAtIndex(categoriesContainer.getComponentCount() - 1, categoryPanel);
+            categoriaRefs.put(categoriaId, categoryPanel);  // Almacena la referencia del panel de la categoría
+            categoriesContainer.add(categoryPanel);
         }
     }
-
-
-
 
 
     private void agregarNuevaCategoria() {
@@ -150,8 +155,15 @@ public class GastosView extends VerticalLayout {
         description.setClassName("category-description");
         descriptionRefs.put(categoriaId, description);
 
+        // Contenedor de gastos dentro de la categoría
+        VerticalLayout gastosContainer = new VerticalLayout();
+        gastosContainer.setClassName("gastos-container");
+        gastosContainer.setSpacing(false);
+        gastosContainer.setPadding(false);
+
         Button addGastoButton = new Button("Añadir Gasto");
         addGastoButton.setClassName("action-button");
+        addGastoButton.addClickListener(event -> openAddGastoDialog(categoriaId, gastosContainer));
 
         // Crear el diálogo de opciones de categoría
         Dialog optionsDialog = new Dialog();
@@ -182,14 +194,13 @@ public class GastosView extends VerticalLayout {
         menuIcon.addClickListener(event -> optionsDialog.open());
 
         // Añadir elementos al panel
-        panel.add(title, description, addGastoButton, menuIcon);
+        panel.add(title, description, addGastoButton, menuIcon, gastosContainer);
+
+        // Cargar los gastos de la categoría
+        cargarGastosPorUsuario(usuarioId);
+
         return panel;
     }
-
-
-
-
-
 
 
     private void openEditCategoryDialog(int categoriaId, H2 title, Span description) {
@@ -249,7 +260,128 @@ public class GastosView extends VerticalLayout {
         }
     }
 
+    /* -------------------- */
+
+    /* Metodos para gastos */
+
+    // Abrir el diálogo de añadir gasto
+    private void openAddGastoDialog(int categoriaId, VerticalLayout gastosContainer) {
+        Dialog addGastoDialog = new Dialog();
+        addGastoDialog.setHeaderTitle("Nuevo Gasto");
+
+        // Campos para los detalles del gasto
+        TextField nameField = new TextField("Nombre del Gasto");
+        nameField.setPlaceholder("Ej: Transporte");
+
+        NumberField amountField = new NumberField("Monto");
+        amountField.setPrefixComponent(new Span("€"));
+        amountField.setPlaceholder("Ej: 50.00");
+
+        DatePicker dateField = new DatePicker("Fecha");
+        dateField.setPlaceholder("Selecciona una fecha");
+
+        // Botón para guardar el nuevo gasto
+        Button saveButton = new Button("Guardar", event -> {
+            String nombre = nameField.getValue();
+            Double monto = amountField.getValue();
+            LocalDate fecha = dateField.getValue();
+
+            if (nombre.isEmpty() || monto == null || fecha == null) {
+                Notification.show("Todos los campos son obligatorios.");
+                return;
+            }
+
+            Map<String, Object> gastoData = Map.of(
+                    "nombre", nombre,
+                    "monto", monto,
+                    "fecha", fecha.toString()
+            );
 
 
+            boolean success = gastoService.createGasto(usuarioId, categoriaId, gastoData);
+            if (success) {
+                Notification.show("Gasto agregado con éxito.");
+                addGastoDialog.close();
+                // Opcional: Lógica para actualizar la lista de gastos en el panel si es necesario
+            } else {
+                Notification.show("Error al agregar el gasto. Inténtalo nuevamente.");
+            }
+        });
+
+        Button cancelButton = new Button("Cancelar", event -> addGastoDialog.close());
+
+        HorizontalLayout buttonsLayout = new HorizontalLayout(saveButton, cancelButton);
+        addGastoDialog.add(nameField, amountField, dateField, buttonsLayout);
+        addGastoDialog.open();
+    }
+
+
+    // Metodo para actualizar el panel de gastos
+    private void cargarGastosPorUsuario(int usuarioId) {
+        List<Map<String, Object>> gastos = gastoService.getGastosPorUsuario(usuarioId);
+
+        for (Map<String, Object> gasto : gastos) {
+            Integer gastoId = (Integer) gasto.get("id");
+            String nombreGasto = (String) gasto.get("nombre");
+            Double montoGasto = (Double) gasto.get("monto");
+            String fechaGasto = (String) gasto.get("fecha");
+
+            // Encuentra la categoría asociada al gasto
+            Integer categoriaId = (Integer) gasto.get("categoriaId");  // Asegúrate de que los gastos devuelven este campo
+            if (categoriaRefs.containsKey(categoriaId)) {
+                Div categoriaPanel = categoriaRefs.get(categoriaId);
+                // Añade el gasto al panel de la categoría
+                Div gastoDiv = createGastoDiv(gastoId, nombreGasto, montoGasto, fechaGasto);
+                categoriaPanel.add(gastoDiv);
+            } else {
+                System.out.println("Categoría no encontrada para gasto con ID: " + gastoId);
+            }
+        }
+    }
+
+
+    private Div createGastoDiv(Integer gastoId, String nombreGasto, Double montoGasto, String fechaGasto) {
+        Div gastoDiv = new Div();
+        gastoDiv.setClassName("gasto-item");
+
+        // Título del gasto
+        NativeLabel nombreLabel = new NativeLabel("Nombre: " + nombreGasto);
+        nombreLabel.addClassName("gasto-nombre");
+
+        // Monto del gasto
+        NativeLabel montoLabel = new NativeLabel("Monto: " + montoGasto + " €");
+        montoLabel.addClassName("gasto-monto");
+
+        // Fecha del gasto
+        NativeLabel fechaLabel = new NativeLabel("Fecha: " + fechaGasto);
+        fechaLabel.addClassName("gasto-fecha");
+
+        // Botón para eliminar el gasto
+        Button deleteButton = new Button("Eliminar", event -> eliminarGasto(gastoId, gastoDiv));
+        deleteButton.addClassName("gasto-eliminar");
+
+        gastoDiv.add(nombreLabel, montoLabel, fechaLabel, deleteButton);
+
+        return gastoDiv;
+    }
+
+
+
+    private void eliminarGasto(Integer gastoId, Div gastoDiv) {
+        boolean success = gastoService.deleteGasto(gastoId);
+        if (success) {
+            Notification.show("Gasto eliminado con éxito.");
+            gastoDiv.getParent().ifPresent(parent -> {
+                if (parent instanceof Div) {
+                    ((Div) parent).remove(gastoDiv);
+                }
+            });
+        } else {
+            Notification.show("Error al eliminar el gasto.");
+        }
+    }
+
+
+    /* -------------------- */
 
 }

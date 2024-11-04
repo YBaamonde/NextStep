@@ -1,5 +1,7 @@
 package com.nextstep.nextstepBackEnd.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,6 +24,8 @@ public class Gasto {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
+    //@JsonBackReference // Para que Spring serialice el objeto como un JSON
+    //@JsonIgnore // Ignorar el campo para que no se serialice
     private Usuario usuario;
 
     @ManyToOne(fetch = FetchType.LAZY)
