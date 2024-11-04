@@ -33,9 +33,13 @@ public class AuthControllerTest {
     @Test
     public void testLoginSuccess() {
         // Arrange
-        String token = "testtoken";
+        String token = "test-token";
         LoginRequest request = new LoginRequest("testuser", "testemail@example.com", "testpassword");
-        AuthResponse authResponse = new AuthResponse(token);
+        AuthResponse authResponse = AuthResponse.builder()
+                .token("test-token")
+                .userId(1)
+                .build();
+
 
         // Simula el comportamiento del servicio
         when(authService.login(any(LoginRequest.class))).thenReturn(authResponse);
@@ -84,9 +88,13 @@ public class AuthControllerTest {
     @Test
     public void testRegisterSuccess() {
         // Arrange
-        String token = "testtoken";
+        String token = "test-token";
         RegisterRequest request = new RegisterRequest("testuser", "testemail@example.com", "testpassword");
-        AuthResponse authResponse = new AuthResponse(token);
+        AuthResponse authResponse = AuthResponse.builder()
+                .token("test-token")
+                .userId(1)
+                .build();
+
 
         // Simula el comportamiento del servicio
         when(authService.register(any(RegisterRequest.class))).thenReturn(authResponse);

@@ -85,4 +85,44 @@ public class GastoRepositoryTest {
         assertEquals(1, gastos.size());
         assertEquals("Taxi", gastos.get(0).getNombre());
     }
+
+    @Test
+    public void testFindByUsuarioId() {
+        // Crear y guardar un gasto asociado al usuario
+        Gasto gasto = new Gasto();
+        gasto.setUsuario(usuario);
+        gasto.setNombre("Bus");
+        gasto.setMonto(BigDecimal.valueOf(2.50));
+        gasto.setFecha(LocalDate.now());
+        gasto.setCategoria(categoria);
+        gastoRepository.save(gasto);
+
+        // Recuperar los gastos por usuario ID
+        List<Gasto> gastos = gastoRepository.findByUsuarioId(usuario.getId());
+
+        assertNotNull(gastos);
+        assertFalse(gastos.isEmpty());
+        assertEquals(1, gastos.size());
+        assertEquals("Bus", gastos.get(0).getNombre());
+    }
+
+    @Test
+    public void testFindByCategoriaId() {
+        // Crear y guardar un gasto asociado a la categoría
+        Gasto gasto = new Gasto();
+        gasto.setUsuario(usuario);
+        gasto.setNombre("Taxi");
+        gasto.setMonto(BigDecimal.valueOf(10.00));
+        gasto.setFecha(LocalDate.now());
+        gasto.setCategoria(categoria);
+        gastoRepository.save(gasto);
+
+        // Recuperar los gastos por categoría ID
+        List<Gasto> gastos = gastoRepository.findByCategoriaId(categoria.getId());
+
+        assertNotNull(gastos);
+        assertFalse(gastos.isEmpty());
+        assertEquals(1, gastos.size());
+        assertEquals("Taxi", gastos.get(0).getNombre());
+    }
 }

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class GastoService {
@@ -27,37 +28,54 @@ public class GastoService {
     }
 
     // Obtener todos los gastos de un usuario por ID (usando búsqueda directa)
-    public List<Gasto> getGastosByUsuarioId(Integer usuarioId) {
-        return gastoRepository.findByUsuarioId(usuarioId);
+    public List<GastoDTO> getGastosByUsuarioId(Integer usuarioId) {
+        Optional<Usuario> usuarioOpt = userRepository.findById(usuarioId);
+        if (usuarioOpt.isEmpty()) {
+            throw new IllegalArgumentException("Usuario no encontrado.");
+        }
+
+        Usuario usuario = usuarioOpt.get();
+        List<Gasto> gastos = gastoRepository.findByUsuario(usuario);
+
+        // Convertir cada Gasto a GastoDTO
+        return gastos.stream()
+                .map(gasto -> new GastoDTO(
+                        gasto.getId(),
+                        gasto.getNombre(),
+                        gasto.getMonto(),
+                        gasto.getFecha(),
+                        gasto.getCategoria().getId()
+                ))
+                .collect(Collectors.toList());
     }
+
 
     // Crear un nuevo gasto usando GastoDTO
-    public Gasto createGasto(Integer usuarioId, Integer categoriaId, GastoDTO gastoDTO) {
-        Usuario usuario = userRepository.findById(usuarioId)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado."));
-        Categoria categoria = categoriaRepository.findById(categoriaId)
-                .orElseThrow(() -> new IllegalArgumentException("Categoría no encontrada."));
+    public GastoDTO createGasto(Integer usuarioId, Integer categoriaId, GastoDTO gastoDTO) {
+        Optional<Usuario> usuario = userRepository.findById(usuarioId);
+        Optional<Categoria> categoria = categoriaRepository.findById(categoriaId);
 
-        Gasto newGasto = new Gasto();
-        newGasto.setNombre(gastoDTO.getNombre());
-        newGasto.setMonto(gastoDTO.getMonto());
-        newGasto.setFecha(gastoDTO.getFecha());
-        newGasto.setUsuario(usuario);
-        newGasto.setCategoria(categoria);
-
-        return gastoRepository.save(newGasto);
+        if (usuario.isPresent() && categoria.isPresent()) {
+            Gasto gasto = new Gasto();
+            gasto.setNombre(gastoDTO.getNombre());
+            gasto.setMonto(gastoDTO.getMonto());
+            gasto.setFecha(gastoDTO.getFecha());
+            gasto.setUsuario(usuario.get());
+            gasto.setCategoria(categoria.get());
+            Gasto savedGasto = gastoRepository.save(gasto);
+            return new GastoDTO(savedGasto.getId(), savedGasto.getNombre(), savedGasto.getMonto(), savedGasto.getFecha(), savedGasto.getCategoria().getId());
+        } else {
+            throw new IllegalArgumentException("Usuario o categoría no encontrados.");
+        }
     }
 
-    // Actualizar un gasto existente usando GastoDTO
-    public Gasto updateGasto(Integer gastoId, GastoDTO gastoDTO) {
-        if (gastoId == null) {
-            throw new IllegalArgumentException("El ID del gasto no debe ser null");
-        }
+    public GastoDTO updateGasto(Integer gastoId, GastoDTO gastoDTO) {
         return gastoRepository.findById(gastoId).map(existingGasto -> {
             existingGasto.setNombre(gastoDTO.getNombre());
             existingGasto.setMonto(gastoDTO.getMonto());
             existingGasto.setFecha(gastoDTO.getFecha());
-            return gastoRepository.save(existingGasto);
+            Gasto updatedGasto = gastoRepository.save(existingGasto);
+            return new GastoDTO(updatedGasto.getId(), updatedGasto.getNombre(), updatedGasto.getMonto(), updatedGasto.getFecha(), updatedGasto.getCategoria().getId());
         }).orElseThrow(() -> new IllegalArgumentException("Gasto no encontrado."));
     }
 
