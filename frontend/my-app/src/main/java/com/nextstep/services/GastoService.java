@@ -85,6 +85,26 @@ public class GastoService {
         return false;
     }
 
+    // Metodo para actualizar un gasto existente
+    public boolean updateGasto(int gastoId, Map<String, Object> updatedGasto) {
+        try {
+            String json = objectMapper.writeValueAsString(updatedGasto);
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(baseUrl + "/gastos/" + gastoId))
+                    .header("Authorization", "Bearer " + getToken())
+                    .header("Content-Type", "application/json")
+                    .PUT(HttpRequest.BodyPublishers.ofString(json))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return response.statusCode() == 200;
+        } catch (IOException | InterruptedException e) {
+            Notification.show("Error al actualizar el gasto: " + e.getMessage());
+        }
+        return false;
+    }
+
+
     // Metodo para obtener el token de autenticación
     private String getToken() {
         // Implementación para obtener el token JWT de la sesión o almacenamiento

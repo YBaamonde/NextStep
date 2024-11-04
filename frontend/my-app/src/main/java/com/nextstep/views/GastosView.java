@@ -317,7 +317,7 @@ public class GastosView extends VerticalLayout {
         addGastoDialog.open();
     }
 
-    
+
     // Metodo para actualizar el panel de gastos
     private void cargarGastosPorUsuario(int usuarioId) {
         List<Map<String, Object>> gastos = gastoService.getGastosPorUsuario(usuarioId);
@@ -346,6 +346,7 @@ public class GastosView extends VerticalLayout {
         Div gastoDiv = new Div();
         gastoDiv.setClassName("gasto-item");
 
+        // Etiquetas de información del gasto
         NativeLabel nombreLabel = new NativeLabel("Nombre: " + nombreGasto);
         nombreLabel.addClassName("gasto-nombre");
 
@@ -355,23 +356,24 @@ public class GastosView extends VerticalLayout {
         NativeLabel fechaLabel = new NativeLabel("Fecha: " + fechaGasto);
         fechaLabel.addClassName("gasto-fecha");
 
-        Button deleteButton = new Button("Eliminar", event -> {
-            if (gastoId != null) {
-                eliminarGasto(gastoId, gastoDiv);
-            } else {
-                gastoDiv.getParent().ifPresent(parent -> {
-                    if (parent instanceof Div) {
-                        ((Div) parent).remove(gastoDiv);
-                    }
-                });
-            }
-        });
+        // Botones de edición y eliminación
+        Button editButton = new Button("Editar", event -> openEditGastoDialog(gastoId, gastoDiv, nombreLabel, montoLabel, fechaLabel));
+        editButton.addClassName("action-button");
+
+        Button deleteButton = new Button("Eliminar", event -> eliminarGasto(gastoId, gastoDiv));
+        deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
         deleteButton.addClassName("gasto-eliminar");
 
-        gastoDiv.add(nombreLabel, montoLabel, fechaLabel, deleteButton);
+        // Contenedor para apilar los botones verticalmente
+        Div buttonContainer = new Div(editButton, deleteButton);
+        buttonContainer.setClassName("gasto-buttons");
+
+        // Añadir las etiquetas y el contenedor de botones al gastoDiv
+        gastoDiv.add(nombreLabel, montoLabel, fechaLabel, buttonContainer);
 
         return gastoDiv;
     }
+
 
 
     private void eliminarGasto(Integer gastoId, Div gastoDiv) {
@@ -386,6 +388,58 @@ public class GastosView extends VerticalLayout {
         } else {
             Notification.show("Error al eliminar el gasto.");
         }
+    }
+
+
+    private void openEditGastoDialog(Integer gastoId, Div gastoDiv, NativeLabel nombreLabel, NativeLabel montoLabel, NativeLabel fechaLabel) {
+        Dialog editGastoDialog = new Dialog();
+        editGastoDialog.setHeaderTitle("Editar Gasto");
+
+        TextField nameField = new TextField("Nombre del Gasto");
+        nameField.setValue(nombreLabel.getText().replace("Nombre: ", ""));
+
+        NumberField amountField = new NumberField("Monto");
+        amountField.setPrefixComponent(new Span("€"));
+        amountField.setValue(Double.valueOf(montoLabel.getText().replace("Monto: ", "").replace(" €", "")));
+
+        DatePicker dateField = new DatePicker("Fecha");
+        dateField.setValue(LocalDate.parse(fechaLabel.getText().replace("Fecha: ", "")));
+
+        Button saveButton = new Button("Guardar", event -> {
+            String newName = nameField.getValue();
+            Double newAmount = amountField.getValue();
+            LocalDate newDate = dateField.getValue();
+
+            if (newName.isEmpty() || newAmount == null || newDate == null) {
+                Notification.show("Todos los campos son obligatorios.");
+                return;
+            }
+
+            Map<String, Object> updatedGasto = Map.of(
+                    "nombre", newName,
+                    "monto", newAmount,
+                    "fecha", newDate.toString()
+            );
+
+            boolean success = gastoService.updateGasto(gastoId, updatedGasto);
+            if (success) {
+                Notification.show("Gasto actualizado con éxito.");
+                editGastoDialog.close();
+
+                // Actualizar los detalles en la UI
+                nombreLabel.setText("Nombre: " + newName);
+                montoLabel.setText("Monto: " + newAmount + " €");
+                fechaLabel.setText("Fecha: " + newDate);
+            } else {
+                Notification.show("Error al actualizar el gasto.");
+            }
+        });
+
+        Button cancelButton = new Button("Cancelar", event -> editGastoDialog.close());
+
+        HorizontalLayout buttonsLayout = new HorizontalLayout(saveButton, cancelButton);
+        editGastoDialog.add(nameField, amountField, dateField, buttonsLayout);
+        editGastoDialog.open();
     }
 
 

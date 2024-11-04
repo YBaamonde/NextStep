@@ -119,8 +119,6 @@ body, #outlet {
 
 .gasto-eliminar {
     align-self: flex-end;
-    background-color: #ff5722;
-    color: white;
     border: none;
     border-radius: 5px;
     padding: 5px 10px;
@@ -128,11 +126,24 @@ body, #outlet {
     transition: background-color 0.3s;
 }
 
-.gasto-eliminar:hover {
-    background-color: #e64a19;
+
+.gasto-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 5px; /* Espacio entre los botones */
 }
 
+.gasto-editar {
+    cursor: pointer;
+}
 
+.gasto-editar, .gasto-eliminar {
+    width: 100%; /* Ajustar al ancho del contenedor */
+}
+
+.gasto-editar:hover {
+    background-color: #e64a19;
+}
 
 
 /* Estilo en pantallas grandes */
