@@ -10,6 +10,12 @@ import java.util.List;
 
 @Repository
 public interface GastoRepository extends JpaRepository<Gasto, Integer> {
+    // Búsqueda por entidad
     List<Gasto> findByUsuario(Usuario usuario);
     List<Gasto> findByCategoria(Categoria categoria);
+
+    // Búsqueda directa por ID
+    List<Gasto> findByUsuarioId(Integer usuarioId);
+    List<Gasto> findByCategoriaId(Integer categoriaId);
 }
+

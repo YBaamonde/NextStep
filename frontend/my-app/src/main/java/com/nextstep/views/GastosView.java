@@ -4,6 +4,7 @@ import com.nextstep.services.AuthService;
 import com.nextstep.services.CategoriaService;
 import com.nextstep.services.GastoService;
 import com.nextstep.views.components.MainNavbar;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 //import com.vaadin.flow.component.charts.model.Label;
@@ -266,6 +267,8 @@ public class GastosView extends VerticalLayout {
 
     // Abrir el diálogo de añadir gasto
     private void openAddGastoDialog(int categoriaId, VerticalLayout gastosContainer) {
+        //Integer newGastoId = null;
+
         Dialog addGastoDialog = new Dialog();
         addGastoDialog.setHeaderTitle("Nuevo Gasto");
 
@@ -295,19 +298,27 @@ public class GastosView extends VerticalLayout {
                     "fecha", fecha.toString()
             );
 
-            boolean success = gastoService.createGasto(usuarioId, categoriaId, gastoData);
-            if (success) {
-                Notification.show("Gasto agregado con éxito.");
-                addGastoDialog.close();
+            Optional<Map<String, Object>> result = gastoService.createGasto(usuarioId, categoriaId, gastoData);
+            if (result.isPresent()) {
+                Map<String, Object> newGasto = result.get();
+                Integer newGastoId = (Integer) newGasto.get("id");
+                String newNombre = (String) newGasto.get("nombre");
+                Double newMonto = (Double) newGasto.get("monto");
+                String newFecha = (String) newGasto.get("fecha");
 
-                // Crear el nuevo gasto div y añadirlo al panel de la categoría
-                Div gastoDiv = createGastoDiv(null, nombre, monto, fecha.toString()); // ID de gasto puede ser null o asignado si se devuelve del servidor
-                if (categoriaRefs.containsKey(categoriaId)) {
-                    categoriaRefs.get(categoriaId).add(gastoDiv);
+                Div gastoDiv = createGastoDiv(newGastoId, newNombre, newMonto, newFecha);
+                if (gastoDiv != null) {
+                    Div categoriaPanel = categoriaRefs.get(categoriaId);
+                    if (categoriaPanel != null) {
+                        categoriaPanel.add(gastoDiv);
+                    }
                 }
+
+                addGastoDialog.close();
             } else {
                 Notification.show("Error al agregar el gasto. Inténtalo nuevamente.");
             }
+
         });
 
         Button cancelButton = new Button("Cancelar", event -> addGastoDialog.close());
@@ -343,8 +354,15 @@ public class GastosView extends VerticalLayout {
 
 
     private Div createGastoDiv(Integer gastoId, String nombreGasto, Double montoGasto, String fechaGasto) {
+        if (gastoId == null) {
+            Notification.show("Error: No se pudo cargar el gasto.");
+            return null;
+        }
+
         Div gastoDiv = new Div();
         gastoDiv.setClassName("gasto-item");
+        System.out.println("Creando GastoDiv con gastoId: " + gastoId); // Depuración
+
 
         // Etiquetas de información del gasto
         NativeLabel nombreLabel = new NativeLabel("Nombre: " + nombreGasto);
@@ -376,6 +394,8 @@ public class GastosView extends VerticalLayout {
 
 
 
+
+
     private void eliminarGasto(Integer gastoId, Div gastoDiv) {
         boolean success = gastoService.deleteGasto(gastoId);
         if (success) {
@@ -391,55 +411,56 @@ public class GastosView extends VerticalLayout {
     }
 
 
-    private void openEditGastoDialog(Integer gastoId, Div gastoDiv, NativeLabel nombreLabel, NativeLabel montoLabel, NativeLabel fechaLabel) {
-        Dialog editGastoDialog = new Dialog();
-        editGastoDialog.setHeaderTitle("Editar Gasto");
+    private void openEditGastoDialog(int gastoId, Div gastoDiv, NativeLabel nombreLabel, NativeLabel montoLabel, NativeLabel fechaLabel) {
+        Dialog editDialog = new Dialog();
+        editDialog.setHeaderTitle("Editar Gasto");
+        System.out.println("Abriendo diálogo de edición para gastoId: " + gastoId); // Depuración
+
 
         TextField nameField = new TextField("Nombre del Gasto");
         nameField.setValue(nombreLabel.getText().replace("Nombre: ", ""));
 
         NumberField amountField = new NumberField("Monto");
-        amountField.setPrefixComponent(new Span("€"));
-        amountField.setValue(Double.valueOf(montoLabel.getText().replace("Monto: ", "").replace(" €", "")));
+        amountField.setValue(Double.parseDouble(montoLabel.getText().replace("Monto: ", "").replace(" €", "")));
 
         DatePicker dateField = new DatePicker("Fecha");
         dateField.setValue(LocalDate.parse(fechaLabel.getText().replace("Fecha: ", "")));
 
         Button saveButton = new Button("Guardar", event -> {
-            String newName = nameField.getValue();
-            Double newAmount = amountField.getValue();
-            LocalDate newDate = dateField.getValue();
+            String nuevoNombre = nameField.getValue();
+            Double nuevoMonto = amountField.getValue();
+            LocalDate nuevaFecha = dateField.getValue();
 
-            if (newName.isEmpty() || newAmount == null || newDate == null) {
+            if (nuevoNombre.isEmpty() || nuevoMonto == null || nuevaFecha == null) {
                 Notification.show("Todos los campos son obligatorios.");
                 return;
             }
 
-            Map<String, Object> updatedGasto = Map.of(
-                    "nombre", newName,
-                    "monto", newAmount,
-                    "fecha", newDate.toString()
+            Map<String, Object> updatedGastoData = Map.of(
+                    "nombre", nuevoNombre,
+                    "monto", nuevoMonto,
+                    "fecha", nuevaFecha.toString()
             );
 
-            boolean success = gastoService.updateGasto(gastoId, updatedGasto);
+            boolean success = gastoService.updateGasto(gastoId, nuevoNombre, nuevoMonto, nuevaFecha);
             if (success) {
                 Notification.show("Gasto actualizado con éxito.");
-                editGastoDialog.close();
+                editDialog.close();
 
-                // Actualizar los detalles en la UI
-                nombreLabel.setText("Nombre: " + newName);
-                montoLabel.setText("Monto: " + newAmount + " €");
-                fechaLabel.setText("Fecha: " + newDate);
+                // Actualiza los detalles en la interfaz sin refrescar
+                nombreLabel.setText("Nombre: " + nuevoNombre);
+                montoLabel.setText("Monto: " + nuevoMonto + " €");
+                fechaLabel.setText("Fecha: " + nuevaFecha.toString());
             } else {
                 Notification.show("Error al actualizar el gasto.");
             }
         });
 
-        Button cancelButton = new Button("Cancelar", event -> editGastoDialog.close());
+        Button cancelButton = new Button("Cancelar", event -> editDialog.close());
 
         HorizontalLayout buttonsLayout = new HorizontalLayout(saveButton, cancelButton);
-        editGastoDialog.add(nameField, amountField, dateField, buttonsLayout);
-        editGastoDialog.open();
+        editDialog.add(nameField, amountField, dateField, buttonsLayout);
+        editDialog.open();
     }
 
 

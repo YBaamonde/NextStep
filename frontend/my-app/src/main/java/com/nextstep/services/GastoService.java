@@ -10,9 +10,11 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class GastoService {
     private final String baseUrl;
@@ -50,7 +52,7 @@ public class GastoService {
     }
 
     // Crear un nuevo gasto
-    public boolean createGasto(int usuarioId, int categoriaId, Map<String, Object> gasto) {
+    public Optional<Map<String, Object>> createGasto(int usuarioId, int categoriaId, Map<String, Object> gasto) {
         try {
             String json = objectMapper.writeValueAsString(gasto);
             HttpRequest request = HttpRequest.newBuilder()
@@ -61,12 +63,19 @@ public class GastoService {
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return response.statusCode() == 200;
+
+            if (response.statusCode() == 200) {
+                Map<String, Object> responseMap = objectMapper.readValue(response.body(), new TypeReference<>() {});
+                return Optional.of(responseMap);
+            } else {
+                Notification.show("Error al crear el gasto: " + response.statusCode());
+            }
         } catch (IOException | InterruptedException e) {
             Notification.show("Error al crear el gasto: " + e.getMessage());
         }
-        return false;
+        return Optional.empty();
     }
+
 
     // Eliminar un gasto
     public boolean deleteGasto(int gastoId) {
@@ -86,22 +95,45 @@ public class GastoService {
     }
 
     // Metodo para actualizar un gasto existente
-    public boolean updateGasto(int gastoId, Map<String, Object> updatedGasto) {
+    public boolean updateGasto(int gastoId, String nombre, double monto, LocalDate fecha) {
         try {
-            String json = objectMapper.writeValueAsString(updatedGasto);
+            Map<String, Object> gastoActualizado = Map.of(
+                    "nombre", nombre,
+                    "monto", monto,
+                    "fecha", fecha.toString()
+            );
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(baseUrl + "/gastos/" + gastoId))
                     .header("Authorization", "Bearer " + getToken())
                     .header("Content-Type", "application/json")
-                    .PUT(HttpRequest.BodyPublishers.ofString(json))
+                    .PUT(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(gastoActualizado)))
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println("Update Gasto Response Code: " + response.statusCode());
+            System.out.println("Update Gasto Response Body: " + response.body());
             return response.statusCode() == 200;
         } catch (IOException | InterruptedException e) {
             Notification.show("Error al actualizar el gasto: " + e.getMessage());
         }
         return false;
+    }
+
+
+    // Obtener el último gasto creado
+    public Map<String, Object> getLastCreatedGasto() {
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(baseUrl + "/gastos/lastCreated"))
+                    .header("Authorization", "Bearer " + getToken())
+                    .GET()
+                    .build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return objectMapper.readValue(response.body(), new TypeReference<>() {});
+        } catch (IOException | InterruptedException e) {
+            Notification.show("Error al obtener el último gasto creado: " + e.getMessage());
+        }
+        return null;
     }
 
 

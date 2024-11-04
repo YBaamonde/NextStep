@@ -2,6 +2,7 @@ package com.nextstep.nextstepBackEnd.service;
 
 import com.nextstep.nextstepBackEnd.model.Categoria;
 import com.nextstep.nextstepBackEnd.model.Gasto;
+import com.nextstep.nextstepBackEnd.model.GastoDTO;
 import com.nextstep.nextstepBackEnd.model.Usuario;
 import com.nextstep.nextstepBackEnd.repository.CategoriaRepository;
 import com.nextstep.nextstepBackEnd.repository.GastoRepository;
@@ -25,37 +26,43 @@ public class GastoService {
         this.userRepository = userRepository;
     }
 
-    // Metodo para obtener todos los gastos de un usuario
+    // Obtener todos los gastos de un usuario por ID (usando búsqueda directa)
     public List<Gasto> getGastosByUsuarioId(Integer usuarioId) {
-        Optional<Usuario> usuario = userRepository.findById(usuarioId);
-        return usuario.map(gastoRepository::findByUsuario).orElse(Collections.emptyList());
+        return gastoRepository.findByUsuarioId(usuarioId);
     }
 
-    // Metodo para crear un gasto
-    public Gasto createGasto(Integer usuarioId, Integer categoriaId, Gasto gasto) {
-        Optional<Usuario> usuario = userRepository.findById(usuarioId);
-        Optional<Categoria> categoria = categoriaRepository.findById(categoriaId);
+    // Crear un nuevo gasto usando GastoDTO
+    public Gasto createGasto(Integer usuarioId, Integer categoriaId, GastoDTO gastoDTO) {
+        Usuario usuario = userRepository.findById(usuarioId)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado."));
+        Categoria categoria = categoriaRepository.findById(categoriaId)
+                .orElseThrow(() -> new IllegalArgumentException("Categoría no encontrada."));
 
-        if (usuario.isPresent() && categoria.isPresent()) {
-            gasto.setUsuario(usuario.get());
-            gasto.setCategoria(categoria.get());
-            return gastoRepository.save(gasto);
-        } else {
-            throw new IllegalArgumentException("Usuario o categoría no encontrados.");
+        Gasto newGasto = new Gasto();
+        newGasto.setNombre(gastoDTO.getNombre());
+        newGasto.setMonto(gastoDTO.getMonto());
+        newGasto.setFecha(gastoDTO.getFecha());
+        newGasto.setUsuario(usuario);
+        newGasto.setCategoria(categoria);
+
+        return gastoRepository.save(newGasto);
+    }
+
+    // Actualizar un gasto existente usando GastoDTO
+    public Gasto updateGasto(Integer gastoId, GastoDTO gastoDTO) {
+        if (gastoId == null) {
+            throw new IllegalArgumentException("El ID del gasto no debe ser null");
         }
-    }
-
-    // Metodo para actualizar un gasto existente
-    public Gasto updateGasto(Integer gastoId, Gasto updatedGasto) {
         return gastoRepository.findById(gastoId).map(existingGasto -> {
-            existingGasto.setNombre(updatedGasto.getNombre());
-            existingGasto.setMonto(updatedGasto.getMonto());
-            existingGasto.setFecha(updatedGasto.getFecha());
+            existingGasto.setNombre(gastoDTO.getNombre());
+            existingGasto.setMonto(gastoDTO.getMonto());
+            existingGasto.setFecha(gastoDTO.getFecha());
             return gastoRepository.save(existingGasto);
         }).orElseThrow(() -> new IllegalArgumentException("Gasto no encontrado."));
     }
 
-    // Metodo para eliminar un gasto por ID
+
+    // Eliminar un gasto
     public void deleteGasto(Integer gastoId) {
         if (gastoRepository.existsById(gastoId)) {
             gastoRepository.deleteById(gastoId);
