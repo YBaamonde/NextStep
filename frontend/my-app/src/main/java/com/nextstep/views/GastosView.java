@@ -269,7 +269,6 @@ public class GastosView extends VerticalLayout {
         Dialog addGastoDialog = new Dialog();
         addGastoDialog.setHeaderTitle("Nuevo Gasto");
 
-        // Campos para los detalles del gasto
         TextField nameField = new TextField("Nombre del Gasto");
         nameField.setPlaceholder("Ej: Transporte");
 
@@ -280,7 +279,6 @@ public class GastosView extends VerticalLayout {
         DatePicker dateField = new DatePicker("Fecha");
         dateField.setPlaceholder("Selecciona una fecha");
 
-        // Botón para guardar el nuevo gasto
         Button saveButton = new Button("Guardar", event -> {
             String nombre = nameField.getValue();
             Double monto = amountField.getValue();
@@ -297,12 +295,16 @@ public class GastosView extends VerticalLayout {
                     "fecha", fecha.toString()
             );
 
-
             boolean success = gastoService.createGasto(usuarioId, categoriaId, gastoData);
             if (success) {
                 Notification.show("Gasto agregado con éxito.");
                 addGastoDialog.close();
-                // Opcional: Lógica para actualizar la lista de gastos en el panel si es necesario
+
+                // Crear el nuevo gasto div y añadirlo al panel de la categoría
+                Div gastoDiv = createGastoDiv(null, nombre, monto, fecha.toString()); // ID de gasto puede ser null o asignado si se devuelve del servidor
+                if (categoriaRefs.containsKey(categoriaId)) {
+                    categoriaRefs.get(categoriaId).add(gastoDiv);
+                }
             } else {
                 Notification.show("Error al agregar el gasto. Inténtalo nuevamente.");
             }
@@ -315,7 +317,7 @@ public class GastosView extends VerticalLayout {
         addGastoDialog.open();
     }
 
-
+    
     // Metodo para actualizar el panel de gastos
     private void cargarGastosPorUsuario(int usuarioId) {
         List<Map<String, Object>> gastos = gastoService.getGastosPorUsuario(usuarioId);
@@ -344,27 +346,32 @@ public class GastosView extends VerticalLayout {
         Div gastoDiv = new Div();
         gastoDiv.setClassName("gasto-item");
 
-        // Título del gasto
         NativeLabel nombreLabel = new NativeLabel("Nombre: " + nombreGasto);
         nombreLabel.addClassName("gasto-nombre");
 
-        // Monto del gasto
         NativeLabel montoLabel = new NativeLabel("Monto: " + montoGasto + " €");
         montoLabel.addClassName("gasto-monto");
 
-        // Fecha del gasto
         NativeLabel fechaLabel = new NativeLabel("Fecha: " + fechaGasto);
         fechaLabel.addClassName("gasto-fecha");
 
-        // Botón para eliminar el gasto
-        Button deleteButton = new Button("Eliminar", event -> eliminarGasto(gastoId, gastoDiv));
+        Button deleteButton = new Button("Eliminar", event -> {
+            if (gastoId != null) {
+                eliminarGasto(gastoId, gastoDiv);
+            } else {
+                gastoDiv.getParent().ifPresent(parent -> {
+                    if (parent instanceof Div) {
+                        ((Div) parent).remove(gastoDiv);
+                    }
+                });
+            }
+        });
         deleteButton.addClassName("gasto-eliminar");
 
         gastoDiv.add(nombreLabel, montoLabel, fechaLabel, deleteButton);
 
         return gastoDiv;
     }
-
 
 
     private void eliminarGasto(Integer gastoId, Div gastoDiv) {
