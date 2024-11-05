@@ -48,7 +48,9 @@ public class GastosView extends VerticalLayout {
     private final Div spacer;
     private final Map<Integer, Span> descriptionRefs = new HashMap<>();
     private final GastoService gastoService = new GastoService();
-    private final Map<Integer, Div> categoriaRefs = new HashMap<>();
+    private final Map<Integer, VerticalLayout> categoriaRefs = new HashMap<>();
+
+
 
 
     public GastosView() {
@@ -109,11 +111,16 @@ public class GastosView extends VerticalLayout {
             String descripcionCategoria = (String) categoria.get("descripcion");
             int categoriaId = (Integer) categoria.get("id");
 
-            Div categoryPanel = createCategoryPanel(nombreCategoria, descripcionCategoria, categoriaId, descriptionRefs);
-            categoriaRefs.put(categoriaId, categoryPanel);  // Almacena la referencia del panel de la categoría
+            // Crear el panel de categoría y actualizar categoriaRefs
+            Div categoryPanel = createCategoryPanel(nombreCategoria, descripcionCategoria, categoriaId, categoriaRefs);
+
+            // Añadir el panel a la vista
             categoriesContainer.add(categoryPanel);
         }
     }
+
+
+
 
 
     private void agregarNuevaCategoria() {
@@ -122,7 +129,6 @@ public class GastosView extends VerticalLayout {
             return;
         }
 
-        // Crear el objeto de la nueva categoría
         Map<String, Object> nuevaCategoria = Map.of("nombre", "Nueva Categoría", "usuarioId", usuarioId);
         Optional<Map<String, Object>> createdCategoria = categoriaService.createCategoria(usuarioId, nuevaCategoria);
 
@@ -132,11 +138,11 @@ public class GastosView extends VerticalLayout {
             String descripcionCategoria = (String) createdCategoria.get().get("descripcion");
             int categoriaId = (Integer) createdCategoria.get().get("id");
 
-            // Crear el panel de la nueva categoría y pasar descriptionRefs
-            Div categoryPanel = createCategoryPanel(nombreCategoria, descripcionCategoria, categoriaId, descriptionRefs);
+            // Crear el panel de categoría y actualizar categoriaRefs
+            Div categoryPanel = createCategoryPanel(nombreCategoria, descripcionCategoria, categoriaId, categoriaRefs);
 
-            // Agregar el nuevo panel al final de categoriesContainer
-            categoriesContainer.addComponentAtIndex(categoriesContainer.getComponentCount() - 1, categoryPanel);
+            // Añadir el nuevo panel al contenedor de categorías
+            categoriesContainer.add(categoryPanel);
 
             Notification.show("Categoría creada con éxito.");
         } else {
@@ -145,7 +151,11 @@ public class GastosView extends VerticalLayout {
     }
 
 
-    private Div createCategoryPanel(String categoryName, String categoryDescription, int categoriaId, Map<Integer, Span> descriptionRefs) {
+
+
+
+
+    private Div createCategoryPanel(String categoryName, String categoryDescription, int categoriaId, Map<Integer, VerticalLayout> categoriaRefs) {
         Div panel = new Div();
         panel.setClassName("panel");
 
@@ -154,7 +164,6 @@ public class GastosView extends VerticalLayout {
 
         Span description = new Span(categoryDescription != null ? categoryDescription : "Sin descripción");
         description.setClassName("category-description");
-        descriptionRefs.put(categoriaId, description);
 
         // Contenedor de gastos dentro de la categoría
         VerticalLayout gastosContainer = new VerticalLayout();
@@ -162,46 +171,32 @@ public class GastosView extends VerticalLayout {
         gastosContainer.setSpacing(false);
         gastosContainer.setPadding(false);
 
+        // Almacenar el gastosContainer en categoriaRefs
+        categoriaRefs.put(categoriaId, gastosContainer);
+
         Button addGastoButton = new Button("Añadir Gasto");
         addGastoButton.setClassName("action-button");
         addGastoButton.addClickListener(event -> openAddGastoDialog(categoriaId, gastosContainer));
-
-        // Crear el diálogo de opciones de categoría
-        Dialog optionsDialog = new Dialog();
-        optionsDialog.setHeaderTitle("Opciones de Categoría");
-
-        // Botón para editar
-        Button editButton = new Button("Editar", event -> {
-            optionsDialog.close();
-            openEditCategoryDialog(categoriaId, title, description);
-        });
-        editButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-
-        // Botón para eliminar
-        Button deleteButton = new Button("Eliminar", event -> {
-            optionsDialog.close();
-            eliminarCategoria(panel, categoriaId);
-        });
-        deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
-
-        // Añadir botones al diálogo
-        HorizontalLayout buttonsLayout = new HorizontalLayout(editButton, deleteButton);
-        optionsDialog.add(buttonsLayout);
 
         // Icono de menú para abrir el diálogo
         Icon menuIcon = new Icon(VaadinIcon.ELLIPSIS_DOTS_V);
         menuIcon.setClassName("context-menu-icon");
         menuIcon.getStyle().set("cursor", "pointer");
-        menuIcon.addClickListener(event -> optionsDialog.open());
+        menuIcon.addClickListener(event -> {
+            // Opcional: Lógica para abrir un menú contextual
+        });
 
         // Añadir elementos al panel
         panel.add(title, description, addGastoButton, menuIcon, gastosContainer);
 
-        // Cargar los gastos de la categoría
+        // Cargar los gastos de la categoría si es necesario
         cargarGastosPorUsuario(usuarioId);
 
         return panel;
     }
+
+
+
 
 
     private void openEditCategoryDialog(int categoriaId, H2 title, Span description) {
@@ -267,8 +262,6 @@ public class GastosView extends VerticalLayout {
 
     // Abrir el diálogo de añadir gasto
     private void openAddGastoDialog(int categoriaId, VerticalLayout gastosContainer) {
-        //Integer newGastoId = null;
-
         Dialog addGastoDialog = new Dialog();
         addGastoDialog.setHeaderTitle("Nuevo Gasto");
 
@@ -307,12 +300,7 @@ public class GastosView extends VerticalLayout {
                 String newFecha = (String) newGasto.get("fecha");
 
                 Div gastoDiv = createGastoDiv(newGastoId, newNombre, newMonto, newFecha);
-                if (gastoDiv != null) {
-                    Div categoriaPanel = categoriaRefs.get(categoriaId);
-                    if (categoriaPanel != null) {
-                        categoriaPanel.add(gastoDiv);
-                    }
-                }
+                gastosContainer.add(gastoDiv);
 
                 addGastoDialog.close();
             } else {
@@ -329,6 +317,9 @@ public class GastosView extends VerticalLayout {
     }
 
 
+
+
+
     // Metodo para actualizar el panel de gastos
     private void cargarGastosPorUsuario(int usuarioId) {
         List<Map<String, Object>> gastos = gastoService.getGastosPorUsuario(usuarioId);
@@ -338,19 +329,19 @@ public class GastosView extends VerticalLayout {
             String nombreGasto = (String) gasto.get("nombre");
             Double montoGasto = (Double) gasto.get("monto");
             String fechaGasto = (String) gasto.get("fecha");
+            Integer categoriaId = (Integer) gasto.get("categoriaId");
 
-            // Encuentra la categoría asociada al gasto
-            Integer categoriaId = (Integer) gasto.get("categoriaId");  // Asegúrate de que los gastos devuelven este campo
-            if (categoriaRefs.containsKey(categoriaId)) {
-                Div categoriaPanel = categoriaRefs.get(categoriaId);
-                // Añade el gasto al panel de la categoría
+            // Usar categoriaRefs para obtener el VerticalLayout (contenedor de gastos)
+            VerticalLayout gastosContainer = categoriaRefs.get(categoriaId);
+            if (gastosContainer != null) {
                 Div gastoDiv = createGastoDiv(gastoId, nombreGasto, montoGasto, fechaGasto);
-                categoriaPanel.add(gastoDiv);
+                gastosContainer.add(gastoDiv);
             } else {
                 System.out.println("Categoría no encontrada para gasto con ID: " + gastoId);
             }
         }
     }
+
 
 
     private Div createGastoDiv(Integer gastoId, String nombreGasto, Double montoGasto, String fechaGasto) {
@@ -400,15 +391,16 @@ public class GastosView extends VerticalLayout {
         boolean success = gastoService.deleteGasto(gastoId);
         if (success) {
             Notification.show("Gasto eliminado con éxito.");
-            gastoDiv.getParent().ifPresent(parent -> {
-                if (parent instanceof Div) {
-                    ((Div) parent).remove(gastoDiv);
-                }
-            });
+
+            // Eliminar el Div del contenedor de gastos
+            if (gastoDiv.getParent().isPresent()) {
+                ((VerticalLayout) gastoDiv.getParent().get()).remove(gastoDiv);
+            }
         } else {
             Notification.show("Error al eliminar el gasto.");
         }
     }
+
 
 
     private void openEditGastoDialog(int gastoId, Div gastoDiv, NativeLabel nombreLabel, NativeLabel montoLabel, NativeLabel fechaLabel) {
