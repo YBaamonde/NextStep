@@ -178,13 +178,29 @@ public class GastosView extends VerticalLayout {
         addGastoButton.setClassName("action-button");
         addGastoButton.addClickListener(event -> openAddGastoDialog(categoriaId, gastosContainer));
 
-        // Icono de menú para abrir el diálogo
+        // Opciones del menú contextual
+        Dialog optionsDialog = new Dialog();
+        optionsDialog.setHeaderTitle("Opciones de Categoría");
+
+        Button editButton = new Button("Editar", event -> {
+            optionsDialog.close();
+            openEditCategoryDialog(categoriaId, title, description);
+        });
+        editButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+
+        Button deleteButton = new Button("Eliminar", event -> {
+            optionsDialog.close();
+            eliminarCategoria(panel, categoriaId);
+        });
+        deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
+
+        HorizontalLayout buttonsLayout = new HorizontalLayout(editButton, deleteButton);
+        optionsDialog.add(buttonsLayout);
+
         Icon menuIcon = new Icon(VaadinIcon.ELLIPSIS_DOTS_V);
         menuIcon.setClassName("context-menu-icon");
         menuIcon.getStyle().set("cursor", "pointer");
-        menuIcon.addClickListener(event -> {
-            // Opcional: Lógica para abrir un menú contextual
-        });
+        menuIcon.addClickListener(event -> optionsDialog.open());
 
         // Añadir elementos al panel
         panel.add(title, description, addGastoButton, menuIcon, gastosContainer);
