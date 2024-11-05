@@ -1,5 +1,6 @@
 package com.nextstep.nextstepBackEnd.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -37,6 +38,14 @@ public class Usuario implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     Rol rol;
+
+
+    // Relación bidireccional con Gasto
+    /*
+    @OneToMany(mappedBy = "usuario")
+    @JsonManagedReference // Para que Spring serialice el objeto como un JSON
+    private List<Gasto> gastos;
+     */
 
     // Métodos de UserDetails
     @Override

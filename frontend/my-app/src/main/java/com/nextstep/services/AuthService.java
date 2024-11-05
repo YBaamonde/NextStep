@@ -48,11 +48,18 @@ public class AuthService {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() == 200) {
-                Map<String, String> responseMap = objectMapper.readValue(response.body(), new TypeReference<>() {});
-                String token = responseMap.get("token");
+                Map<String, Object> responseMap = objectMapper.readValue(response.body(), new TypeReference<>() {});
+                String token = (String) responseMap.get("token");
+                Integer userId = (Integer) responseMap.get("userId"); // Obtener el userId de la respuesta
 
-                // Almacenar el token en localStorage para usarlo en otras vistas
+                // Almacenar el token en la sesión
                 UI.getCurrent().getSession().setAttribute("authToken", token);
+
+                // Almacenar el userId en la sesión
+                UI.getCurrent().getSession().setAttribute("userId", userId);
+
+                // Almacenar el nombre de usuario en la sesión
+                UI.getCurrent().getSession().setAttribute("username", username);
 
                 loginCallback.accept(true);
             } else {
@@ -62,8 +69,6 @@ public class AuthService {
             loginCallback.accept(false);
         }
     }
-
-
 
 
 
@@ -203,5 +208,8 @@ public class AuthService {
         return (String) UI.getCurrent().getSession().getAttribute("authToken");
     }
 
-
+    // Metodo para obtener el nombre de usuario desde la sesión
+    public String getUsername() {
+        return (String) UI.getCurrent().getSession().getAttribute("username");
+    }
 }

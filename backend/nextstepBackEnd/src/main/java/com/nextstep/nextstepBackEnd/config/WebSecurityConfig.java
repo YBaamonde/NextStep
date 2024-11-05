@@ -33,6 +33,7 @@ public class WebSecurityConfig {
                 .requestMatchers("/auth/**").permitAll() // Permitir libre acceso a las rutas de autenticación
                 .requestMatchers("/admin/**").hasAnyAuthority("admin")  // Solo los administradores pueden acceder
                 .requestMatchers("/api/protegido/**").authenticated() // Proteger las rutas de la API
+                .requestMatchers("/categorias/**").authenticated() // Requiere autenticación para las rutas de categorías
                 .requestMatchers("/").authenticated() // Bloquear la ruta raíz si no está autenticado
                 .anyRequest().authenticated() // Proteger cualquier otra ruta
                 //.anyRequest().permitAll() // Deshabilitar la protección de rutas para probar

@@ -62,9 +62,9 @@ public class JwtService {
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = getUsernameFromToken(token);
-        final List<String> roles = getRolesFromToken(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token) && roles.contains("admin"));
+        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
+
 
 
     private Claims getAllClaims(String token)
