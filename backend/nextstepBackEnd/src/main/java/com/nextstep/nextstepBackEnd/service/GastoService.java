@@ -52,22 +52,30 @@ public class GastoService {
 
     // Crear un nuevo gasto usando GastoDTO
     public GastoDTO createGasto(Integer usuarioId, Integer categoriaId, GastoDTO gastoDTO) {
-        Optional<Usuario> usuario = userRepository.findById(usuarioId);
-        Optional<Categoria> categoria = categoriaRepository.findById(categoriaId);
+        Usuario usuario = userRepository.findById(usuarioId)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado."));
 
-        if (usuario.isPresent() && categoria.isPresent()) {
-            Gasto gasto = new Gasto();
-            gasto.setNombre(gastoDTO.getNombre());
-            gasto.setMonto(gastoDTO.getMonto());
-            gasto.setFecha(gastoDTO.getFecha());
-            gasto.setUsuario(usuario.get());
-            gasto.setCategoria(categoria.get());
-            Gasto savedGasto = gastoRepository.save(gasto);
-            return new GastoDTO(savedGasto.getId(), savedGasto.getNombre(), savedGasto.getMonto(), savedGasto.getFecha(), savedGasto.getCategoria().getId());
-        } else {
-            throw new IllegalArgumentException("Usuario o categoría no encontrados.");
-        }
+        Categoria categoria = categoriaRepository.findById(categoriaId)
+                .orElseThrow(() -> new IllegalArgumentException("Categoría no encontrada."));
+
+        Gasto gasto = new Gasto();
+        gasto.setNombre(gastoDTO.getNombre());
+        gasto.setMonto(gastoDTO.getMonto());
+        gasto.setFecha(gastoDTO.getFecha());
+        gasto.setUsuario(usuario);
+        gasto.setCategoria(categoria);
+
+        Gasto savedGasto = gastoRepository.save(gasto);
+
+        return new GastoDTO(
+                savedGasto.getId(),
+                savedGasto.getNombre(),
+                savedGasto.getMonto(),
+                savedGasto.getFecha(),
+                savedGasto.getCategoria().getId()
+        );
     }
+
 
     public GastoDTO updateGasto(Integer gastoId, GastoDTO gastoDTO) {
         return gastoRepository.findById(gastoId).map(existingGasto -> {
