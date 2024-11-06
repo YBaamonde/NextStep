@@ -28,50 +28,65 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        // Obtener el token desde el request
-        final String token = getTokenFromReq(request);
-        final String username;
-        // Si no hay token, continuar con el filtro
-        if (token == null) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
 
-        // Obtener el nombre de usuario desde el token
-        username = jwtService.getUsernameFromToken(token);
+        try {
+            // Obtener el token desde el encabezado de autorización
+            final String token = getTokenFromReq(request);
 
-        // Si hay un usuario y aún no está autenticado
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-            // Verificar si el token es válido
-            if (jwtService.isTokenValid(token, userDetails)) {
-                // Extraer los roles del token (si se han añadido)
-                List<String> roles = jwtService.getRolesFromToken(token);
-
-                // Crear la lista de autoridades usando los roles
-                List<SimpleGrantedAuthority> authorities = roles.stream()
-                        .map(SimpleGrantedAuthority::new)
-                        .collect(Collectors.toList());
-
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, authorities);
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-
+            // Continuar con el filtro si no hay token en la solicitud
+            if (token == null) {
+                filterChain.doFilter(request, response);
+                return;
             }
-        }
 
-        // Continuar con el filtro
-        filterChain.doFilter(request, response);
+            // Extraer el nombre de usuario desde el token
+            String username = jwtService.getUsernameFromToken(token);
+
+            // Verificar que el usuario está en el token y que aún no está autenticado en el contexto de seguridad
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+                // Validar el token
+                if (jwtService.isTokenValid(token, userDetails)) {
+                    // Extraer roles del token y convertirlos en autoridades
+                    List<String> roles = jwtService.getRolesFromToken(token);
+                    List<SimpleGrantedAuthority> authorities = roles.stream()
+                            .map(SimpleGrantedAuthority::new)
+                            .collect(Collectors.toList());
+
+                    // Crear el token de autenticación
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, authorities);
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                    // Establecer el token de autenticación en el contexto de seguridad
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+
+                    // Log de éxito de autenticación
+                    //System.out.println("Usuario autenticado: " + username + " con roles: " + roles); // Debug
+                } else {
+                    // Token no válido, enviar error 401
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token inválido o expirado");
+                    return;
+                }
+            }
+
+            // Continuar con la cadena de filtros
+            filterChain.doFilter(request, response);
+
+        } catch (Exception ex) {
+            // En caso de excepción, responder con un error 401 y log para depuración
+            System.err.println("Error en el filtro de autenticación JWT: " + ex.getMessage());
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "No autorizado");
+        }
     }
 
     String getTokenFromReq(HttpServletRequest request) {
         final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (StringUtils.hasText(header) && header.startsWith("Bearer ")) {
-            return header.substring(7);
+            return header.substring(7); // Eliminar el prefijo "Bearer " y devolver el token
         }
         return null;
     }

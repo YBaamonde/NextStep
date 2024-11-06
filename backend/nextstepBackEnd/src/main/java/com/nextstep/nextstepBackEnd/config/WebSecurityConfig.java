@@ -32,17 +32,26 @@ public class WebSecurityConfig {
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers("/auth/**").permitAll() // Permitir libre acceso a las rutas de autenticación
                 .requestMatchers("/admin/**").hasAnyAuthority("admin")  // Solo los administradores pueden acceder
-                .requestMatchers("/api/protegido/**").authenticated() // Proteger las rutas de la API
+                .requestMatchers("/api/protegido/**").authenticated() // Proteger las rutas de la API (pruebas)
                 .requestMatchers("/categorias/**").authenticated() // Requiere autenticación para las rutas de categorías
+                .requestMatchers("/debug/**").permitAll() // Permitir acceso a rutas de depuración
+                .requestMatchers("/perfil/**").authenticated() // Requiere autenticación para las rutas de perfil
                 .requestMatchers("/").authenticated() // Bloquear la ruta raíz si no está autenticado
                 .anyRequest().authenticated() // Proteger cualquier otra ruta
-                //.anyRequest().permitAll() // Deshabilitar la protección de rutas para probar
         );
 
         // Establecer la política de sesiones como STATELESS (sin estado) para usar JWT
         http.sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         );
+
+        /*
+        PARA DEPURAR
+
+        http.sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // Temporalmente para depuración
+        );
+         */
 
         // Configurar el proveedor de autenticación y añadir el filtro JWT
         http.authenticationProvider(authProvider);
