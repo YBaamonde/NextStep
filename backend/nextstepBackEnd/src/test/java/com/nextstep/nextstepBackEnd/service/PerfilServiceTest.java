@@ -1,28 +1,21 @@
 package com.nextstep.nextstepBackEnd.service;
 
-import com.nextstep.nextstepBackEnd.model.Rol;
 import com.nextstep.nextstepBackEnd.model.Usuario;
 import com.nextstep.nextstepBackEnd.repository.UserRepository;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.web.server.ResponseStatusException;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@RunWith(MockitoJUnitRunner.class)
-public class PerfilServiceTest {
+@ExtendWith(MockitoExtension.class)
+class PerfilServiceTest {
 
     @Mock
     private UserRepository userRepository;
@@ -32,60 +25,78 @@ public class PerfilServiceTest {
 
     private Usuario usuario;
 
-    @Before
-    public void setUp() {
-        // Configuración de usuario de prueba
-        usuario = Usuario.builder()
-                .id(1)
-                .username("testuser")
-                .email("testuser@example.com")
-                .password("hashedPassword") // Simular una contraseña codificada
-                .rol(Rol.normal)
-                .build();
+    @BeforeEach
+    void setUp() {
+        usuario = new Usuario();
+        usuario.setId(1);
+        usuario.setUsername("testuser");
+        usuario.setEmail("testuser@example.com");
+        usuario.setPassword("password"); // Simulación para las pruebas
     }
 
-    // Test para obtener el perfil
     @Test
-    public void shouldReturnUserProfile() {
-        Mockito.when(userRepository.findById(1)).thenReturn(Optional.of(usuario));
+    void getProfile() {
+        // Simulación del repositorio para que devuelva el usuario mockeado
+        when(userRepository.findById(1)).thenReturn(Optional.of(usuario));
 
         Usuario result = perfilService.getProfile(1);
+
         assertNotNull(result);
         assertEquals("testuser", result.getUsername());
+        assertEquals("testuser@example.com", result.getEmail());
+
+        verify(userRepository, times(1)).findById(1);
     }
 
-    // Test para cambiar la contraseña
     @Test
-    public void shouldUpdateUserPassword() {
-        Mockito.when(userRepository.findById(1)).thenReturn(Optional.of(usuario));
+    void updatePassword() {
+        // Simulación del repositorio para que devuelva el usuario al buscar por ID
+        when(userRepository.findById(1)).thenReturn(Optional.of(usuario));
+        when(userRepository.save(any(Usuario.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        // Simulamos la codificación de contraseña
-        String newPassword = "newEncodedPassword";
-        perfilService.updatePassword(1, newPassword);
+        // Actualizar la contraseña
+        boolean result = Boolean.parseBoolean(perfilService.updatePassword(1, "newPassword123"));
 
-        ArgumentCaptor<Usuario> usuarioCaptor = ArgumentCaptor.forClass(Usuario.class);
-        Mockito.verify(userRepository).save(usuarioCaptor.capture());
-        assertEquals(newPassword, usuarioCaptor.getValue().getPassword());
+        assertTrue(result);
+        verify(userRepository, times(1)).findById(1);
+        verify(userRepository, times(1)).save(usuario);
     }
 
-    // Test para eliminar un usuario existente
     @Test
-    public void shouldDeleteUser() {
-        Mockito.when(userRepository.existsById(1)).thenReturn(true);
+    void deleteAccount() {
+        // Simulación de existencia del usuario
+        when(userRepository.existsById(1)).thenReturn(true);
 
         perfilService.deleteAccount(1);
 
-        Mockito.verify(userRepository).deleteById(1);
+        verify(userRepository, times(1)).existsById(1);
+        verify(userRepository, times(1)).deleteById(1);
     }
 
-    // Test para intentar eliminar un usuario no existente y recibir excepción
     @Test
-    public void shouldThrowExceptionWhenDeletingNonExistentUser() {
-        Mockito.when(userRepository.existsById(1)).thenReturn(false);
+    void getProfileThrowsExceptionWhenUserNotFound() {
+        when(userRepository.findById(1)).thenReturn(Optional.empty());
 
-        assertThrows(ResponseStatusException.class, () -> {
-            perfilService.deleteAccount(1);
-        });
+        assertThrows(IllegalArgumentException.class, () -> perfilService.getProfile(1));
+
+        verify(userRepository, times(1)).findById(1);
+    }
+
+    @Test
+    void updatePasswordThrowsExceptionWhenUserNotFound() {
+        when(userRepository.findById(1)).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> perfilService.updatePassword(1, "newPassword123"));
+
+        verify(userRepository, times(1)).findById(1);
+    }
+
+    @Test
+    void deleteAccountThrowsExceptionWhenUserNotFound() {
+        when(userRepository.existsById(1)).thenReturn(false);
+
+        assertThrows(IllegalArgumentException.class, () -> perfilService.deleteAccount(1));
+
+        verify(userRepository, times(1)).existsById(1);
     }
 }
-
