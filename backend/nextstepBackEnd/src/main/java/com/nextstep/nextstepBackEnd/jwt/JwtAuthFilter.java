@@ -63,25 +63,22 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
                     // Establecer el token de autenticación en el contexto de seguridad
                     SecurityContextHolder.getContext().setAuthentication(authToken);
-
-                    // Log de éxito de autenticación
-                    //System.out.println("Usuario autenticado: " + username + " con roles: " + roles); // Debug
                 } else {
-                    // Token no válido, enviar error 401
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token inválido o expirado");
+                    // Token no válido, continuar con el filtro sin autenticar
+                    filterChain.doFilter(request, response);
                     return;
                 }
             }
 
-            // Continuar con la cadena de filtros
-            filterChain.doFilter(request, response);
-
         } catch (Exception ex) {
-            // En caso de excepción, responder con un error 401 y log para depuración
+            // Log para depuración y continuar con el filtro sin autenticar
             System.err.println("Error en el filtro de autenticación JWT: " + ex.getMessage());
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "No autorizado");
         }
+
+        // Continuar con la cadena de filtros en cualquier caso
+        filterChain.doFilter(request, response);
     }
+
 
     String getTokenFromReq(HttpServletRequest request) {
         final String header = request.getHeader(HttpHeaders.AUTHORIZATION);

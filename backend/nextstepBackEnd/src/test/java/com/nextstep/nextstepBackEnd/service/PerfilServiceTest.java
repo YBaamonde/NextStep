@@ -1,5 +1,6 @@
 package com.nextstep.nextstepBackEnd.service;
 
+import com.nextstep.nextstepBackEnd.jwt.JwtService;
 import com.nextstep.nextstepBackEnd.model.Usuario;
 import com.nextstep.nextstepBackEnd.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,6 +9,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -19,6 +23,12 @@ class PerfilServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private JwtService jwtService;
 
     @InjectMocks
     private PerfilService perfilService;
@@ -50,17 +60,32 @@ class PerfilServiceTest {
 
     @Test
     void updatePassword() {
-        // Simulación del repositorio para que devuelva el usuario al buscar por ID
+        // Configuración del PasswordEncoder para simular la codificación de la nueva contraseña
+        when(passwordEncoder.encode("newPassword123")).thenReturn("encodedPassword");
+
+        // Configuración del repositorio para que devuelva el usuario mockeado
         when(userRepository.findById(1)).thenReturn(Optional.of(usuario));
+
+        // Configuración de JwtService para devolver un token simulado cuando se le pasa el objeto usuario
+        when(jwtService.generateToken(any(User.class))).thenReturn("mockedToken");
+
+        // Mock del metodo save en el repositorio de usuarios
         when(userRepository.save(any(Usuario.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        // Actualizar la contraseña
-        boolean result = Boolean.parseBoolean(perfilService.updatePassword(1, "newPassword123"));
+        // Ejecutar el metodo de actualización de contraseña
+        boolean result = perfilService.updatePassword(1, "newPassword123");
 
+        // Verificaciones
         assertTrue(result);
+        verify(passwordEncoder, times(1)).encode("newPassword123");
+        verify(jwtService, times(1)).generateToken(any(User.class));
         verify(userRepository, times(1)).findById(1);
         verify(userRepository, times(1)).save(usuario);
     }
+
+
+
+
 
     @Test
     void deleteAccount() {
@@ -84,19 +109,25 @@ class PerfilServiceTest {
 
     @Test
     void updatePasswordThrowsExceptionWhenUserNotFound() {
+        // Configuración para que userRepository devuelva vacío (simulando usuario no encontrado)
         when(userRepository.findById(1)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> perfilService.updatePassword(1, "newPassword123"));
+        // Ejecutar el metodo y verificar que lanza ResponseStatusException
+        assertThrows(ResponseStatusException.class, () -> perfilService.updatePassword(1, "newPassword123"));
 
+        // Verificar que el metodo findById fue llamado una vez
         verify(userRepository, times(1)).findById(1);
+        verifyNoMoreInteractions(userRepository, jwtService, passwordEncoder);
     }
+
 
     @Test
     void deleteAccountThrowsExceptionWhenUserNotFound() {
         when(userRepository.existsById(1)).thenReturn(false);
 
-        assertThrows(IllegalArgumentException.class, () -> perfilService.deleteAccount(1));
+        assertThrows(ResponseStatusException.class, () -> perfilService.deleteAccount(1));
 
         verify(userRepository, times(1)).existsById(1);
     }
+
 }

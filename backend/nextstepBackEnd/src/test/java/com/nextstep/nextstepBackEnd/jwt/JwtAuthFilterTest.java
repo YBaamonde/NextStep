@@ -83,23 +83,30 @@ public class JwtAuthFilterTest {
     // Test para simular un token inválido y verificar que no se autentica
     @Test
     public void shouldNotAuthenticateWithInvalidToken() throws Exception {
-        // Arrange: Configura las respuestas simuladas para un token inválido
+        // Arrange: Configura un token inválido y otros mocks necesarios
         String token = "invalidToken";
         String username = "testuser";
 
+        // Configura los mocks para un token inválido y usuario no encontrado
         when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
         when(jwtService.getUsernameFromToken(token)).thenReturn(username);
-        UserDetails userDetails = null;  // Simula un usuario nulo
-        when(userDetailsService.loadUserByUsername(username)).thenReturn(userDetails);
-        when(jwtService.isTokenValid(token, userDetails)).thenReturn(false);
+        when(userDetailsService.loadUserByUsername(username)).thenReturn(null); // Usuario no encontrado
+        when(jwtService.isTokenValid(token, null)).thenReturn(false); // Token inválido
+
+        // Asegura que el contexto está limpio antes de iniciar el test
+        SecurityContextHolder.clearContext();
 
         // Act: Ejecuta el filtro
         jwtAuthFilter.doFilterInternal(request, response, filterChain);
 
-        // Assert: Verifica que no se autentica y que el filtro continúa
+        // Assert: Verifica que el filtro continúe y que el contexto de autenticación permanezca vacío
         verify(filterChain, times(1)).doFilter(request, response);
-        assertNull(SecurityContextHolder.getContext().getAuthentication());  // Verifica que no hay autenticación en el contexto
+        assertNull(SecurityContextHolder.getContext().getAuthentication(), "Authentication context should be null for invalid token");
     }
+
+
+
+
 
     // Test para verificar que el filtro continúa si no hay token en el request
     @Test

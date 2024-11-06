@@ -5,9 +5,13 @@ import com.nextstep.nextstepBackEnd.model.Usuario;
 import com.nextstep.nextstepBackEnd.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
@@ -24,17 +28,23 @@ public class PerfilService {
     }
 
     // Actualizar la contraseña y devolver un nuevo token
-    public String updatePassword(Integer usuarioId, String newPassword) {
-        Usuario usuario = userRepository.findById(usuarioId)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+    public boolean updatePassword(int userId, String newPassword) {
+        // Buscar al usuario por ID
+        Usuario usuario = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
-        // Codificar la nueva contraseña y guardarla
+        // Codificar la nueva contraseña
         usuario.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(usuario);
 
-        // Generar y devolver un nuevo token JWT para el usuario
-        return jwtService.generateToken(usuario);
+        // Generar un nuevo token de autenticación, si es necesario
+        User userDetails = new User(usuario.getUsername(), usuario.getPassword(),
+                Collections.singletonList(new SimpleGrantedAuthority("normal")));
+        jwtService.generateToken(userDetails);
+
+        return true; // Cambiado a booleano, indicando que la actualización fue exitosa
     }
+
 
     // Eliminar la cuenta del usuario
     public void deleteAccount(Integer usuarioId) {
