@@ -1,4 +1,4 @@
-package com.nextstep.views.temp;
+package com.nextstep.views;
 
 import com.nextstep.services.AuthService;
 import com.nextstep.services.PerfilService;
