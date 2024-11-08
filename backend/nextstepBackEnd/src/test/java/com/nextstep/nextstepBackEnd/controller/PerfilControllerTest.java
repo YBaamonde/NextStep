@@ -21,6 +21,8 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -100,6 +102,7 @@ public class PerfilControllerTest {
     }
 
 
+    // Test para obtener el perfil del usuario
     @Test
     @WithMockUser(username = "testuser", roles = "normal")
     public void shouldGetUserProfile() throws Exception {
@@ -110,6 +113,8 @@ public class PerfilControllerTest {
                 .andExpect(status().isOk());
     }
 
+
+    // Test para eliminar el usuario
     @Test
     @WithMockUser(username = "testuser", roles = "normal")
     public void shouldDeleteUserAccount() throws Exception {
@@ -119,4 +124,44 @@ public class PerfilControllerTest {
         mockMvc.perform(delete("/perfil/1"))
                 .andExpect(status().isOk());
     }
+
+    // Test para actualizar el nombre de usuario
+    @Test
+    @WithMockUser(username = "testuser", roles = "normal")
+    public void shouldUpdateUsername() throws Exception {
+        // Datos de prueba
+        int userId = 1;
+        String newUsername = "nuevoNombreDeUsuario";
+        String token = "mockedToken";
+
+        // Crear el usuario simulado
+        Usuario usuario = new Usuario();
+        usuario.setId(userId);
+        usuario.setUsername("nombreAntiguo");
+        usuario.setPassword("password123");
+
+        // Configurar el servicio de perfil y el servicio JWT para la prueba
+        when(userRepository.findById(userId)).thenReturn(Optional.of(usuario));
+        // No necesitamos `doNothing()` aquí, simplemente llamamos al metodo sin configurarlo como mock
+        when(jwtService.generateToken(any(UserDetails.class))).thenReturn(token);
+
+        // Crear el cuerpo de la solicitud en formato JSON
+        Map<String, String> requestBody = new HashMap<>();
+        requestBody.put("newUsername", newUsername);
+        String requestBodyJson = objectMapper.writeValueAsString(requestBody);
+
+        // Ejecutar la solicitud y verificar el resultado
+        mockMvc.perform(put("/perfil/" + userId + "/username")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBodyJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Nombre de usuario actualizado correctamente"))
+                .andExpect(jsonPath("$.token").value(token));
+
+        // Verificar interacciones
+        verify(perfilService, times(1)).updateUsername(userId, newUsername);
+        verify(jwtService, times(1)).generateToken(any(UserDetails.class));
+    }
+
+
 }

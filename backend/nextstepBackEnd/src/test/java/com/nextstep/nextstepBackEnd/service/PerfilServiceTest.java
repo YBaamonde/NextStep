@@ -44,6 +44,8 @@ class PerfilServiceTest {
         usuario.setPassword("password"); // Simulación para las pruebas
     }
 
+
+    // Test para obtener el perfil del usuario
     @Test
     void getProfile() {
         // Simulación del repositorio para que devuelva el usuario mockeado
@@ -58,6 +60,8 @@ class PerfilServiceTest {
         verify(userRepository, times(1)).findById(1);
     }
 
+
+    // Test para actualizar la contraseña
     @Test
     void updatePassword() {
         // Configuración del PasswordEncoder para simular la codificación de la nueva contraseña
@@ -85,8 +89,7 @@ class PerfilServiceTest {
 
 
 
-
-
+    // Test para eliminar el usuario
     @Test
     void deleteAccount() {
         // Simulación de existencia del usuario
@@ -98,6 +101,8 @@ class PerfilServiceTest {
         verify(userRepository, times(1)).deleteById(1);
     }
 
+
+    // Test para obtener el perfil del usuario
     @Test
     void getProfileThrowsExceptionWhenUserNotFound() {
         when(userRepository.findById(1)).thenReturn(Optional.empty());
@@ -107,6 +112,8 @@ class PerfilServiceTest {
         verify(userRepository, times(1)).findById(1);
     }
 
+
+    // Test para actualizar la contraseña
     @Test
     void updatePasswordThrowsExceptionWhenUserNotFound() {
         // Configuración para que userRepository devuelva vacío (simulando usuario no encontrado)
@@ -121,6 +128,7 @@ class PerfilServiceTest {
     }
 
 
+    // Test para eliminar el usuario
     @Test
     void deleteAccountThrowsExceptionWhenUserNotFound() {
         when(userRepository.existsById(1)).thenReturn(false);
@@ -129,5 +137,33 @@ class PerfilServiceTest {
 
         verify(userRepository, times(1)).existsById(1);
     }
+
+
+    // Test para actualizar el username de un usuario
+    @Test
+    void updateUsername() {
+        // Configurar el usuario actual en la base de datos simulada
+        int userId = 1;
+        String newUsername = "nuevoNombreDeUsuario";
+
+        Usuario usuario = new Usuario();
+        usuario.setId(userId);
+        usuario.setUsername("nombreAntiguo");
+        usuario.setPassword("password123");
+
+        // Configurar el mock para encontrar el usuario por ID
+        when(userRepository.findById(userId)).thenReturn(Optional.of(usuario));
+        when(userRepository.save(any(Usuario.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // Ejecutar el metodo de actualización
+        perfilService.updateUsername(userId, newUsername);
+
+        // Verificar que el nombre de usuario se haya actualizado
+        assertEquals(newUsername, usuario.getUsername());
+
+        // Verificar que el repositorio haya llamado a save con el usuario actualizado
+        verify(userRepository, times(1)).save(usuario);
+    }
+
 
 }

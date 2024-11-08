@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collections;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -54,6 +55,21 @@ public class PerfilService {
         }
         userRepository.deleteById(usuarioId);
         //System.out.println("Usuario eliminado correctamente."); // Debug
+    }
+
+
+    // Metodo para actualizar el username de un usuario
+    public boolean updateUsername(Integer usuarioId, String newUsername) {
+        Optional<Usuario> optionalUsuario = userRepository.findById(usuarioId);
+
+        if (optionalUsuario.isPresent()) {
+            Usuario usuario = optionalUsuario.get();
+            usuario.setUsername(newUsername);
+            userRepository.save(usuario);
+            return true;
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado");
+        }
     }
 
 }

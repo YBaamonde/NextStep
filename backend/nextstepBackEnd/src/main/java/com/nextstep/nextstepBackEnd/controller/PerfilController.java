@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -73,4 +74,31 @@ public class PerfilController {
         perfilService.deleteAccount(usuarioId);
         return ResponseEntity.ok("Account deleted successfully.");
     }
+
+    // Endpoint para actualizar el nombre de usuario
+    @PutMapping("/{usuarioId}/username")
+    public ResponseEntity<Map<String, String>> updateUsername(@PathVariable Integer usuarioId,
+                                                              @RequestBody Map<String, String> request) {
+        String newUsername = request.get("newUsername");
+        perfilService.updateUsername(usuarioId, newUsername);
+
+        // Generar nuevo token con el nuevo nombre de usuario
+        Usuario usuario = userRepository.findById(usuarioId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+        // Crear UserDetails con el nuevo username
+        UserDetails userDetails = new User(usuario.getUsername(), usuario.getPassword(),
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
+
+        // Generar nuevo token
+        String newToken = jwtService.generateToken(userDetails);
+
+        // Responder con un mensaje de éxito y el nuevo token
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Nombre de usuario actualizado correctamente");
+        response.put("token", newToken);  // Devuelve el nuevo token
+
+        return ResponseEntity.ok(response);
+    }
+
 }

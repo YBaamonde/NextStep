@@ -212,4 +212,30 @@ public class AuthService {
     public String getUsername() {
         return (String) UI.getCurrent().getSession().getAttribute("username");
     }
+
+
+    // Metodo para comprobar la contraseña (Para actualizarla)
+    public void validatePassword(String username, String password, Consumer<Boolean> callback) {
+        try {
+            Map<String, String> requestBody = new HashMap<>();
+            requestBody.put("username", username);
+            requestBody.put("password", password);
+
+            String requestBodyJson = objectMapper.writeValueAsString(requestBody);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(baseUrl + "/auth/login"))  // Usamos la misma ruta de autenticación
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(requestBodyJson))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            // Si la respuesta es 200, significa que la contraseña es válida
+            callback.accept(response.statusCode() == 200);
+
+        } catch (IOException | InterruptedException e) {
+            callback.accept(false);
+        }
+    }
 }
