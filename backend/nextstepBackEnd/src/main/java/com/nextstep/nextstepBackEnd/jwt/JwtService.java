@@ -90,10 +90,4 @@ public class JwtService {
         return claims.get("roles", List.class); // Extrae los roles como una lista desde el token
     }
 
-    // Métodos antiguos:
-    // `signWith(SignatureAlgorithm.HS256, SECRET)` en `generateToken`
-    // - Reemplazado por `signWith(getKey())` para mejorar la seguridad usando una clave HMAC.
-    //
-    // `parser().setSigningKey(SECRET)` en `getAllClaims`
-    // - Reemplazado por `parserBuilder().setSigningKey(getKey())` para mayor seguridad en la clave.
 }
