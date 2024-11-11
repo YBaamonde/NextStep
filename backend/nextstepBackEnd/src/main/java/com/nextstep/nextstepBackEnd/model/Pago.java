@@ -21,7 +21,7 @@ public class Pago {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY) // Relación 1 a N con Usuario
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
@@ -38,10 +38,11 @@ public class Pago {
     private Boolean recurrente;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = true, length = 10)
-    private Frecuencia frecuencia;
+    @Column(nullable = true, length = 10) // Ahora es nullable
+    private Frecuencia frecuencia; // Se asignará solo si recurrente = true
 
     public enum Frecuencia {
         DIARIA, SEMANAL, MENSUAL, ANUAL
     }
 }
+

@@ -5,11 +5,11 @@ import com.nextstep.nextstepBackEnd.model.PagoDTO;
 import com.nextstep.nextstepBackEnd.model.Usuario;
 import com.nextstep.nextstepBackEnd.repository.PagoRepository;
 import com.nextstep.nextstepBackEnd.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,14 +38,15 @@ public class PagoService {
                         pago.getMonto(),
                         pago.getFecha(),
                         pago.getRecurrente(),
-                        pago.getFrecuencia()
-                ))
+                        pago.getFrecuencia()))
                 .collect(Collectors.toList());
     }
 
     // Crear un nuevo pago
     @Transactional
     public PagoDTO createPago(Integer usuarioId, PagoDTO pagoDTO) {
+        validarFrecuenciaRecurrente(pagoDTO);
+
         Usuario usuario = userRepository.findById(usuarioId)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado."));
 
@@ -54,7 +55,7 @@ public class PagoService {
         pago.setMonto(pagoDTO.getMonto());
         pago.setFecha(pagoDTO.getFecha());
         pago.setRecurrente(pagoDTO.getRecurrente());
-        pago.setFrecuencia(pagoDTO.getFrecuencia());
+        pago.setFrecuencia(pagoDTO.getRecurrente() ? pagoDTO.getFrecuencia() : null); // Asigna frecuencia solo si es recurrente
         pago.setUsuario(usuario);
 
         Pago savedPago = pagoRepository.save(pago);
@@ -72,12 +73,14 @@ public class PagoService {
     // Actualizar un pago existente
     @Transactional
     public PagoDTO updatePago(Integer pagoId, PagoDTO pagoDTO) {
+        validarFrecuenciaRecurrente(pagoDTO);
+
         return pagoRepository.findById(pagoId).map(existingPago -> {
             existingPago.setNombre(pagoDTO.getNombre());
             existingPago.setMonto(pagoDTO.getMonto());
             existingPago.setFecha(pagoDTO.getFecha());
             existingPago.setRecurrente(pagoDTO.getRecurrente());
-            existingPago.setFrecuencia(pagoDTO.getFrecuencia());
+            existingPago.setFrecuencia(pagoDTO.getRecurrente() ? pagoDTO.getFrecuencia() : null); // Asigna frecuencia solo si es recurrente
             Pago updatedPago = pagoRepository.save(existingPago);
 
             return new PagoDTO(
@@ -115,9 +118,32 @@ public class PagoService {
                         pago.getMonto(),
                         pago.getFecha(),
                         pago.getRecurrente(),
-                        pago.getFrecuencia()
-                ))
+                        pago.getFrecuencia()))
                 .collect(Collectors.toList());
     }
-}
 
+    // Obtener pagos de un usuario en un rango de fechas
+    public List<PagoDTO> getPagosByUsuarioAndDateRange(Integer usuarioId, LocalDate startDate, LocalDate endDate) {
+        Usuario usuario = userRepository.findById(usuarioId)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado."));
+
+        List<Pago> pagos = pagoRepository.findByUsuarioIdAndFechaBetween(usuario.getId(), startDate, endDate);
+
+        return pagos.stream()
+                .map(pago -> new PagoDTO(
+                        pago.getId(),
+                        pago.getNombre(),
+                        pago.getMonto(),
+                        pago.getFecha(),
+                        pago.getRecurrente(),
+                        pago.getFrecuencia()))
+                .collect(Collectors.toList());
+    }
+
+    // Validación de frecuencia solo para pagos recurrentes
+    private void validarFrecuenciaRecurrente(PagoDTO pagoDTO) {
+        if (!pagoDTO.getRecurrente() && pagoDTO.getFrecuencia() != null) {
+            throw new IllegalArgumentException("No se puede asignar una frecuencia a un pago no recurrente.");
+        }
+    }
+}

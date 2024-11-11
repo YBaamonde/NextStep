@@ -13,9 +13,8 @@ public class PagoDTO {
     private BigDecimal monto;
     private LocalDate fecha;
     private Boolean recurrente;
-    private Pago.Frecuencia frecuencia;
+    private Pago.Frecuencia frecuencia;  // nullable
 
-    // Constructor, getters y setters
     public PagoDTO(Integer id, String nombre, BigDecimal monto, LocalDate fecha, Boolean recurrente, Pago.Frecuencia frecuencia) {
         this.id = id;
         this.nombre = nombre;
@@ -25,4 +24,5 @@ public class PagoDTO {
         this.frecuencia = frecuencia;
     }
 }
+
 
