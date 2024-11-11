@@ -8,7 +8,6 @@ import com.nextstep.nextstepBackEnd.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -110,24 +109,6 @@ public class PagoService {
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado."));
 
         List<Pago> pagos = pagoRepository.findByUsuarioIdAndRecurrenteTrue(usuario.getId());
-
-        return pagos.stream()
-                .map(pago -> new PagoDTO(
-                        pago.getId(),
-                        pago.getNombre(),
-                        pago.getMonto(),
-                        pago.getFecha(),
-                        pago.getRecurrente(),
-                        pago.getFrecuencia()))
-                .collect(Collectors.toList());
-    }
-
-    // Obtener pagos de un usuario en un rango de fechas
-    public List<PagoDTO> getPagosByUsuarioAndDateRange(Integer usuarioId, LocalDate startDate, LocalDate endDate) {
-        Usuario usuario = userRepository.findById(usuarioId)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado."));
-
-        List<Pago> pagos = pagoRepository.findByUsuarioIdAndFechaBetween(usuario.getId(), startDate, endDate);
 
         return pagos.stream()
                 .map(pago -> new PagoDTO(
