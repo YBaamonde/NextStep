@@ -26,6 +26,7 @@ import com.vaadin.flow.component.html.NativeLabel;
 
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -151,20 +152,23 @@ public class PagosView extends VerticalLayout {
             Double monto = amountField.getValue();
             LocalDate fecha = dateField.getValue();
             Boolean recurrente = recurrenteCheckbox.getValue();
-            String frecuencia = recurrente ? frecuenciaComboBox.getValue() : null;
+            String frecuencia = recurrente ? frecuenciaComboBox.getValue().toUpperCase() : null; // Convierte el valor recibido en mayusc para que lo entienda el backend
 
             if (nombre.isEmpty() || monto == null || fecha == null || (recurrente && frecuencia == null)) {
                 Notification.show("Todos los campos son obligatorios.");
                 return;
             }
 
-            Map<String, Object> pagoData = Map.of(
-                    "nombre", nombre,
-                    "monto", monto,
-                    "fecha", fecha.toString(),
-                    "recurrente", recurrente,
-                    "frecuencia", frecuencia
-            );
+            Map<String, Object> pagoData = new HashMap<>();
+            pagoData.put("nombre", nameField.getValue());
+            pagoData.put("monto", amountField.getValue());
+            pagoData.put("fecha", dateField.getValue().toString());
+            pagoData.put("recurrente", recurrenteCheckbox.getValue());
+
+            if (recurrenteCheckbox.getValue()) {
+                pagoData.put("frecuencia", frecuenciaComboBox.getValue().toUpperCase());
+            }
+
 
             Optional<Map<String, Object>> result = pagoService.createPago(usuarioId, pagoData);
             if (result.isPresent()) {

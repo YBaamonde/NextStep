@@ -11,10 +11,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class PagoService {
     private final String baseUrl;
@@ -95,13 +92,15 @@ public class PagoService {
     // Actualizar un pago existente
     public boolean updatePago(int pagoId, String nombre, double monto, LocalDate fecha, boolean recurrente, String frecuencia) {
         try {
-            Map<String, Object> pagoActualizado = Map.of(
-                    "nombre", nombre,
-                    "monto", monto,
-                    "fecha", fecha.toString(),
-                    "recurrente", recurrente,
-                    "frecuencia", recurrente ? frecuencia : null
-            );
+            Map<String, Object> pagoActualizado = new HashMap<>();
+            pagoActualizado.put("nombre", nombre);
+            pagoActualizado.put("monto", monto);
+            pagoActualizado.put("fecha", fecha.toString());
+            pagoActualizado.put("recurrente", recurrente);
+
+            if (recurrente && frecuencia != null) {
+                pagoActualizado.put("frecuencia", frecuencia);
+            }
 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(baseUrl + "/pagos/" + pagoId))
@@ -117,6 +116,7 @@ public class PagoService {
         }
         return false;
     }
+
 
     // Obtener todos los pagos recurrentes de un usuario
     public List<Map<String, Object>> getPagosRecurrentesPorUsuario(int usuarioId) {

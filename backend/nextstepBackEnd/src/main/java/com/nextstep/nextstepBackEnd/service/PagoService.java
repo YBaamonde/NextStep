@@ -72,14 +72,19 @@ public class PagoService {
     // Actualizar un pago existente
     @Transactional
     public PagoDTO updatePago(Integer pagoId, PagoDTO pagoDTO) {
-        validarFrecuenciaRecurrente(pagoDTO);
-
         return pagoRepository.findById(pagoId).map(existingPago -> {
             existingPago.setNombre(pagoDTO.getNombre());
             existingPago.setMonto(pagoDTO.getMonto());
             existingPago.setFecha(pagoDTO.getFecha());
             existingPago.setRecurrente(pagoDTO.getRecurrente());
-            existingPago.setFrecuencia(pagoDTO.getRecurrente() ? pagoDTO.getFrecuencia() : null); // Asigna frecuencia solo si es recurrente
+
+            // Solo asigna frecuencia si el pago es recurrente y frecuencia no es null
+            if (pagoDTO.getRecurrente() && pagoDTO.getFrecuencia() != null) {
+                existingPago.setFrecuencia(pagoDTO.getFrecuencia());
+            } else {
+                existingPago.setFrecuencia(null); // Asegura que se elimine la frecuencia si el pago ya no es recurrente
+            }
+
             Pago updatedPago = pagoRepository.save(existingPago);
 
             return new PagoDTO(
@@ -88,10 +93,11 @@ public class PagoService {
                     updatedPago.getMonto(),
                     updatedPago.getFecha(),
                     updatedPago.getRecurrente(),
-                    updatedPago.getFrecuencia()
+                    updatedPago.getFrecuencia()  // Frecuencia puede ser null para no recurrentes
             );
         }).orElseThrow(() -> new IllegalArgumentException("Pago no encontrado."));
     }
+
 
     // Eliminar un pago
     @Transactional
