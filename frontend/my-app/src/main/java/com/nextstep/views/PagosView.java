@@ -138,6 +138,8 @@ public class PagosView extends VerticalLayout {
 
         DatePicker dateField = new DatePicker("Fecha");
         dateField.setPlaceholder("Selecciona una fecha");
+        // Configurar para solo fechas futuras
+        dateField.setMin(LocalDate.now().plusDays(1)); // La fecha mínima es mañana
 
         Checkbox recurrenteCheckbox = new Checkbox("Recurrente");
 
@@ -201,6 +203,8 @@ public class PagosView extends VerticalLayout {
 
         DatePicker dateField = new DatePicker("Fecha");
         dateField.setValue(LocalDate.parse(fechaLabel.getText().replace("Fecha: ", "")));
+        // Configurar para solo fechas futuras
+        dateField.setMin(LocalDate.now().plusDays(1)); // La fecha mínima es mañana
 
         Checkbox recurrenteCheckbox = new Checkbox("Recurrente", recurrenteLabel.getText().contains("Sí"));
 

@@ -288,6 +288,8 @@ public class GastosView extends VerticalLayout {
 
         DatePicker dateField = new DatePicker("Fecha");
         dateField.setPlaceholder("Selecciona una fecha");
+        // Configurar para solo fechas pasadas (hoy incluido)
+        dateField.setMin(LocalDate.now()); // La fecha máxima es hoy
 
         Button saveButton = new Button("Guardar", event -> {
             String nombre = nameField.getValue();
@@ -431,6 +433,8 @@ public class GastosView extends VerticalLayout {
 
         DatePicker dateField = new DatePicker("Fecha");
         dateField.setValue(LocalDate.parse(fechaLabel.getText().replace("Fecha: ", "")));
+        // Configurar para solo fechas pasadas (hoy incluido)
+        dateField.setMin(LocalDate.now()); // La fecha máxima es hoy
 
         Button saveButton = new Button("Guardar", event -> {
             String nuevoNombre = nameField.getValue();
