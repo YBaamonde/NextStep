@@ -173,7 +173,7 @@ public class GastosView extends VerticalLayout {
         categoriaRefs.put(categoriaId, gastosContainer);
 
         Button addGastoButton = new Button("Añadir Gasto");
-        addGastoButton.setClassName("action-button");
+        addGastoButton.setClassName("gastos-action-button");
         addGastoButton.addClickListener(event -> openAddGastoDialog(categoriaId, gastosContainer));
 
         // Opciones del menú contextual
@@ -240,10 +240,13 @@ public class GastosView extends VerticalLayout {
                 Notification.show("Error al actualizar la categoría.");
             }
         });
+        saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        saveButton.addClassName("botones-menu");
         saveButton.getStyle().set("margin-right", "10px");
 
         Button cancelButton = new Button("Cancelar", event -> editDialog.close());
         cancelButton.addClassName("cancel-button");
+        cancelButton.addClassName("botones-menu");
 
         // Crear un layout para los botones y añadirles algo de espacio
         HorizontalLayout buttonsLayout = new HorizontalLayout(saveButton, cancelButton);
@@ -324,8 +327,11 @@ public class GastosView extends VerticalLayout {
             }
 
         });
+        saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        saveButton.addClassName("botones-menu");
 
         Button cancelButton = new Button("Cancelar", event -> addGastoDialog.close());
+        cancelButton.addClassName("botones-menu");
 
         HorizontalLayout buttonsLayout = new HorizontalLayout(saveButton, cancelButton);
         addGastoDialog.add(nameField, amountField, dateField, buttonsLayout);
@@ -383,7 +389,7 @@ public class GastosView extends VerticalLayout {
 
         // Botones de edición y eliminación
         Button editButton = new Button("Editar", event -> openEditGastoDialog(gastoId, gastoDiv, nombreLabel, montoLabel, fechaLabel));
-        editButton.addClassName("action-button");
+        editButton.addClassName("gastos-action-button");
 
         Button deleteButton = new Button("Eliminar", event -> eliminarGasto(gastoId, gastoDiv));
         deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
@@ -465,8 +471,11 @@ public class GastosView extends VerticalLayout {
                 Notification.show("Error al actualizar el gasto.");
             }
         });
+        saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        saveButton.addClassName("botones-menu");
 
         Button cancelButton = new Button("Cancelar", event -> editDialog.close());
+        cancelButton.addClassName("botones-menu");
 
         HorizontalLayout buttonsLayout = new HorizontalLayout(saveButton, cancelButton);
         editDialog.add(nameField, amountField, dateField, buttonsLayout);
