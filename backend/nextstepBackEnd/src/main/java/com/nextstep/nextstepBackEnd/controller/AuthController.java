@@ -52,13 +52,4 @@ public class AuthController {
         }
     }
 
-    /*
-    // Obtener el ID del usuario actual
-    @GetMapping("/user")
-    public ResponseEntity<Map<String, Object>> getUserId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Map<String, Object> userId = Map.of("userId", authentication.getPrincipal());
-        return ResponseEntity.ok(userId);
-    }
-     */
 }
