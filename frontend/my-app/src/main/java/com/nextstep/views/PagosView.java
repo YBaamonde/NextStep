@@ -64,8 +64,8 @@ public class PagosView extends VerticalLayout {
 
         cargarPagosPorUsuario(usuarioId);
 
-        Button addPagoButton = new Button("Añadir Pago", new Icon(VaadinIcon.PLUS));
-        addPagoButton.setClassName("pago-button");
+        Button addPagoButton = new Button(new Icon(VaadinIcon.PLUS));
+        addPagoButton.setClassName("masPago-button");
         addPagoButton.addClickListener(e -> openAddPagoDialog());
         add(addPagoButton);
     }
@@ -84,16 +84,21 @@ public class PagosView extends VerticalLayout {
             Div pagoDiv = createPagoDiv(pagoId, nombrePago, montoPago, fechaPago, recurrente, frecuencia);
             pagosContainer.add(pagoDiv);
         }
+
+        // Añadir espaciador al final del contenedor de pagos
+        Div spacer = new Div();
+        spacer.setClassName("pago-spacer");
+        pagosContainer.add(spacer);
     }
 
-    private Div createPagoDiv(Integer pagoId, String nombre, Double monto, String fecha, Boolean recurrente, String frecuencia) {
-        if (pagoId == null) {
-            Notification.show("Error: No se pudo cargar el pago.");
-            return null;
-        }
 
+    private Div createPagoDiv(Integer pagoId, String nombre, Double monto, String fecha, Boolean recurrente, String frecuencia) {
         Div pagoDiv = new Div();
         pagoDiv.setClassName("pago-item");
+
+        // Datos del pago en un contenedor separado en columna
+        Div pagoDatos = new Div();
+        pagoDatos.setClassName("pago-datos");
 
         NativeLabel nombreLabel = new NativeLabel("Nombre: " + nombre);
         nombreLabel.addClassName("pago-nombre");
@@ -110,20 +115,27 @@ public class PagosView extends VerticalLayout {
         NativeLabel frecuenciaLabel = new NativeLabel("Frecuencia: " + (frecuencia != null ? frecuencia : "N/A"));
         frecuenciaLabel.addClassName("pago-frecuencia");
 
+        // Agrega los labels al contenedor de datos
+        pagoDatos.add(nombreLabel, montoLabel, fechaLabel, recurrenteLabel, frecuenciaLabel);
+
+        // Botones
         Button editButton = new Button("Editar", event -> openEditPagoDialog(pagoId, pagoDiv, nombreLabel, montoLabel, fechaLabel, recurrenteLabel, frecuenciaLabel));
-        editButton.addClassName("action-button");
+        editButton.addClassName("pago-button-editar");
 
         Button deleteButton = new Button("Eliminar", event -> eliminarPago(pagoId, pagoDiv));
-        deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
-        deleteButton.addClassName("pago-eliminar");
+        deleteButton.addClassName("pago-button-eliminar");
 
         Div buttonContainer = new Div(editButton, deleteButton);
         buttonContainer.setClassName("pago-buttons");
 
-        pagoDiv.add(nombreLabel, montoLabel, fechaLabel, recurrenteLabel, frecuenciaLabel, buttonContainer);
+
+        // Añade los elementos al pagoDiv principal
+        pagoDiv.add(pagoDatos, buttonContainer);
 
         return pagoDiv;
     }
+
+
 
     private void openAddPagoDialog() {
         Dialog addPagoDialog = new Dialog();
@@ -183,8 +195,11 @@ public class PagosView extends VerticalLayout {
                 Notification.show("Error al agregar el pago. Inténtalo nuevamente.");
             }
         });
+        saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        saveButton.addClassName("botones-menu");
 
         Button cancelButton = new Button("Cancelar", event -> addPagoDialog.close());
+        cancelButton.addClassName("botones-menu");
 
         HorizontalLayout buttonsLayout = new HorizontalLayout(saveButton, cancelButton);
         addPagoDialog.add(nameField, amountField, dateField, recurrenteCheckbox, frecuenciaComboBox, buttonsLayout);
@@ -241,8 +256,11 @@ public class PagosView extends VerticalLayout {
                 Notification.show("Error al actualizar el pago.");
             }
         });
+        saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        saveButton.addClassName("botones-menu");
 
         Button cancelButton = new Button("Cancelar", event -> editDialog.close());
+        cancelButton.addClassName("botones-menu");
 
         HorizontalLayout buttonsLayout = new HorizontalLayout(saveButton, cancelButton);
         editDialog.add(nameField, amountField, dateField, recurrenteCheckbox, frecuenciaComboBox, buttonsLayout);

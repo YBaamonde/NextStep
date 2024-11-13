@@ -3,7 +3,6 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    /*justify-content: center; /* Centrado vertical */
     background-image: url('../../../resources/media/picoPerfil.jpg');
     background-size: cover;
     background-position: center;
