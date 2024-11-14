@@ -12,19 +12,6 @@ import java.util.Map;
 @Service
 public class SimulacionService {
 
-    // Servicio para generar PDF de la simulación
-    private final SimulacionPdfService simulacionPdfService;
-
-    public SimulacionService(SimulacionPdfService simulacionPdfService) {
-        this.simulacionPdfService = simulacionPdfService;
-    }
-
-    public byte[] generarReportePdf(SimulacionDTO simulacionDTO) {
-        return simulacionPdfService.generarPdfSimulacion(simulacionDTO);
-    }
-
-
-
     // Calcula el balance proyectado basado en ingresos y gastos simulados
     public SimulacionDTO calcularSimulacion(SimulacionDTO simulacionDTO) {
         double ingresos = simulacionDTO.getIngresos();  // Obtener ingresos simulados

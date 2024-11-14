@@ -17,9 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class SimulacionController {
 
     private final SimulacionService simulacionService;
+    private final SimulacionPdfService simulacionPdfService;
 
-    public SimulacionController(SimulacionService simulacionService) {
+    public SimulacionController(SimulacionService simulacionService, SimulacionPdfService simulacionPdfService) {
         this.simulacionService = simulacionService;
+        this.simulacionPdfService = simulacionPdfService;
     }
 
     // Endpoint para calcular la simulación financiera avanzada
@@ -32,11 +34,11 @@ public class SimulacionController {
     // Endpoint para generar el PDF de la simulación
     @PostMapping("/exportar")
     public ResponseEntity<ByteArrayResource> exportarSimulacionPdf(@RequestBody SimulacionDTO simulacionDTO) {
-        // Primero, calcula la simulación para asegurar datos completos en el DTO
-        SimulacionDTO resultadoSimulacion = simulacionService.calcularSimulacion(simulacionDTO);
+        byte[] pdfBytes = simulacionPdfService.generarPdfSimulacion(simulacionDTO);
 
-        // Luego, genera el PDF con los datos calculados
-        byte[] pdfBytes = simulacionService.generarReportePdf(resultadoSimulacion);
+        if (pdfBytes == null) {
+            throw new IllegalArgumentException("Byte array must not be null");
+        }
 
         ByteArrayResource resource = new ByteArrayResource(pdfBytes);
         return ResponseEntity.ok()
@@ -45,4 +47,5 @@ public class SimulacionController {
                 .contentLength(pdfBytes.length)
                 .body(resource);
     }
+
 }
