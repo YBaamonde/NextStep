@@ -38,12 +38,12 @@ public class SimulacionService {
     }
 
     // Suma todos los valores en el mapa de gastos del DTO
-    private double calcularTotalGastos(SimulacionDTO simulacionDTO) {
+    double calcularTotalGastos(SimulacionDTO simulacionDTO) {
         return simulacionDTO.getGastos().values().stream().mapToDouble(Double::doubleValue).sum();
     }
 
     // Calcula el balance mes a mes durante el período de simulación
-    private Map<Integer, Double> calcularBalanceMensual(SimulacionDTO simulacionDTO, double ingresos, double totalGastos) {
+    Map<Integer, Double> calcularBalanceMensual(SimulacionDTO simulacionDTO, double ingresos, double totalGastos) {
         Map<Integer, Double> balancePorMes = new HashMap<>();
         for (int mes = 1; mes <= simulacionDTO.getMesesSimulacion(); mes++) {
             balancePorMes.put(mes, ingresos - totalGastos);
@@ -52,7 +52,7 @@ public class SimulacionService {
     }
 
     // Evalúa si el usuario puede alcanzar su meta de ahorro en el período de simulación
-    private void evaluarMetaAhorro(SimulacionDTO simulacionDTO, Map<Integer, Double> balancePorMes) {
+    void evaluarMetaAhorro(SimulacionDTO simulacionDTO, Map<Integer, Double> balancePorMes) {
         // Inicializar la lista de recomendaciones si es null
         if (simulacionDTO.getRecomendaciones() == null) {
             simulacionDTO.setRecomendaciones(new ArrayList<>());
@@ -71,7 +71,7 @@ public class SimulacionService {
 
 
     // Genera recomendaciones en función de los gastos clasificados y el balance proyectado
-    private List<String> generarRecomendaciones(SimulacionDTO simulacionDTO, double balanceProyectado) {
+    List<String> generarRecomendaciones(SimulacionDTO simulacionDTO, double balanceProyectado) {
         List<String> recomendaciones = new ArrayList<>();
 
         if (balanceProyectado < 0) {
