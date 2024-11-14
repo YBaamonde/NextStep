@@ -215,7 +215,7 @@ body, #outlet {
         border-radius: 50%; /* Bordes redondeados para darle forma circular */
         position: fixed;
         bottom: 80px; /* Posición sobre el menú inferior */
-        left: 20px;
+        left: 50px;
         background-color: #FF5722;
         color: white;
         border: none;

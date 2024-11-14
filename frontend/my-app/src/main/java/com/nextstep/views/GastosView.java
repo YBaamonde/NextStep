@@ -204,7 +204,7 @@ public class GastosView extends VerticalLayout {
         panel.add(title, description, addGastoButton, menuIcon, gastosContainer);
 
         // Cargar los gastos de la categoría si es necesario
-        cargarGastosPorUsuario(usuarioId);
+        // cargarGastosPorUsuario(usuarioId); // Eliminar para evitar duplicados
 
         return panel;
     }
@@ -353,13 +353,13 @@ public class GastosView extends VerticalLayout {
             String fechaGasto = (String) gasto.get("fecha");
             Integer categoriaId = (Integer) gasto.get("categoriaId");
 
-            // Usar categoriaRefs para obtener el VerticalLayout (contenedor de gastos)
             VerticalLayout gastosContainer = categoriaRefs.get(categoriaId);
             if (gastosContainer != null) {
+                // Limpia el contenedor antes de agregar los gastos, para evitar duplicación
+                gastosContainer.removeAll();
+
                 Div gastoDiv = createGastoDiv(gastoId, nombreGasto, montoGasto, fechaGasto);
                 gastosContainer.add(gastoDiv);
-            } else {
-                System.out.println("Categoría no encontrada para gasto con ID: " + gastoId);
             }
         }
     }
