@@ -1,0 +1,58 @@
+.simulacion-view {
+    background-image: url('../../../resources/media/monteSimu.jpg');
+    background-size: cover;
+    background-position: center top;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0;
+    width: 100%;
+    overflow-x: hidden;
+}
+
+.simulacion-container {
+    width: 90%;
+    max-width: 600px;
+    background: rgba(255, 255, 255, 0.22);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(6.1px);
+    -webkit-backdrop-filter: blur(6.1px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 50px;
+}
+
+.calcular-button {
+    width: 100%;
+    background-color: #FF5722;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    padding: 10px;
+}
+
+.calcular-button:hover {
+    background-color: #E64A19;
+}
+
+.resultado-balance {
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: black;
+    margin-bottom: 15px;
+}
+
+.resultado-recomendaciones {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    color: #333;
+    font-size: 1.1rem;
+}
