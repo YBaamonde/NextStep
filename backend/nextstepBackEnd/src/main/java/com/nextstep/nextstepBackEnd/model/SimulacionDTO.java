@@ -13,11 +13,13 @@ import java.util.Map;
 public class SimulacionDTO {
 
     private double ingresos;
-    private Map<String, Double> gastos = new HashMap<>();
-    private double balanceProyectado;
     private int mesesSimulacion;
     private Double metaAhorro;
-    private Map<String, Map<String, Double>> gastosClasificados = new HashMap<>();  // Inicializar el mapa aquí
+    private double balanceProyectado;
+
+    // Cambiar Map<String, Double> gastos por gastosClasificados para ajustar a la estructura JSON
+    private Map<String, Map<String, Double>> gastosClasificados = new HashMap<>();
+
     private Map<Integer, Double> balancePorMes = new HashMap<>();
-    private List<String> recomendaciones = new ArrayList<>();  // Inicializar también para evitar null
+    private List<String> recomendaciones = new ArrayList<>();
 }

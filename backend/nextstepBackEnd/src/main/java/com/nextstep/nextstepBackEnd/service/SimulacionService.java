@@ -12,10 +12,9 @@ import java.util.Map;
 @Service
 public class SimulacionService {
 
-    // Calcula el balance proyectado basado en ingresos y gastos simulados
     public SimulacionDTO calcularSimulacion(SimulacionDTO simulacionDTO) {
-        double ingresos = simulacionDTO.getIngresos();  // Obtener ingresos simulados
-        double totalGastos = calcularTotalGastos(simulacionDTO);  // Sumar los gastos simulados
+        double ingresos = simulacionDTO.getIngresos();
+        double totalGastos = calcularTotalGastos(simulacionDTO.getGastosClasificados()); // Ajuste para usar gastosClasificados
 
         // Calcular balance general proyectado
         double balanceProyectado = ingresos - totalGastos;
@@ -37,12 +36,16 @@ public class SimulacionService {
         return simulacionDTO;
     }
 
-    // Suma todos los valores en el mapa de gastos del DTO
-    double calcularTotalGastos(SimulacionDTO simulacionDTO) {
-        return simulacionDTO.getGastos().values().stream().mapToDouble(Double::doubleValue).sum();
+
+    double calcularTotalGastos(Map<String, Map<String, Double>> gastosClasificados) {
+        return gastosClasificados.values().stream()
+                .flatMap(map -> map.values().stream())
+                .mapToDouble(Double::doubleValue)
+                .sum();
     }
 
-    // Calcula el balance mes a mes durante el período de simulación
+
+
     Map<Integer, Double> calcularBalanceMensual(SimulacionDTO simulacionDTO, double ingresos, double totalGastos) {
         Map<Integer, Double> balancePorMes = new HashMap<>();
         for (int mes = 1; mes <= simulacionDTO.getMesesSimulacion(); mes++) {
@@ -51,46 +54,32 @@ public class SimulacionService {
         return balancePorMes;
     }
 
-    // Evalúa si el usuario puede alcanzar su meta de ahorro en el período de simulación
     void evaluarMetaAhorro(SimulacionDTO simulacionDTO, Map<Integer, Double> balancePorMes) {
-        // Inicializar la lista de recomendaciones si es null
-        if (simulacionDTO.getRecomendaciones() == null) {
-            simulacionDTO.setRecomendaciones(new ArrayList<>());
-        }
-
         double ahorroAcumulado = balancePorMes.values().stream().mapToDouble(Double::doubleValue).sum();
         double metaAhorro = simulacionDTO.getMetaAhorro();
 
         if (ahorroAcumulado >= metaAhorro) {
-            simulacionDTO.getRecomendaciones().add("Meta de ahorro alcanzable con los ingresos y gastos actuales.");
+            simulacionDTO.getRecomendaciones().add("\nMeta de ahorro alcanzable con los ingresos y gastos actuales.");
         } else {
             double deficit = metaAhorro - ahorroAcumulado;
-            simulacionDTO.getRecomendaciones().add("Para alcanzar su meta de ahorro, necesita reducir sus gastos o aumentar sus ingresos en: " + deficit);
+            simulacionDTO.getRecomendaciones().add("\nPara alcanzar su meta de ahorro, necesita reducir sus gastos o aumentar sus ingresos en: " + deficit);
         }
     }
 
-
-    // Genera recomendaciones en función de los gastos clasificados y el balance proyectado
     List<String> generarRecomendaciones(SimulacionDTO simulacionDTO, double balanceProyectado) {
         List<String> recomendaciones = new ArrayList<>();
 
         if (balanceProyectado < 0) {
-            recomendaciones.add("Su balance proyectado es negativo. Considere reducir sus gastos.");
+            recomendaciones.add("\nSu balance proyectado es negativo. Considere reducir sus gastos.");
         } else {
-            recomendaciones.add("Su balance proyectado es positivo. Está en una buena posición para independizarse.");
+            recomendaciones.add("\nSu balance proyectado es positivo. Está en una buena posición para independizarse.");
         }
 
-        Map<String, Double> gastosEsenciales = simulacionDTO.getGastosClasificados().get("esenciales");
         Map<String, Double> gastosOpcionales = simulacionDTO.getGastosClasificados().get("opcionales");
-
-        if (gastosOpcionales != null) {
-            double totalOpcionales = gastosOpcionales.values().stream().mapToDouble(Double::doubleValue).sum();
-            if (totalOpcionales > 0) {
-                recomendaciones.add("Considere reducir gastos opcionales en estas categorías: " + gastosOpcionales.keySet());
-            }
+        if (gastosOpcionales != null && !gastosOpcionales.isEmpty() && balanceProyectado < 0) {
+            recomendaciones.add("\nConsidere reducir gastos opcionales en estas categorías: " + gastosOpcionales.keySet());
         }
 
         return recomendaciones;
     }
-
 }

@@ -3,20 +3,30 @@ package com.nextstep.views.simulacion;
 // Vista con los resultados de la simulación
 
 import com.nextstep.services.AuthService;
+import com.nextstep.services.SimulacionService;
 import com.nextstep.views.components.MainNavbar;
-import com.vaadin.flow.component.*;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import java.util.*;
 
 @Route("resultados")
-@PageTitle("Resultados | NextStep")
+@PageTitle("Resultados de Simulación | NextStep")
 @CssImport("./themes/nextstepfrontend/resultados-view.css")
-public class ResultadosView extends VerticalLayout {
+public class ResultadosView extends VerticalLayout implements BeforeEnterObserver {
+
+    private Span balanceLabel;
+    private Div recomendacionesContainer;
+    private Map<String, Object> simulacionData; // Guardar datos de simulación para exportar
 
     public ResultadosView() {
         setClassName("resultados-view");
@@ -29,40 +39,59 @@ public class ResultadosView extends VerticalLayout {
         MainNavbar navbar = new MainNavbar(authService);
         add(navbar);
 
-        // Obtener parámetros
-        String balanceProyectado = UI.getCurrent().getInternals().getActiveViewLocation().getQueryParameters()
-                .getParameters().getOrDefault("balanceProyectado", List.of("0")).get(0);
-        String recomendaciones = UI.getCurrent().getInternals().getActiveViewLocation().getQueryParameters()
-                .getParameters().getOrDefault("recomendaciones", List.of("")).get(0);
-
-        // Contenedor principal
+        // Contenedor principal de resultados
         Div resultadosContainer = new Div();
         resultadosContainer.setClassName("resultados-container");
+
+        balanceLabel = new Span();
+        balanceLabel.addClassName("resultado-balance");
+
+        Span recomendacionesLabel = new Span("Recomendaciones:");
+        recomendacionesLabel.addClassName("resultado-recomendaciones-title");
+
+        recomendacionesContainer = new Div();
+        recomendacionesContainer.setClassName("recomendaciones-container");
+
+        // Botones para exportar y nueva simulación
+        Button exportarPdfButton = new Button("Exportar PDF", event -> exportarPdf());
+        exportarPdfButton.addClassName("export-pdf-button");
+
+        Button nuevaSimulacionButton = new Button("Nueva Simulación", event -> UI.getCurrent().navigate("simulacion"));
+        nuevaSimulacionButton.addClassName("nueva-simulacion-button");
+
+        HorizontalLayout buttonLayout = new HorizontalLayout(exportarPdfButton, nuevaSimulacionButton);
+        buttonLayout.addClassName("button-layout");
+
+        resultadosContainer.add(balanceLabel, recomendacionesLabel, recomendacionesContainer, buttonLayout);
         add(resultadosContainer);
+    }
 
-        // Mostrar balance proyectado
-        Div balanceDiv = new Div();
-        balanceDiv.setClassName("resultado-balance");
-        balanceDiv.setText("Balance Proyectado: " + balanceProyectado + " €");
-        resultadosContainer.add(balanceDiv);
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        String balanceProyectado = event.getLocation().getQueryParameters().getParameters()
+                .getOrDefault("balanceProyectado", List.of("0")).get(0);
+        List<String> recomendaciones = event.getLocation().getQueryParameters().getParameters()
+                .getOrDefault("recomendaciones", List.of("No se han generado recomendaciones"));
 
-        // Mostrar recomendaciones
-        Div recomendacionesTitleDiv = new Div();
-        recomendacionesTitleDiv.setClassName("resultado-recomendaciones-title");
-        recomendacionesTitleDiv.setText("Recomendaciones:");
-        resultadosContainer.add(recomendacionesTitleDiv);
+        // Actualizar el balance
+        balanceLabel.setText("Balance Proyectado: " + balanceProyectado + " €");
 
-        Div recomendacionesDiv = new Div();
-        recomendacionesDiv.setClassName("recomendaciones-container");
-        Arrays.stream(recomendaciones.split(","))
-                .map(String::trim)
-                .forEach(rec -> {
-                    Div recDiv = new Div();
-                    recDiv.setClassName("resultado-recomendacion");
-                    recDiv.setText("- " + rec);
-                    recomendacionesDiv.add(recDiv);
-                });
+        // Actualizar las recomendaciones
+        recomendacionesContainer.removeAll();
+        recomendaciones.forEach(rec -> {
+            Span recLabel = new Span("- " + rec.trim());
+            recLabel.addClassName("resultado-recomendacion");
+            recomendacionesContainer.add(recLabel);
+        });
 
-        resultadosContainer.add(recomendacionesDiv);
+        // Guardar datos de simulación para exportar
+        simulacionData = new HashMap<>();
+        simulacionData.put("balanceProyectado", balanceProyectado);
+        simulacionData.put("recomendaciones", recomendaciones);
+    }
+
+    private void exportarPdf() {
+        SimulacionService simulacionService = new SimulacionService();
+        simulacionService.exportarSimulacionPdf(simulacionData); // Llamar al metodo para exportar PDF
     }
 }

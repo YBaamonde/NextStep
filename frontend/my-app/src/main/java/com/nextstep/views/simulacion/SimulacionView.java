@@ -5,6 +5,7 @@ import com.nextstep.services.SimulacionService;
 import com.nextstep.views.components.MainNavbar;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.notification.Notification;
@@ -95,10 +96,17 @@ public class SimulacionView extends VerticalLayout {
 
         // Botón Calcular
         calcularButton = new Button("Calcular Resultados");
-        calcularButton.addClassName("calcular-button");
         calcularButton.setEnabled(false);
         calcularButton.addClickListener(event -> calcularSimulacion());
         enableButtonOnValidInputs();
+
+        // Si el botón está activado tiene un estilo diferente
+        if (calcularButton.isEnabled()) {
+            calcularButton.addClassName("calcular-button");
+        }
+        else {
+            calcularButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        }
 
         // Añadir componentes al contenedor
         simulacionContainer.add(ingresosField, mesesField, metaAhorroField, gastosContainer, calcularButton);
@@ -150,10 +158,19 @@ public class SimulacionView extends VerticalLayout {
         simulacionData.put("ingresos", ingresosField.getValue());
         simulacionData.put("mesesSimulacion", mesesField.getValue());
         simulacionData.put("metaAhorro", metaAhorroField.getValue());
-        simulacionData.put("gastosEsenciales", gastosEsencialesFields.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getValue())));
-        simulacionData.put("gastosOpcionales", gastosOpcionalesFields.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getValue())));
+
+        // Agrega los gastos esenciales
+        Map<String, Double> gastosEsenciales = gastosEsencialesFields.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getValue()));
+        simulacionData.put("gastosEsenciales", gastosEsenciales);
+
+        // Agrega los gastos opcionales
+        Map<String, Double> gastosOpcionales = gastosOpcionalesFields.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getValue()));
+        simulacionData.put("gastosOpcionales", gastosOpcionales);
+
+        // Debug: Verificar los datos antes de enviarlos al servicio
+        System.out.println("Datos de simulación enviados al backend: " + simulacionData); // Debug
 
         SimulacionService simulacionService = new SimulacionService();
         Optional<Map<String, Object>> result = simulacionService.calcularSimulacion(simulacionData);
@@ -168,4 +185,5 @@ public class SimulacionView extends VerticalLayout {
             Notification.show("Error al calcular la simulación. Inténtelo nuevamente.");
         }
     }
+
 }

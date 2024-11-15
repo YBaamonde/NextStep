@@ -13,7 +13,7 @@
 
 .simulacion-container {
     width: 90%;
-    max-width: 600px; /* Cambiado a un tamaño menor */
+    max-width: 800px;
     background: rgba(255, 255, 255, 0.22);
     border-radius: 16px;
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
@@ -28,7 +28,7 @@
     margin-bottom: 20px;
 }
 
-/* Título de categorías */
+/* Encabezado de categorías */
 .category-header {
     font-size: 1.2rem;
     font-weight: bold;
@@ -37,11 +37,21 @@
     text-align: left;
 }
 
-/* Campos de gastos en una columna para móvil */
+/* Contenedor de gastos en dos columnas */
 .gastos-container {
     display: flex;
+    gap: 20px;
+}
+
+/* Columnas individuales para esenciales y opcionales */
+.category-column {
+    flex: 1;
+    display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.6);
+    padding: 15px;
+    border-radius: 8px;
 }
 
 /* Campo de gasto */
@@ -57,7 +67,7 @@
     color: white;
     border: none;
     border-radius: 8px;
-    cursor: pointer;
+    cursor: pointer !important;
     transition: background-color 0.3s;
     padding: 10px;
     font-size: 1rem;
@@ -68,15 +78,26 @@
     background-color: #E64A19;
 }
 
-/* Diseño adaptativo para pantallas pequeñas */
+/* Diseño adaptativo en dispositivos móviles */
 @media (max-width: 767px) {
     .simulacion-container {
-        width: 95%;
+        width: 80%;
         padding: 15px;
+        margin-bottom: 80px;
     }
 
+    /* Cambiar a una sola columna en dispositivos móviles */
     .gastos-container {
         flex-direction: column;
+    }
+
+    .category-column {
+        width: 100%;
+    }
+
+    .category-header {
+        font-size: 1.1rem;
+        margin-top: 10px;
     }
 
     .gasto-field {

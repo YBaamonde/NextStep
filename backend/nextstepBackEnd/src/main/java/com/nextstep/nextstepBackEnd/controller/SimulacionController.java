@@ -27,7 +27,16 @@ public class SimulacionController {
     // Endpoint para calcular la simulación financiera avanzada
     @PostMapping("/calcular")
     public ResponseEntity<SimulacionDTO> calcularSimulacion(@RequestBody SimulacionDTO simulacionDTO) {
+        // Debug: Verificar los datos recibidos en el backend
+        System.out.println("Datos recibidos en el backend para simulación: " + simulacionDTO); // Debug
+
+        // Procesar la simulación
         SimulacionDTO resultadoSimulacion = simulacionService.calcularSimulacion(simulacionDTO);
+
+        // Debug: Verificar los resultados antes de enviarlos de vuelta
+        System.out.println("Resultado de la simulación: " + resultadoSimulacion); // Debug
+
+        // Devolver la respuesta como JSON
         return ResponseEntity.ok(resultadoSimulacion);
     }
 

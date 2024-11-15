@@ -13,6 +13,8 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -30,6 +32,17 @@ public class SimulacionService {
     // Metodo para enviar datos de simulación y calcular resultados
     public Optional<Map<String, Object>> calcularSimulacion(Map<String, Object> simulacionData) {
         try {
+            // Estructura los gastos clasificados en un solo campo
+            Map<String, Map<String, Double>> gastosClasificados = new HashMap<>();
+            gastosClasificados.put("esenciales", (Map<String, Double>) simulacionData.get("gastosEsenciales"));
+            gastosClasificados.put("opcionales", (Map<String, Double>) simulacionData.get("gastosOpcionales"));
+
+            // Elimina los campos individuales de gastos y agrega `gastosClasificados`
+            simulacionData.remove("gastosEsenciales");
+            simulacionData.remove("gastosOpcionales");
+            simulacionData.put("gastosClasificados", gastosClasificados);
+
+            // Serializa el JSON y envía la solicitud como antes
             String json = objectMapper.writeValueAsString(simulacionData);
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(baseUrl + "/simulacion/calcular"))
@@ -51,6 +64,7 @@ public class SimulacionService {
         }
         return Optional.empty();
     }
+
 
     // Metodo para exportar la simulación como PDF
     public void exportarSimulacionPdf(Map<String, Object> simulacionData) {
