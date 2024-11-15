@@ -25,8 +25,10 @@
     flex-direction: column;
     gap: 15px;
     margin-top: 50px;
+    margin-bottom: 20px;
 }
 
+/* Botón para calcular */
 .calcular-button {
     width: 100%;
     background-color: #FF5722;
@@ -36,17 +38,20 @@
     cursor: pointer;
     transition: background-color 0.3s;
     padding: 10px;
+    font-size: 1rem;
 }
 
 .calcular-button:hover {
     background-color: #E64A19;
 }
 
+/* Estilos de resultados */
 .resultado-balance {
     font-weight: bold;
     font-size: 1.2rem;
     color: black;
     margin-bottom: 15px;
+    text-align: center;
 }
 
 .resultado-recomendaciones {
@@ -55,4 +60,82 @@
     gap: 10px;
     color: #333;
     font-size: 1.1rem;
+}
+
+/* Botones de acción (Exportar y Nueva Simulación) */
+.button-layout {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    gap: 15px;
+}
+
+.export-pdf-button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 1rem;
+}
+
+.export-pdf-button:hover {
+    background-color: #0056b3;
+}
+
+.nueva-simulacion-button {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 1rem;
+}
+
+.nueva-simulacion-button:hover {
+    background-color: #218838;
+}
+
+/* Barra de carga */
+.barra-carga {
+    margin: 20px auto;
+    width: 80%;
+}
+
+/* Adaptaciones para dispositivos móviles */
+@media (max-width: 767px) {
+    .simulacion-container {
+        width: 90% !important;
+        max-width: 100%;
+        padding: 15px;
+    }
+
+    .calcular-button {
+        padding: 8px;
+        font-size: 0.9rem;
+    }
+
+    .resultado-balance {
+        font-size: 1rem;
+    }
+
+    .resultado-recomendaciones {
+        font-size: 0.95rem;
+    }
+
+    .button-layout {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .export-pdf-button,
+    .nueva-simulacion-button {
+        width: 100%;
+        padding: 8px;
+        font-size: 0.9rem;
+    }
 }

@@ -4,7 +4,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.server.StreamRegistration;
+import com.vaadin.flow.server.StreamResource;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -38,7 +41,6 @@ public class SimulacionService {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() == 200) {
-                // Convertir la respuesta JSON en un Map
                 Map<String, Object> responseMap = objectMapper.readValue(response.body(), new TypeReference<>() {});
                 return Optional.of(responseMap);
             } else {
@@ -50,10 +52,47 @@ public class SimulacionService {
         return Optional.empty();
     }
 
+    // Metodo para exportar la simulación como PDF
+    public void exportarSimulacionPdf(Map<String, Object> simulacionData) {
+        try {
+            String json = objectMapper.writeValueAsString(simulacionData);
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(baseUrl + "/simulacion/exportar"))
+                    .header("Authorization", "Bearer " + getToken())
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(json))
+                    .build();
+
+            HttpResponse<byte[]> response = client.send(request, HttpResponse.BodyHandlers.ofByteArray());
+
+            if (response.statusCode() == 200) {
+                byte[] pdfBytes = response.body();
+
+                // Crear un StreamResource para encapsular el PDF
+                StreamResource pdfResource = new StreamResource("simulacion.pdf", () -> new ByteArrayInputStream(pdfBytes));
+                pdfResource.setContentType("application/pdf");
+                pdfResource.setCacheTime(0); // Evitar cacheo
+
+                // Registrar el recurso en el ResourceRegistry
+                StreamRegistration registration = UI.getCurrent().getSession().getResourceRegistry().registerResource(pdfResource);
+
+                // Obtener la URL del recurso
+                String pdfUrl = registration.getResourceUri().toString();
+
+                // Abrir el archivo PDF en una nueva ventana del navegador
+                UI.getCurrent().getPage().open(pdfUrl, "_blank");
+            } else {
+                Notification.show("Error al exportar el PDF: " + response.statusCode());
+            }
+        } catch (IOException | InterruptedException e) {
+            Notification.show("Error al exportar el PDF: " + e.getMessage());
+        }
+    }
+
+
+
     // Obtener el token de autenticación
     private String getToken() {
-        // Implementación para obtener el token JWT de la sesión o almacenamiento
         return (String) UI.getCurrent().getSession().getAttribute("authToken");
     }
 }
-

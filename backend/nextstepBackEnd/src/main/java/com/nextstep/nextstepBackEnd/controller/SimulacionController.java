@@ -34,13 +34,16 @@ public class SimulacionController {
     // Endpoint para generar el PDF de la simulación
     @PostMapping("/exportar")
     public ResponseEntity<ByteArrayResource> exportarSimulacionPdf(@RequestBody SimulacionDTO simulacionDTO) {
+        // Generar el PDF como un array de bytes en memoria
         byte[] pdfBytes = simulacionPdfService.generarPdfSimulacion(simulacionDTO);
 
-        if (pdfBytes == null) {
-            throw new IllegalArgumentException("Byte array must not be null");
+        if (pdfBytes == null || pdfBytes.length == 0) {
+            throw new IllegalArgumentException("El PDF no se generó correctamente");
         }
 
+        // Enviar el PDF directamente en la respuesta HTTP
         ByteArrayResource resource = new ByteArrayResource(pdfBytes);
+
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=simulacion.pdf")
                 .contentType(MediaType.APPLICATION_PDF)
