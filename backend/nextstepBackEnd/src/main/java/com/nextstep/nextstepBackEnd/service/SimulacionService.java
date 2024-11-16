@@ -13,6 +13,8 @@ import java.util.Map;
 public class SimulacionService {
 
     public SimulacionDTO calcularSimulacion(SimulacionDTO simulacionDTO) {
+        System.out.println("Datos recibidos en el backend: " + simulacionDTO); // DEBUG
+
         double ingresos = simulacionDTO.getIngresos();
         double totalGastos = calcularTotalGastos(simulacionDTO.getGastosClasificados()); // Ajuste para usar gastosClasificados
 
@@ -68,18 +70,32 @@ public class SimulacionService {
 
     List<String> generarRecomendaciones(SimulacionDTO simulacionDTO, double balanceProyectado) {
         List<String> recomendaciones = new ArrayList<>();
+        double ahorroAcumulado = balanceProyectado * simulacionDTO.getMesesSimulacion();
+        Double metaAhorro = simulacionDTO.getMetaAhorro();
 
         if (balanceProyectado < 0) {
-            recomendaciones.add("\nSu balance proyectado es negativo. Considere reducir sus gastos.");
+            recomendaciones.add("Su balance proyectado es negativo. Reduzca gastos esenciales o considere incrementar sus ingresos.");
         } else {
-            recomendaciones.add("\nSu balance proyectado es positivo. Está en una buena posición para independizarse.");
+            recomendaciones.add("Su balance proyectado es positivo. Puede considerar ahorrar o invertir.");
+        }
+
+        if (metaAhorro != null && metaAhorro > 0) {
+            if (ahorroAcumulado >= metaAhorro) {
+                recomendaciones.add("¡Felicitaciones! Su meta de ahorro está alcanzada en " + simulacionDTO.getMesesSimulacion() + " meses.");
+            } else {
+                double deficit = metaAhorro - ahorroAcumulado;
+                recomendaciones.add("Para alcanzar su meta de ahorro de " + metaAhorro + " €, necesita ahorrar " + deficit + " € más.");
+            }
         }
 
         Map<String, Double> gastosOpcionales = simulacionDTO.getGastosClasificados().get("opcionales");
-        if (gastosOpcionales != null && !gastosOpcionales.isEmpty() && balanceProyectado < 0) {
-            recomendaciones.add("\nConsidere reducir gastos opcionales en estas categorías: " + gastosOpcionales.keySet());
+        if (gastosOpcionales != null && !gastosOpcionales.isEmpty()) {
+            recomendaciones.add("Puede reducir gastos opcionales como: " + String.join(", ", gastosOpcionales.keySet()));
         }
 
         return recomendaciones;
     }
+
+
+
 }

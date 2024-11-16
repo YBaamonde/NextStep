@@ -32,6 +32,12 @@ public class SimulacionService {
     // Metodo para enviar datos de simulación y calcular resultados
     public Optional<Map<String, Object>> calcularSimulacion(Map<String, Object> simulacionData) {
         try {
+            // Validar tipos de datos de gastos
+            if (!(simulacionData.get("gastosEsenciales") instanceof Map) || !(simulacionData.get("gastosOpcionales") instanceof Map)) {
+                Notification.show("Error en los datos: los gastos no tienen el formato esperado.");
+                return Optional.empty();
+            }
+
             // Estructura los gastos clasificados en un solo campo
             Map<String, Map<String, Double>> gastosClasificados = new HashMap<>();
             gastosClasificados.put("esenciales", (Map<String, Double>) simulacionData.get("gastosEsenciales"));
@@ -42,6 +48,12 @@ public class SimulacionService {
             simulacionData.remove("gastosOpcionales");
             simulacionData.put("gastosClasificados", gastosClasificados);
 
+            // Validar campos necesarios
+            if (!simulacionData.containsKey("metaAhorro") || !simulacionData.containsKey("mesesSimulacion") || !simulacionData.containsKey("ingresos")) {
+                Notification.show("Faltan campos requeridos en la simulación.");
+                return Optional.empty();
+            }
+
             // Serializa el JSON y envía la solicitud como antes
             String json = objectMapper.writeValueAsString(simulacionData);
             HttpRequest request = HttpRequest.newBuilder()
@@ -51,8 +63,8 @@ public class SimulacionService {
                     .POST(HttpRequest.BodyPublishers.ofString(json))
                     .build();
 
+            // Procesar la respuesta
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
             if (response.statusCode() == 200) {
                 Map<String, Object> responseMap = objectMapper.readValue(response.body(), new TypeReference<>() {});
                 return Optional.of(responseMap);
@@ -66,15 +78,21 @@ public class SimulacionService {
     }
 
 
+
     // Metodo para exportar la simulación como PDF
     public void exportarSimulacionPdf(Map<String, Object> simulacionData) {
         try {
-            String json = objectMapper.writeValueAsString(simulacionData);
+            if (simulacionData == null || simulacionData.isEmpty()) {
+                Notification.show("Error: Los datos de simulación son inválidos o están vacíos.");
+                return;
+            }
+
+            String json = objectMapper.writeValueAsString(simulacionData); // Serializa a JSON
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(baseUrl + "/simulacion/exportar"))
                     .header("Authorization", "Bearer " + getToken())
                     .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(json))
+                    .POST(HttpRequest.BodyPublishers.ofString(json)) // Enviar JSON
                     .build();
 
             HttpResponse<byte[]> response = client.send(request, HttpResponse.BodyHandlers.ofByteArray());
@@ -102,7 +120,6 @@ public class SimulacionService {
             Notification.show("Error al exportar el PDF: " + e.getMessage());
         }
     }
-
 
 
     // Obtener el token de autenticación

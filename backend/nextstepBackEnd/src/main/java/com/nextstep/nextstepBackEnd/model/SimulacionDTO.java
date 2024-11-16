@@ -12,14 +12,12 @@ import java.util.Map;
 @NoArgsConstructor
 public class SimulacionDTO {
 
-    private double ingresos;
-    private int mesesSimulacion;
-    private Double metaAhorro;
-    private double balanceProyectado;
+    private double ingresos; // Ingresos mensuales
+    private int mesesSimulacion; // Duración en meses de la simulación
+    private Double metaAhorro; // Meta de ahorro deseada
+    private double balanceProyectado; // Balance proyectado al final de la simulación
 
-    // Cambiar Map<String, Double> gastos por gastosClasificados para ajustar a la estructura JSON
-    private Map<String, Map<String, Double>> gastosClasificados = new HashMap<>();
-
-    private Map<Integer, Double> balancePorMes = new HashMap<>();
-    private List<String> recomendaciones = new ArrayList<>();
+    private Map<String, Map<String, Double>> gastosClasificados = new HashMap<>(); // Gastos clasificados en esenciales y opcionales
+    private Map<Integer, Double> balancePorMes = new HashMap<>(); // Balance mensual proyectado
+    private List<String> recomendaciones = new ArrayList<>(); // Recomendaciones generadas durante la simulación
 }

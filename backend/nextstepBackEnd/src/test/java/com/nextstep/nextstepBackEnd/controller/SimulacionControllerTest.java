@@ -17,13 +17,12 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -48,39 +47,40 @@ public class SimulacionControllerTest {
 
     @BeforeEach
     void setUp() {
-        // Inicializa el ObjectMapper manualmente
+        // Configuración del ObjectMapper para manejar Java Time
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
-        Map<String, Double> gastos = Map.of(
+        // Configuración del DTO de prueba
+        Map<String, Map<String, Double>> gastosClasificados = new HashMap<>();
+        gastosClasificados.put("esenciales", Map.of(
                 "vivienda", 800.0,
                 "alimentacion", 400.0,
-                "transporte", 200.0,
-                "entretenimiento", 150.0
-        );
-
-        Map<String, Map<String, Double>> gastosClasificados = new HashMap<>();
-        gastosClasificados.put("esenciales", Map.of("vivienda", 800.0, "alimentacion", 400.0));
-        gastosClasificados.put("opcionales", Map.of("transporte", 200.0, "entretenimiento", 150.0));
+                "transporte", 200.0
+        ));
+        gastosClasificados.put("opcionales", Map.of(
+                "entretenimiento", 150.0,
+                "suscripciones", 50.0
+        ));
 
         simulacionDTO = new SimulacionDTO();
         simulacionDTO.setIngresos(2500.0);
-        simulacionDTO.setGastos(gastos);
         simulacionDTO.setMesesSimulacion(6);
         simulacionDTO.setMetaAhorro(1000.0);
-        simulacionDTO.setBalanceProyectado(950.0);
         simulacionDTO.setGastosClasificados(gastosClasificados);
+        simulacionDTO.setBalanceProyectado(950.0);
         simulacionDTO.setRecomendaciones(List.of(
                 "Su balance proyectado es positivo. Está en una buena posición para independizarse.",
-                "Considere reducir gastos opcionales en estas categorías: [transporte, entretenimiento]"
+                "Considere reducir gastos opcionales en estas categorías: [entretenimiento, suscripciones]"
         ));
     }
 
     @Test
     @WithMockUser(roles = "normal")
     public void testCalcularSimulacion() throws Exception {
-        when(simulacionService.calcularSimulacion(simulacionDTO)).thenReturn(simulacionDTO);
+        // Mock del servicio para calcular la simulación
+        when(simulacionService.calcularSimulacion(any(SimulacionDTO.class))).thenReturn(simulacionDTO);
 
         mockMvc.perform(post("/simulacion/calcular")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -88,19 +88,19 @@ public class SimulacionControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.balanceProyectado").value(950.0))
                 .andExpect(jsonPath("$.recomendaciones[0]").value("Su balance proyectado es positivo. Está en una buena posición para independizarse."))
-                .andExpect(jsonPath("$.recomendaciones[1]").value("Considere reducir gastos opcionales en estas categorías: [transporte, entretenimiento]"));
+                .andExpect(jsonPath("$.recomendaciones[1]").value("Considere reducir gastos opcionales en estas categorías: [entretenimiento, suscripciones]"));
     }
 
     @Test
     @WithMockUser(roles = "normal")
     public void testExportarSimulacionPdf() throws Exception {
-        // Crea un byte array simulado para el PDF
-        byte[] pdfContent = new byte[]{1, 2, 3, 4}; // Simulación de contenido PDF
+        // Simulación de contenido PDF
+        byte[] pdfContent = new byte[]{1, 2, 3, 4};
 
-        // Configura el mock de SimulacionPdfService para devolver el contenido PDF
+        // Mock del servicio de exportación a PDF
         when(simulacionPdfService.generarPdfSimulacion(any(SimulacionDTO.class))).thenReturn(pdfContent);
 
-        // Asegúrate de que el contenido PDF simulado no sea null
+        // Asegurar que el contenido PDF no sea null
         assertNotNull(pdfContent, "El contenido PDF simulado no debe ser null");
 
         mockMvc.perform(post("/simulacion/exportar")

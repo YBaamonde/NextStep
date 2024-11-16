@@ -5,6 +5,7 @@ import com.nextstep.nextstepBackEnd.service.SimulacionPdfService;
 import com.nextstep.nextstepBackEnd.service.SimulacionService;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,21 +44,22 @@ public class SimulacionController {
     // Endpoint para generar el PDF de la simulación
     @PostMapping("/exportar")
     public ResponseEntity<ByteArrayResource> exportarSimulacionPdf(@RequestBody SimulacionDTO simulacionDTO) {
-        // Generar el PDF como un array de bytes en memoria
-        byte[] pdfBytes = simulacionPdfService.generarPdfSimulacion(simulacionDTO);
-
-        if (pdfBytes == null || pdfBytes.length == 0) {
-            throw new IllegalArgumentException("El PDF no se generó correctamente");
+        if (simulacionDTO == null) {
+            return ResponseEntity.badRequest().build();
         }
 
-        // Enviar el PDF directamente en la respuesta HTTP
-        ByteArrayResource resource = new ByteArrayResource(pdfBytes);
+        byte[] pdfContent = simulacionPdfService.generarPdfSimulacion(simulacionDTO);
+        if (pdfContent == null) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
 
+        ByteArrayResource resource = new ByteArrayResource(pdfContent);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=simulacion.pdf")
                 .contentType(MediaType.APPLICATION_PDF)
-                .contentLength(pdfBytes.length)
+                .contentLength(pdfContent.length)
                 .body(resource);
     }
+
 
 }

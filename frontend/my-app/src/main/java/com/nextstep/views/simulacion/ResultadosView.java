@@ -25,6 +25,7 @@ import java.util.*;
 public class ResultadosView extends VerticalLayout implements BeforeEnterObserver {
 
     private Span balanceLabel;
+    private Span metaAhorroLabel; // Mostrar meta de ahorro
     private Div recomendacionesContainer;
     private Map<String, Object> simulacionData; // Guardar datos de simulación para exportar
 
@@ -46,6 +47,9 @@ public class ResultadosView extends VerticalLayout implements BeforeEnterObserve
         balanceLabel = new Span();
         balanceLabel.addClassName("resultado-balance");
 
+        metaAhorroLabel = new Span(); // Nuevo elemento para meta de ahorro
+        metaAhorroLabel.addClassName("resultado-meta-ahorro");
+
         Span recomendacionesLabel = new Span("Recomendaciones:");
         recomendacionesLabel.addClassName("resultado-recomendaciones-title");
 
@@ -62,19 +66,20 @@ public class ResultadosView extends VerticalLayout implements BeforeEnterObserve
         HorizontalLayout buttonLayout = new HorizontalLayout(exportarPdfButton, nuevaSimulacionButton);
         buttonLayout.addClassName("button-layout");
 
-        resultadosContainer.add(balanceLabel, recomendacionesLabel, recomendacionesContainer, buttonLayout);
+        resultadosContainer.add(balanceLabel, metaAhorroLabel, recomendacionesLabel, recomendacionesContainer, buttonLayout);
         add(resultadosContainer);
     }
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        String balanceProyectado = event.getLocation().getQueryParameters().getParameters()
-                .getOrDefault("balanceProyectado", List.of("0")).get(0);
-        List<String> recomendaciones = event.getLocation().getQueryParameters().getParameters()
-                .getOrDefault("recomendaciones", List.of("No se han generado recomendaciones"));
+        Map<String, List<String>> queryParams = event.getLocation().getQueryParameters().getParameters();
 
-        // Actualizar el balance
-        balanceLabel.setText("Balance Proyectado: " + balanceProyectado + " €");
+        String balanceProyectado = queryParams.getOrDefault("balanceProyectado", List.of("0")).get(0);
+        String metaAhorro = queryParams.getOrDefault("metaAhorro", List.of("0")).get(0);
+        List<String> recomendaciones = queryParams.getOrDefault("recomendaciones", List.of("No se han generado recomendaciones"));
+
+        // Actualizar el balance y meta de ahorro
+        balanceLabel.setText("Balance Proyectado: " + balanceProyectado + " €\nMeta de Ahorro: " + metaAhorro + " €");
 
         // Actualizar las recomendaciones
         recomendacionesContainer.removeAll();
@@ -86,12 +91,20 @@ public class ResultadosView extends VerticalLayout implements BeforeEnterObserve
 
         // Guardar datos de simulación para exportar
         simulacionData = new HashMap<>();
-        simulacionData.put("balanceProyectado", balanceProyectado);
+        simulacionData.put("balanceProyectado", Double.parseDouble(balanceProyectado));
+        simulacionData.put("metaAhorro", Double.parseDouble(metaAhorro));
         simulacionData.put("recomendaciones", recomendaciones);
     }
 
+
+
     private void exportarPdf() {
         SimulacionService simulacionService = new SimulacionService();
-        simulacionService.exportarSimulacionPdf(simulacionData); // Llamar al metodo para exportar PDF
+
+        // Debug: Mostrar los datos enviados para exportar
+        System.out.println("Datos enviados para exportar PDF: " + simulacionData); // Debug
+
+        simulacionService.exportarSimulacionPdf(simulacionData); // Llama al servicio
     }
+
 }

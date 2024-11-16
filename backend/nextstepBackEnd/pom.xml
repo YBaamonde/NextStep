@@ -85,6 +85,8 @@
 		</dependency>
 
 
+
+
 		<!-- PRUEBAS -->
 
 		<!-- H2 Database (base de datos en memoria para pruebas) -->
@@ -119,6 +121,15 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+
+		<dependency>
+			<groupId>org.apache.pdfbox</groupId>
+			<artifactId>pdfbox</artifactId>
+			<version>3.0.3</version>
+		</dependency>
+
+
 
 		<!-- MySQL -->
 		<dependency>
