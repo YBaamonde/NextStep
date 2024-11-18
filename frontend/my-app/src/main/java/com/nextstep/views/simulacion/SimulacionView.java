@@ -57,16 +57,22 @@ public class SimulacionView extends VerticalLayout {
         ingresosField = new NumberField("Ingresos mensuales (€)");
         ingresosField.setPlaceholder("Ej.: 2500");
         ingresosField.setRequiredIndicatorVisible(true);
+        ingresosField.setMin(0); // No permite valores negativos
+        ingresosField.setErrorMessage("El valor debe ser igual o mayor a 0");
 
         // Campo de meses
         mesesField = new NumberField("Duración de la simulación (meses)");
         mesesField.setPlaceholder("Ej.: 6");
         mesesField.setRequiredIndicatorVisible(true);
+        mesesField.setMin(1); // Mínimo de 1 mes
+        mesesField.setErrorMessage("La duración debe ser al menos 1 mes");
 
         // Campo de meta de ahorro
         metaAhorroField = new NumberField("Meta de ahorro (€)");
         metaAhorroField.setPlaceholder("Ej.: 1000");
         metaAhorroField.setRequiredIndicatorVisible(true);
+        metaAhorroField.setMin(0); // No permite valores negativos
+        metaAhorroField.setErrorMessage("El valor debe ser igual o mayor a 0");
 
         // Crear campos de gastos esenciales y opcionales
         gastosEsencialesFields = createGastosFields(Map.of(
@@ -85,6 +91,16 @@ public class SimulacionView extends VerticalLayout {
                 "Suscripciones", "Ej.: Netflix, gimnasio"
         ));
 
+        // Configuración para evitar valores negativos en los gastos
+        gastosEsencialesFields.values().forEach(field -> {
+            field.setMin(0);
+            field.setErrorMessage("El valor debe ser igual o mayor a 0");
+        });
+        gastosOpcionalesFields.values().forEach(field -> {
+            field.setMin(0);
+            field.setErrorMessage("El valor debe ser igual o mayor a 0");
+        });
+
         // Contenedor de categorías
         Div gastosContainer = new Div();
         gastosContainer.setClassName("gastos-container");
@@ -100,15 +116,6 @@ public class SimulacionView extends VerticalLayout {
         calcularButton.addClickListener(event -> calcularSimulacion());
         enableButtonOnValidInputs();
 
-        // Si el botón está activado tiene un estilo diferente
-        if (calcularButton.isEnabled()) {
-            calcularButton.addClassName("calcular-button");
-        }
-        else {
-            calcularButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        }
-
-        // Añadir componentes al contenedor
         simulacionContainer.add(ingresosField, mesesField, metaAhorroField, gastosContainer, calcularButton);
     }
 
@@ -144,52 +151,53 @@ public class SimulacionView extends VerticalLayout {
     }
 
     private void validateInputs() {
-        boolean allInputsValid = ingresosField.getValue() != null
-                && mesesField.getValue() != null
-                && metaAhorroField.getValue() != null
-                && gastosEsencialesFields.values().stream().allMatch(field -> field.getValue() != null)
-                && gastosOpcionalesFields.values().stream().allMatch(field -> field.getValue() != null);
+        boolean allInputsValid = ingresosField.getValue() != null && ingresosField.getValue() >= 0
+                && mesesField.getValue() != null && mesesField.getValue() >= 1
+                && metaAhorroField.getValue() != null && metaAhorroField.getValue() >= 0
+                && gastosEsencialesFields.values().stream().allMatch(field -> field.getValue() != null && field.getValue() >= 0)
+                && gastosOpcionalesFields.values().stream().allMatch(field -> field.getValue() != null && field.getValue() >= 0);
 
         calcularButton.setEnabled(allInputsValid);
     }
 
     private void calcularSimulacion() {
-        try {
-            Map<String, Object> simulacionData = new HashMap<>();
+        // Validar que los valores sean válidos
+        if (ingresosField.getValue() < 0 || mesesField.getValue() < 1 || metaAhorroField.getValue() < 0) {
+            Notification.show("Por favor, corrige los valores del formulario.");
+            return;
+        }
 
-            simulacionData.put("ingresos", ingresosField.getValue() != null ? ingresosField.getValue() : 0.0);
-            simulacionData.put("mesesSimulacion", mesesField.getValue() != null ? mesesField.getValue().intValue() : 0);
-            simulacionData.put("metaAhorro", metaAhorroField.getValue() != null ? metaAhorroField.getValue() : 0.0);
+        boolean invalidGastos = gastosEsencialesFields.values().stream().anyMatch(field -> field.getValue() < 0)
+                || gastosOpcionalesFields.values().stream().anyMatch(field -> field.getValue() < 0);
 
-            // Gastos esenciales
-            Map<String, Double> gastosEsenciales = gastosEsencialesFields.entrySet().stream()
-                    .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getValue()));
-            simulacionData.put("gastosEsenciales", gastosEsenciales);
+        if (invalidGastos) {
+            Notification.show("Los gastos deben ser valores positivos.");
+            return;
+        }
 
-            // Gastos opcionales
-            Map<String, Double> gastosOpcionales = gastosOpcionalesFields.entrySet().stream()
-                    .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getValue()));
-            simulacionData.put("gastosOpcionales", gastosOpcionales);
+        // Continuar con el envío de los datos al backend
+        Map<String, Object> simulacionData = new HashMap<>();
+        simulacionData.put("ingresos", ingresosField.getValue());
+        simulacionData.put("mesesSimulacion", mesesField.getValue().intValue());
+        simulacionData.put("metaAhorro", metaAhorroField.getValue());
 
-            // Llamar al servicio para calcular la simulación
-            SimulacionService simulacionService = new SimulacionService();
-            Optional<Map<String, Object>> result = simulacionService.calcularSimulacion(simulacionData);
+        // Recopilar los gastos
+        Map<String, Double> gastosEsenciales = gastosEsencialesFields.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getValue()));
+        simulacionData.put("gastosEsenciales", gastosEsenciales);
 
-            if (result.isPresent()) {
-                // Almacenar los datos calculados en la sesión
-                UI.getCurrent().getSession().setAttribute("simulacionData", result.get());
+        Map<String, Double> gastosOpcionales = gastosOpcionalesFields.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getValue()));
+        simulacionData.put("gastosOpcionales", gastosOpcionales);
 
-                // Navegar a la vista de resultados
-                UI.getCurrent().navigate("resultados");
-            } else {
-                Notification.show("Error al calcular la simulación. Inténtelo nuevamente.");
-            }
-        } catch (Exception e) {
-            Notification.show("Error inesperado. Inténtelo nuevamente.");
-            e.printStackTrace();
+        SimulacionService simulacionService = new SimulacionService();
+        Optional<Map<String, Object>> result = simulacionService.calcularSimulacion(simulacionData);
+
+        if (result.isPresent()) {
+            UI.getCurrent().getSession().setAttribute("simulacionData", result.get());
+            UI.getCurrent().navigate("resultados");
+        } else {
+            Notification.show("Error al calcular la simulación. Inténtelo nuevamente.");
         }
     }
-
-
-
 }
