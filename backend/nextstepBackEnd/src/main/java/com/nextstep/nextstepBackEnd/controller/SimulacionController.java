@@ -44,8 +44,12 @@ public class SimulacionController {
     // Endpoint para generar el PDF de la simulación
     @PostMapping("/exportar")
     public ResponseEntity<ByteArrayResource> exportarSimulacionPdf(@RequestBody SimulacionDTO simulacionDTO) {
-        if (simulacionDTO == null) {
-            return ResponseEntity.badRequest().build();
+        if (simulacionDTO == null
+                || simulacionDTO.getIngresos() == 0
+                || simulacionDTO.getMesesSimulacion() == 0
+                || simulacionDTO.getGastosClasificados() == null
+                || simulacionDTO.getGastosClasificados().isEmpty()) {
+            return ResponseEntity.badRequest().body(null);
         }
 
         byte[] pdfContent = simulacionPdfService.generarPdfSimulacion(simulacionDTO);
@@ -60,6 +64,5 @@ public class SimulacionController {
                 .contentLength(pdfContent.length)
                 .body(resource);
     }
-
 
 }

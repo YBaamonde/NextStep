@@ -10,6 +10,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEnterEvent;
@@ -72,39 +73,36 @@ public class ResultadosView extends VerticalLayout implements BeforeEnterObserve
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        Map<String, List<String>> queryParams = event.getLocation().getQueryParameters().getParameters();
+        simulacionData = (Map<String, Object>) UI.getCurrent().getSession().getAttribute("simulacionData");
 
-        String balanceProyectado = queryParams.getOrDefault("balanceProyectado", List.of("0")).get(0);
-        String metaAhorro = queryParams.getOrDefault("metaAhorro", List.of("0")).get(0);
-        List<String> recomendaciones = queryParams.getOrDefault("recomendaciones", List.of("No se han generado recomendaciones"));
+        if (simulacionData == null || simulacionData.isEmpty()) {
+            Notification.show("No se encontraron datos de simulación. Por favor, intente nuevamente.");
+            UI.getCurrent().navigate("simulacion");
+            return;
+        }
 
-        // Actualizar el balance y meta de ahorro
-        balanceLabel.setText("Balance Proyectado: " + balanceProyectado + " €\nMeta de Ahorro: " + metaAhorro + " €");
+        // Actualizar las etiquetas y recomendaciones
+        balanceLabel.setText("Balance Proyectado: " + simulacionData.get("balanceProyectado") + " €");
+        metaAhorroLabel.setText("Meta de Ahorro: " + simulacionData.get("metaAhorro") + " €");
 
-        // Actualizar las recomendaciones
+        List<String> recomendaciones = (List<String>) simulacionData.get("recomendaciones");
         recomendacionesContainer.removeAll();
         recomendaciones.forEach(rec -> {
             Span recLabel = new Span("- " + rec.trim());
             recLabel.addClassName("resultado-recomendacion");
             recomendacionesContainer.add(recLabel);
         });
-
-        // Guardar datos de simulación para exportar
-        simulacionData = new HashMap<>();
-        simulacionData.put("balanceProyectado", Double.parseDouble(balanceProyectado));
-        simulacionData.put("metaAhorro", Double.parseDouble(metaAhorro));
-        simulacionData.put("recomendaciones", recomendaciones);
     }
-
-
 
     private void exportarPdf() {
         SimulacionService simulacionService = new SimulacionService();
 
-        // Debug: Mostrar los datos enviados para exportar
-        System.out.println("Datos enviados para exportar PDF: " + simulacionData); // Debug
+        if (simulacionData == null || simulacionData.isEmpty()) {
+            Notification.show("No se encontraron datos de simulación para exportar.");
+            return;
+        }
 
-        simulacionService.exportarSimulacionPdf(simulacionData); // Llama al servicio
+        simulacionService.exportarSimulacionPdf(simulacionData);
     }
 
 }

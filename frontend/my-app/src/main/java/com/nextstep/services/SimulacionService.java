@@ -82,17 +82,19 @@ public class SimulacionService {
     // Metodo para exportar la simulación como PDF
     public void exportarSimulacionPdf(Map<String, Object> simulacionData) {
         try {
-            if (simulacionData == null || simulacionData.isEmpty()) {
-                Notification.show("Error: Los datos de simulación son inválidos o están vacíos.");
+            // Validar campos necesarios
+            if (!simulacionData.containsKey("ingresos") || !simulacionData.containsKey("mesesSimulacion") ||
+                    !simulacionData.containsKey("gastosClasificados") || simulacionData.get("gastosClasificados") == null) {
+                Notification.show("Error: Datos incompletos para la exportación.");
                 return;
             }
 
-            String json = objectMapper.writeValueAsString(simulacionData); // Serializa a JSON
+            String json = objectMapper.writeValueAsString(simulacionData); // Serializar datos
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(baseUrl + "/simulacion/exportar"))
                     .header("Authorization", "Bearer " + getToken())
                     .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(json)) // Enviar JSON
+                    .POST(HttpRequest.BodyPublishers.ofString(json))
                     .build();
 
             HttpResponse<byte[]> response = client.send(request, HttpResponse.BodyHandlers.ofByteArray());
@@ -100,18 +102,13 @@ public class SimulacionService {
             if (response.statusCode() == 200) {
                 byte[] pdfBytes = response.body();
 
-                // Crear un StreamResource para encapsular el PDF
+                // Crear y abrir el PDF como antes
                 StreamResource pdfResource = new StreamResource("simulacion.pdf", () -> new ByteArrayInputStream(pdfBytes));
                 pdfResource.setContentType("application/pdf");
-                pdfResource.setCacheTime(0); // Evitar cacheo
+                pdfResource.setCacheTime(0);
 
-                // Registrar el recurso en el ResourceRegistry
                 StreamRegistration registration = UI.getCurrent().getSession().getResourceRegistry().registerResource(pdfResource);
-
-                // Obtener la URL del recurso
                 String pdfUrl = registration.getResourceUri().toString();
-
-                // Abrir el archivo PDF en una nueva ventana del navegador
                 UI.getCurrent().getPage().open(pdfUrl, "_blank");
             } else {
                 Notification.show("Error al exportar el PDF: " + response.statusCode());
@@ -120,6 +117,7 @@ public class SimulacionService {
             Notification.show("Error al exportar el PDF: " + e.getMessage());
         }
     }
+
 
 
     // Obtener el token de autenticación

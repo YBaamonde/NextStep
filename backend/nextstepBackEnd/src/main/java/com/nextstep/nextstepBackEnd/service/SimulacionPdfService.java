@@ -15,6 +15,14 @@ import java.util.Map;
 public class SimulacionPdfService {
 
     public byte[] generarPdfSimulacion(SimulacionDTO simulacionDTO) {
+        if (simulacionDTO == null
+                || simulacionDTO.getIngresos() == 0
+                || simulacionDTO.getMesesSimulacion() == 0
+                || simulacionDTO.getGastosClasificados() == null
+                || simulacionDTO.getGastosClasificados().isEmpty()) {
+            throw new IllegalArgumentException("Datos inválidos para generar el PDF");
+        }
+
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
             Document document = new Document();
             PdfWriter.getInstance(document, byteArrayOutputStream);

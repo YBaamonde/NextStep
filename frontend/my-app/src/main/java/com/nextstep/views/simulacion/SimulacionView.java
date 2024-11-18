@@ -157,53 +157,39 @@ public class SimulacionView extends VerticalLayout {
         try {
             Map<String, Object> simulacionData = new HashMap<>();
 
-            // Asegúrate de obtener valores válidos para ingresos, meses y metaAhorro
-            simulacionData.put("ingresos", ingresosField.getValue() != null ? ingresosField.getValue() : 0.0); // Double directamente
-            simulacionData.put("mesesSimulacion", mesesField.getValue() != null ? mesesField.getValue().intValue() : 0); // Integer directamente
-            simulacionData.put("metaAhorro", metaAhorroField.getValue() != null ? metaAhorroField.getValue() : 0.0); // Double directamente
+            simulacionData.put("ingresos", ingresosField.getValue() != null ? ingresosField.getValue() : 0.0);
+            simulacionData.put("mesesSimulacion", mesesField.getValue() != null ? mesesField.getValue().intValue() : 0);
+            simulacionData.put("metaAhorro", metaAhorroField.getValue() != null ? metaAhorroField.getValue() : 0.0);
 
-            // Recopila los gastos esenciales
+            // Gastos esenciales
             Map<String, Double> gastosEsenciales = gastosEsencialesFields.entrySet().stream()
                     .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getValue()));
             simulacionData.put("gastosEsenciales", gastosEsenciales);
 
-            // Recopila los gastos opcionales
+            // Gastos opcionales
             Map<String, Double> gastosOpcionales = gastosOpcionalesFields.entrySet().stream()
                     .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getValue()));
             simulacionData.put("gastosOpcionales", gastosOpcionales);
-
-            // Debug: Verificar los datos antes de enviarlos al servicio
-            System.out.println("Datos de simulación enviados al backend: " + simulacionData); // Debug
 
             // Llamar al servicio para calcular la simulación
             SimulacionService simulacionService = new SimulacionService();
             Optional<Map<String, Object>> result = simulacionService.calcularSimulacion(simulacionData);
 
-            // Manejar el resultado
             if (result.isPresent()) {
-                Map<String, Object> resultado = result.get();
-                String balanceProyectado = resultado.get("balanceProyectado").toString();
-                List<String> recomendaciones = (List<String>) resultado.get("recomendaciones");
-                String recomendacionesConcatenadas = String.join(",", recomendaciones);
-
-                // Debug: Verificar el resultado recibido
-                System.out.println("Resultado recibido del backend: " + resultado); // Debug
+                // Almacenar los datos calculados en la sesión
+                UI.getCurrent().getSession().setAttribute("simulacionData", result.get());
 
                 // Navegar a la vista de resultados
-                UI.getCurrent().navigate("resultados?balanceProyectado=" + balanceProyectado
-                        + "&metaAhorro=" + simulacionData.get("metaAhorro")
-                        + "&recomendaciones=" + recomendacionesConcatenadas);
+                UI.getCurrent().navigate("resultados");
             } else {
                 Notification.show("Error al calcular la simulación. Inténtelo nuevamente.");
             }
-        } catch (NumberFormatException e) {
-            Notification.show("Error: Por favor, asegúrese de ingresar valores numéricos válidos en los campos.");
-            e.printStackTrace(); // Debug para identificar errores en los datos ingresados
         } catch (Exception e) {
             Notification.show("Error inesperado. Inténtelo nuevamente.");
-            e.printStackTrace(); // Debug para identificar cualquier otro error
+            e.printStackTrace();
         }
     }
+
 
 
 }
