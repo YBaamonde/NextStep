@@ -50,7 +50,7 @@ public class SimulacionService {
 
 
     // Metodo para calcular el total de todos los gastos clasificados (esenciales y opcionales)
-    private double calcularTotalDeGastosClasificados(Map<String, Map<String, Double>> gastosClasificados) {
+    double calcularTotalDeGastosClasificados(Map<String, Map<String, Double>> gastosClasificados) {
         if (gastosClasificados == null) return 0.0;
         return gastosClasificados.values().stream()
                 .flatMap(gastos -> gastos.values().stream())
@@ -64,7 +64,7 @@ public class SimulacionService {
         return gastos.values().stream().mapToDouble(Double::doubleValue).sum();
     }
 
-    private void calcularProporcionGastos(SimulacionDTO simulacionDTO, double ingresos) {
+    void calcularProporcionGastos(SimulacionDTO simulacionDTO, double ingresos) {
         Map<String, Map<String, Double>> gastosClasificados = simulacionDTO.getGastosClasificados();
         if (gastosClasificados == null) return;
 

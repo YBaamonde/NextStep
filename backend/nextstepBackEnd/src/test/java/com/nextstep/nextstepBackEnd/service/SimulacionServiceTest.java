@@ -27,13 +27,13 @@ class SimulacionServiceTest {
         // Configurar DTO con datos clasificados (esenciales y opcionales)
         Map<String, Map<String, Double>> gastosClasificados = new HashMap<>();
         gastosClasificados.put("esenciales", Map.of(
-                "vivienda", 800.0,
-                "alimentacion", 400.0,
-                "transporte", 200.0
+                "Vivienda", 800.0,
+                "Alimentación", 400.0,
+                "Transporte", 200.0
         ));
         gastosClasificados.put("opcionales", Map.of(
-                "entretenimiento", 150.0,
-                "suscripciones", 50.0
+                "Entretenimiento", 150.0,
+                "Suscripciones", 50.0
         ));
 
         simulacionDTO = new SimulacionDTO();
@@ -44,19 +44,23 @@ class SimulacionServiceTest {
     }
 
     @Test
-    void calcularTotalGastos() {
+    void calcularProporciones() {
         // Act
-        double totalGastos = simulacionService.calcularTotalGastos(simulacionDTO.getGastosClasificados());
+        simulacionService.calcularProporcionGastos(simulacionDTO, simulacionDTO.getIngresos());
 
         // Assert
-        assertEquals(1600.0, totalGastos); // 800 + 400 + 200 + 150 + 50 = 1600
+        assertNotNull(simulacionDTO.getProporciones(), "Las proporciones no deben ser nulas");
+        assertEquals(56.0, simulacionDTO.getProporciones().get("esenciales"), 0.01, "La proporción de esenciales debe ser 56.0%");
+        assertEquals(8.0, simulacionDTO.getProporciones().get("opcionales"), 0.01, "La proporción de opcionales debe ser 8.0%");
     }
+
+
 
     @Test
     void calcularBalanceMensual() {
         // Arrange
         double ingresos = simulacionDTO.getIngresos();
-        double totalGastos = simulacionService.calcularTotalGastos(simulacionDTO.getGastosClasificados());
+        double totalGastos = simulacionService.calcularTotalDeGastosClasificados(simulacionDTO.getGastosClasificados());
 
         // Act
         Map<Integer, Double> balancePorMes = simulacionService.calcularBalanceMensual(simulacionDTO, ingresos, totalGastos);
@@ -110,9 +114,9 @@ class SimulacionServiceTest {
         assertTrue(recomendaciones.get(0).contains("Su balance proyectado es positivo"));
         assertTrue(recomendaciones.size() >= 1);
 
-        if (simulacionDTO.getBalanceProyectado() < 0) {
-            assertTrue(recomendaciones.get(1).contains("Considere reducir gastos opcionales"));
-        }
+        simulacionDTO.setBalanceProyectado(-100.0); // Balance negativo
+        recomendaciones = simulacionService.generarRecomendaciones(simulacionDTO, simulacionDTO.getBalanceProyectado());
+        assertTrue(recomendaciones.get(0).contains("Su balance proyectado es negativo"));
     }
 
     @Test
