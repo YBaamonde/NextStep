@@ -1,5 +1,6 @@
 package com.nextstep.nextstepBackEnd.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,7 +16,7 @@ public class GastoDTO {
     private LocalDate fecha;
     private Integer categoriaId;
 
-    // Constructor, getters y setters
+    // Constructor
     public GastoDTO(Integer id, String nombre, BigDecimal monto, LocalDate fecha, Integer categoriaId) {
         this.id = id;
         this.nombre = nombre;

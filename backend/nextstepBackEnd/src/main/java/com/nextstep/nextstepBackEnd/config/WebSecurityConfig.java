@@ -36,6 +36,7 @@ public class WebSecurityConfig {
                 .requestMatchers("/categorias/**").authenticated() // Requiere autenticación para las rutas de categorías
                 .requestMatchers("/debug/**").permitAll() // Permitir acceso a rutas de depuración
                 .requestMatchers("/perfil/**").authenticated() // Requiere autenticación para las rutas de perfil
+                .requestMatchers("/simulacion/**").authenticated() // Requiere autenticación para las rutas de simulación
                 .requestMatchers("/").authenticated() // Bloquear la ruta raíz si no está autenticado
                 .anyRequest().authenticated() // Proteger cualquier otra ruta
         );

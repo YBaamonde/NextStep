@@ -5,7 +5,7 @@ import com.nextstep.views.GastosView;
 import com.nextstep.views.temp.InicioView;
 import com.nextstep.views.PagosView;
 import com.nextstep.views.PerfilView;
-import com.nextstep.views.temp.SimulacionView;
+import com.nextstep.views.simulacion.SimulacionView;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
