@@ -57,8 +57,8 @@ public class SimulacionView extends VerticalLayout {
         ingresosField = new NumberField("Ingresos mensuales (€)");
         ingresosField.setPlaceholder("Ej.: 2500");
         ingresosField.setRequiredIndicatorVisible(true);
-        ingresosField.setMin(0);
-        ingresosField.setErrorMessage("El valor debe ser igual o mayor a 0");
+        ingresosField.setMin(1);
+        ingresosField.setErrorMessage("El valor debe ser mayor a 0");
 
         // Campo de meses
         mesesField = new NumberField("Duración de la simulación (meses)");

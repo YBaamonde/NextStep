@@ -28,16 +28,16 @@ class SimulacionServiceTest {
         Map<String, Map<String, Double>> gastosClasificados = new HashMap<>();
         gastosClasificados.put("esenciales", Map.of(
                 "Vivienda", 800.0,
-                "Alimentación", 400.0,
-                "Transporte", 200.0
+                "Alimentación", 100.0,
+                "Transporte", 100.0
         ));
         gastosClasificados.put("opcionales", Map.of(
-                "Entretenimiento", 150.0,
-                "Suscripciones", 50.0
+                "Entretenimiento", 400.0,
+                "Suscripciones", 100.0
         ));
 
         simulacionDTO = new SimulacionDTO();
-        simulacionDTO.setIngresos(2500.0);
+        simulacionDTO.setIngresos(2000.0);
         simulacionDTO.setGastosClasificados(gastosClasificados);
         simulacionDTO.setMesesSimulacion(6);
         simulacionDTO.setMetaAhorro(1000.0);
@@ -50,8 +50,8 @@ class SimulacionServiceTest {
 
         // Assert
         assertNotNull(simulacionDTO.getProporciones(), "Las proporciones no deben ser nulas");
-        assertEquals(56.0, simulacionDTO.getProporciones().get("esenciales"), 0.01, "La proporción de esenciales debe ser 56.0%");
-        assertEquals(8.0, simulacionDTO.getProporciones().get("opcionales"), 0.01, "La proporción de opcionales debe ser 8.0%");
+        assertEquals(50.0, simulacionDTO.getProporciones().get("esenciales"), 0.01, "La proporción de esenciales debe ser 56.0%");
+        assertEquals(25.0, simulacionDTO.getProporciones().get("opcionales"), 0.01, "La proporción de opcionales debe ser 8.0%");
     }
 
 
