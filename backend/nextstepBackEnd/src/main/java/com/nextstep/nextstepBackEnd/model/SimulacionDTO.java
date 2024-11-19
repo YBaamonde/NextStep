@@ -20,4 +20,6 @@ public class SimulacionDTO {
     private Map<String, Map<String, Double>> gastosClasificados = new HashMap<>(); // Gastos clasificados en esenciales y opcionales
     private Map<Integer, Double> balancePorMes = new HashMap<>(); // Balance mensual proyectado
     private List<String> recomendaciones = new ArrayList<>(); // Recomendaciones generadas durante la simulación
+
+    private Map<String, Double> proporciones = new HashMap<>(); // Proporción de gastos esenciales y opcionales
 }

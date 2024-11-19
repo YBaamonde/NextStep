@@ -90,3 +90,36 @@
 .nueva-simulacion-button:hover {
     background-color: #218838;
 }
+
+/* Ajustes para pantallas pequeñas */
+@media (max-width: 768px) {
+    .resultados-container {
+        width: 95%;
+        max-width: 80%;
+        padding: 15px;
+        margin-top: 30px;
+    }
+
+    .resultado-balance {
+        font-size: 1.3rem;
+    }
+
+    .resultado-recomendaciones-title {
+        font-size: 1rem;
+    }
+
+    .resultado-recomendacion {
+        font-size: 1rem;
+    }
+
+    .button-layout {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .export-pdf-button,
+    .nueva-simulacion-button {
+        width: 100%;
+        font-size: 0.9rem;
+    }
+}

@@ -31,6 +31,7 @@ public class SimulacionService {
 
     // Metodo para enviar datos de simulación y calcular resultados
     public Optional<Map<String, Object>> calcularSimulacion(Map<String, Object> simulacionData) {
+        System.out.println("Datos enviados al backend para la simulación: " + simulacionData); // Debug
         try {
             // Validar tipos de datos de gastos
             if (!(simulacionData.get("gastosEsenciales") instanceof Map) || !(simulacionData.get("gastosOpcionales") instanceof Map)) {
@@ -43,18 +44,13 @@ public class SimulacionService {
             gastosClasificados.put("esenciales", (Map<String, Double>) simulacionData.get("gastosEsenciales"));
             gastosClasificados.put("opcionales", (Map<String, Double>) simulacionData.get("gastosOpcionales"));
 
-            // Elimina los campos individuales de gastos y agrega `gastosClasificados`
             simulacionData.remove("gastosEsenciales");
             simulacionData.remove("gastosOpcionales");
             simulacionData.put("gastosClasificados", gastosClasificados);
 
-            // Validar campos necesarios
-            if (!simulacionData.containsKey("metaAhorro") || !simulacionData.containsKey("mesesSimulacion") || !simulacionData.containsKey("ingresos")) {
-                Notification.show("Faltan campos requeridos en la simulación.");
-                return Optional.empty();
-            }
+            System.out.println("Datos estructurados para la simulación: " + simulacionData); // Debug
 
-            // Serializa el JSON y envía la solicitud como antes
+            // Serializa el JSON y envía la solicitud
             String json = objectMapper.writeValueAsString(simulacionData);
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(baseUrl + "/simulacion/calcular"))
@@ -63,29 +59,37 @@ public class SimulacionService {
                     .POST(HttpRequest.BodyPublishers.ofString(json))
                     .build();
 
-            // Procesar la respuesta
+            System.out.println("Enviando solicitud al backend..."); // Debug
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println("Respuesta recibida del backend: " + response.body()); // Debug
+
             if (response.statusCode() == 200) {
                 Map<String, Object> responseMap = objectMapper.readValue(response.body(), new TypeReference<>() {});
+                System.out.println("Datos procesados correctamente en el backend: " + responseMap); // Debug
+                System.out.println("Proporciones enviadas por el backend: " + responseMap.get("proporciones")); // Debug
                 return Optional.of(responseMap);
             } else {
                 Notification.show("Error al calcular la simulación: " + response.statusCode());
+                System.out.println("Error al calcular la simulación: " + response.body()); // Debug
             }
         } catch (IOException | InterruptedException e) {
             Notification.show("Error al calcular la simulación: " + e.getMessage());
+            System.out.println("Error al calcular la simulación: " + e.getMessage()); // Debug
         }
         return Optional.empty();
     }
 
 
 
+
     // Metodo para exportar la simulación como PDF
     public void exportarSimulacionPdf(Map<String, Object> simulacionData) {
+        System.out.println("Exportando simulación a PDF con datos: " + simulacionData); // Debug
         try {
-            // Validar campos necesarios
             if (!simulacionData.containsKey("ingresos") || !simulacionData.containsKey("mesesSimulacion") ||
                     !simulacionData.containsKey("gastosClasificados") || simulacionData.get("gastosClasificados") == null) {
                 Notification.show("Error: Datos incompletos para la exportación.");
+                System.out.println("Datos incompletos para la exportación: " + simulacionData); // Debug
                 return;
             }
 
@@ -97,12 +101,13 @@ public class SimulacionService {
                     .POST(HttpRequest.BodyPublishers.ofString(json))
                     .build();
 
+            System.out.println("Enviando solicitud para generar PDF..."); // Debug
             HttpResponse<byte[]> response = client.send(request, HttpResponse.BodyHandlers.ofByteArray());
 
             if (response.statusCode() == 200) {
                 byte[] pdfBytes = response.body();
+                System.out.println("PDF recibido correctamente del backend."); // Debug
 
-                // Crear y abrir el PDF como antes
                 StreamResource pdfResource = new StreamResource("simulacion.pdf", () -> new ByteArrayInputStream(pdfBytes));
                 pdfResource.setContentType("application/pdf");
                 pdfResource.setCacheTime(0);
@@ -112,11 +117,14 @@ public class SimulacionService {
                 UI.getCurrent().getPage().open(pdfUrl, "_blank");
             } else {
                 Notification.show("Error al exportar el PDF: " + response.statusCode());
+                System.out.println("Error al exportar el PDF: " + response.body()); // Debug
             }
         } catch (IOException | InterruptedException e) {
             Notification.show("Error al exportar el PDF: " + e.getMessage());
+            System.out.println("Error al exportar el PDF: " + e.getMessage()); // Debug
         }
     }
+
 
 
 

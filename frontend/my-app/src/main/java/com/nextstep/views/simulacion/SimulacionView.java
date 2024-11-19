@@ -57,21 +57,21 @@ public class SimulacionView extends VerticalLayout {
         ingresosField = new NumberField("Ingresos mensuales (€)");
         ingresosField.setPlaceholder("Ej.: 2500");
         ingresosField.setRequiredIndicatorVisible(true);
-        ingresosField.setMin(0); // No permite valores negativos
+        ingresosField.setMin(0);
         ingresosField.setErrorMessage("El valor debe ser igual o mayor a 0");
 
         // Campo de meses
         mesesField = new NumberField("Duración de la simulación (meses)");
         mesesField.setPlaceholder("Ej.: 6");
         mesesField.setRequiredIndicatorVisible(true);
-        mesesField.setMin(1); // Mínimo de 1 mes
+        mesesField.setMin(1);
         mesesField.setErrorMessage("La duración debe ser al menos 1 mes");
 
         // Campo de meta de ahorro
         metaAhorroField = new NumberField("Meta de ahorro (€)");
         metaAhorroField.setPlaceholder("Ej.: 1000");
         metaAhorroField.setRequiredIndicatorVisible(true);
-        metaAhorroField.setMin(0); // No permite valores negativos
+        metaAhorroField.setMin(0);
         metaAhorroField.setErrorMessage("El valor debe ser igual o mayor a 0");
 
         // Crear campos de gastos esenciales y opcionales
@@ -116,6 +116,10 @@ public class SimulacionView extends VerticalLayout {
         calcularButton.addClickListener(event -> calcularSimulacion());
         enableButtonOnValidInputs();
 
+        if (calcularButton.isEnabled()) {
+            calcularButton.addClassName("calcular-button");
+        }
+
         simulacionContainer.add(ingresosField, mesesField, metaAhorroField, gastosContainer, calcularButton);
     }
 
@@ -158,24 +162,12 @@ public class SimulacionView extends VerticalLayout {
                 && gastosOpcionalesFields.values().stream().allMatch(field -> field.getValue() != null && field.getValue() >= 0);
 
         calcularButton.setEnabled(allInputsValid);
+        if (calcularButton.isEnabled()) {
+            calcularButton.addClassName("calcular-button");
+        }
     }
 
     private void calcularSimulacion() {
-        // Validar que los valores sean válidos
-        if (ingresosField.getValue() < 0 || mesesField.getValue() < 1 || metaAhorroField.getValue() < 0) {
-            Notification.show("Por favor, corrige los valores del formulario.");
-            return;
-        }
-
-        boolean invalidGastos = gastosEsencialesFields.values().stream().anyMatch(field -> field.getValue() < 0)
-                || gastosOpcionalesFields.values().stream().anyMatch(field -> field.getValue() < 0);
-
-        if (invalidGastos) {
-            Notification.show("Los gastos deben ser valores positivos.");
-            return;
-        }
-
-        // Continuar con el envío de los datos al backend
         Map<String, Object> simulacionData = new HashMap<>();
         simulacionData.put("ingresos", ingresosField.getValue());
         simulacionData.put("mesesSimulacion", mesesField.getValue().intValue());
@@ -190,10 +182,13 @@ public class SimulacionView extends VerticalLayout {
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getValue()));
         simulacionData.put("gastosOpcionales", gastosOpcionales);
 
+        System.out.println("Datos enviados al backend para la simulación: " + simulacionData);
+
         SimulacionService simulacionService = new SimulacionService();
         Optional<Map<String, Object>> result = simulacionService.calcularSimulacion(simulacionData);
 
         if (result.isPresent()) {
+            System.out.println("Simulación calculada con éxito: " + result.get());
             UI.getCurrent().getSession().setAttribute("simulacionData", result.get());
             UI.getCurrent().navigate("resultados");
         } else {

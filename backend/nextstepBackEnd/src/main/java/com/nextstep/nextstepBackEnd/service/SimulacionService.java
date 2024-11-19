@@ -13,37 +13,71 @@ import java.util.Map;
 public class SimulacionService {
 
     public SimulacionDTO calcularSimulacion(SimulacionDTO simulacionDTO) {
-        System.out.println("Datos recibidos en el backend: " + simulacionDTO); // DEBUG
+        System.out.println("Datos recibidos en el backend: " + simulacionDTO); // Debug
+
+        if (simulacionDTO.getIngresos() < 0 || simulacionDTO.getMesesSimulacion() <= 0) {
+            simulacionDTO.getRecomendaciones().add("Los ingresos y la duración de la simulación deben ser positivos.");
+            simulacionDTO.setBalanceProyectado(0);
+            System.out.println("Simulación detenida por datos negativos o inválidos."); // Debug
+            return simulacionDTO;
+        }
 
         double ingresos = simulacionDTO.getIngresos();
-        double totalGastos = calcularTotalGastos(simulacionDTO.getGastosClasificados()); // Ajuste para usar gastosClasificados
+        double totalGastos = calcularTotalDeGastosClasificados(simulacionDTO.getGastosClasificados());
+        System.out.println("Total de gastos calculados: " + totalGastos); // Debug
 
-        // Calcular balance general proyectado
+        calcularProporcionGastos(simulacionDTO, ingresos);
+
         double balanceProyectado = ingresos - totalGastos;
         simulacionDTO.setBalanceProyectado(balanceProyectado);
+        System.out.println("Balance proyectado calculado: " + balanceProyectado); // Debug
 
-        // Calcular balance mes a mes
         Map<Integer, Double> balancePorMes = calcularBalanceMensual(simulacionDTO, ingresos, totalGastos);
         simulacionDTO.setBalancePorMes(balancePorMes);
+        System.out.println("Balance mensual calculado: " + balancePorMes); // Debug
 
-        // Evaluar meta de ahorro
         if (simulacionDTO.getMetaAhorro() != null) {
             evaluarMetaAhorro(simulacionDTO, balancePorMes);
         }
 
-        // Generar recomendaciones en base a los gastos clasificados
         List<String> recomendaciones = generarRecomendaciones(simulacionDTO, balanceProyectado);
         simulacionDTO.setRecomendaciones(recomendaciones);
+        System.out.println("Recomendaciones generadas: " + recomendaciones); // Debug
 
+        System.out.println("Simulación finalizada con éxito: " + simulacionDTO); // Debug
         return simulacionDTO;
     }
 
 
-    double calcularTotalGastos(Map<String, Map<String, Double>> gastosClasificados) {
+    // Metodo para calcular el total de todos los gastos clasificados (esenciales y opcionales)
+    private double calcularTotalDeGastosClasificados(Map<String, Map<String, Double>> gastosClasificados) {
+        if (gastosClasificados == null) return 0.0;
         return gastosClasificados.values().stream()
-                .flatMap(map -> map.values().stream())
+                .flatMap(gastos -> gastos.values().stream())
                 .mapToDouble(Double::doubleValue)
                 .sum();
+    }
+
+    // Metodo para calcular el total de un submapa específico (esenciales u opcionales)
+    private double calcularTotalGastos(Map<String, Double> gastos) {
+        if (gastos == null) return 0.0;
+        return gastos.values().stream().mapToDouble(Double::doubleValue).sum();
+    }
+
+    private void calcularProporcionGastos(SimulacionDTO simulacionDTO, double ingresos) {
+        Map<String, Map<String, Double>> gastosClasificados = simulacionDTO.getGastosClasificados();
+        if (gastosClasificados == null) return;
+
+        double totalEsenciales = calcularTotalGastos(gastosClasificados.get("esenciales"));
+        double totalOpcionales = calcularTotalGastos(gastosClasificados.get("opcionales"));
+
+        double proporcionEsenciales = ingresos > 0 ? (totalEsenciales / ingresos) * 100 : 0;
+        double proporcionOpcionales = ingresos > 0 ? (totalOpcionales / ingresos) * 100 : 0;
+
+        simulacionDTO.getProporciones().put("esenciales", proporcionEsenciales);
+        simulacionDTO.getProporciones().put("opcionales", proporcionOpcionales);
+
+        System.out.println("Proporciones calculadas: Esenciales = " + proporcionEsenciales + ", Opcionales = " + proporcionOpcionales);
     }
 
 
@@ -95,8 +129,4 @@ public class SimulacionService {
 
         return recomendaciones;
     }
-
-
-
-
 }

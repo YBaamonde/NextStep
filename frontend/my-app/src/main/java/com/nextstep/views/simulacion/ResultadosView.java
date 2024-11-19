@@ -13,6 +13,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
@@ -26,9 +27,12 @@ import java.util.*;
 public class ResultadosView extends VerticalLayout implements BeforeEnterObserver {
 
     private Span balanceLabel;
-    private Span metaAhorroLabel; // Mostrar meta de ahorro
+    private Span metaAhorroLabel;
     private Div recomendacionesContainer;
-    private Map<String, Object> simulacionData; // Guardar datos de simulación para exportar
+    private Div progressBarsContainer;
+    private ProgressBar esencialesBar;
+    private ProgressBar opcionalesBar;
+    private Map<String, Object> simulacionData;
 
     public ResultadosView() {
         setClassName("resultados-view");
@@ -36,19 +40,17 @@ public class ResultadosView extends VerticalLayout implements BeforeEnterObserve
         setPadding(false);
         setSpacing(false);
 
-        // Navbar
         AuthService authService = new AuthService();
         MainNavbar navbar = new MainNavbar(authService);
         add(navbar);
 
-        // Contenedor principal de resultados
         Div resultadosContainer = new Div();
         resultadosContainer.setClassName("resultados-container");
 
         balanceLabel = new Span();
         balanceLabel.addClassName("resultado-balance");
 
-        metaAhorroLabel = new Span(); // Nuevo elemento para meta de ahorro
+        metaAhorroLabel = new Span();
         metaAhorroLabel.addClassName("resultado-meta-ahorro");
 
         Span recomendacionesLabel = new Span("Recomendaciones:");
@@ -57,7 +59,15 @@ public class ResultadosView extends VerticalLayout implements BeforeEnterObserve
         recomendacionesContainer = new Div();
         recomendacionesContainer.setClassName("recomendaciones-container");
 
-        // Botones para exportar y nueva simulación
+        progressBarsContainer = new Div();
+        progressBarsContainer.setClassName("progress-bars-container");
+
+        esencialesBar = new ProgressBar();
+        esencialesBar.addClassName("esenciales-bar");
+
+        opcionalesBar = new ProgressBar();
+        opcionalesBar.addClassName("opcionales-bar");
+
         Button exportarPdfButton = new Button("Exportar PDF", event -> exportarPdf());
         exportarPdfButton.addClassName("export-pdf-button");
 
@@ -67,24 +77,55 @@ public class ResultadosView extends VerticalLayout implements BeforeEnterObserve
         HorizontalLayout buttonLayout = new HorizontalLayout(exportarPdfButton, nuevaSimulacionButton);
         buttonLayout.addClassName("button-layout");
 
-        resultadosContainer.add(balanceLabel, metaAhorroLabel, recomendacionesLabel, recomendacionesContainer, buttonLayout);
+        resultadosContainer.add(balanceLabel, metaAhorroLabel, recomendacionesLabel, progressBarsContainer, recomendacionesContainer, buttonLayout);
         add(resultadosContainer);
     }
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
+        // Debug: Verificar si los datos de la simulación están disponibles en la sesión
         simulacionData = (Map<String, Object>) UI.getCurrent().getSession().getAttribute("simulacionData");
+        System.out.println("Datos cargados en ResultadosView: " + simulacionData); // Debug
 
         if (simulacionData == null || simulacionData.isEmpty()) {
-            Notification.show("No se encontraron datos de simulación. Por favor, intente nuevamente.");
+            Notification.show("No se encontraron datos de simulación.");
             UI.getCurrent().navigate("simulacion");
             return;
         }
 
-        // Actualizar las etiquetas y recomendaciones
-        balanceLabel.setText("Balance Proyectado: " + simulacionData.get("balanceProyectado") + " €");
-        metaAhorroLabel.setText("Meta de Ahorro: " + simulacionData.get("metaAhorro") + " €");
+        // Extraer y procesar datos
+        double balanceProyectado = (double) simulacionData.getOrDefault("balanceProyectado", 0.0);
+        double metaAhorro = (double) simulacionData.getOrDefault("metaAhorro", 0.0);
 
+        // Verificar y extraer proporciones
+        Map<String, Double> proporciones = (Map<String, Double>) simulacionData.getOrDefault("proporciones", new HashMap<>());
+        double esencialesPorcentaje = proporciones.getOrDefault("esenciales", 0.0);
+        double opcionalesPorcentaje = proporciones.getOrDefault("opcionales", 0.0);
+
+        // Debug: Confirmar proporciones extraídas
+        System.out.println("Proporciones extraídas: Esenciales = " + esencialesPorcentaje + ", Opcionales = " + opcionalesPorcentaje); // Debug
+
+        // Actualizar componentes de la vista
+        balanceLabel.setText("Balance Proyectado: " + balanceProyectado + " €");
+        metaAhorroLabel.setText("Meta de Ahorro: " + metaAhorro + " €");
+
+        // Actualizar barras de progreso
+        esencialesBar.setValue(esencialesPorcentaje / 100.0);
+        opcionalesBar.setValue(opcionalesPorcentaje / 100.0);
+
+        Span esencialesLabel = new Span("Esenciales: " + String.format("%.1f", esencialesPorcentaje) + "%");
+        esencialesLabel.addClassName("progreso-esenciales");
+
+        Span opcionalesLabel = new Span("Opcionales: " + String.format("%.1f", opcionalesPorcentaje) + "%");
+        opcionalesLabel.addClassName("progreso-opcionales");
+
+        VerticalLayout esencialesContainer = new VerticalLayout(esencialesLabel, esencialesBar);
+        VerticalLayout opcionalesContainer = new VerticalLayout(opcionalesLabel, opcionalesBar);
+
+        progressBarsContainer.removeAll();
+        progressBarsContainer.add(esencialesContainer, opcionalesContainer);
+
+        // Procesar recomendaciones
         List<String> recomendaciones = (List<String>) simulacionData.get("recomendaciones");
         recomendacionesContainer.removeAll();
         recomendaciones.forEach(rec -> {
@@ -92,17 +133,21 @@ public class ResultadosView extends VerticalLayout implements BeforeEnterObserve
             recLabel.addClassName("resultado-recomendacion");
             recomendacionesContainer.add(recLabel);
         });
+
+        // Debug: Confirmar que los datos se configuraron correctamente
+        System.out.println("Vista ResultadosView configurada con datos: " + simulacionData); // Debug
     }
 
+
     private void exportarPdf() {
-        SimulacionService simulacionService = new SimulacionService();
+        System.out.println("Exportando PDF con datos: " + simulacionData);
 
         if (simulacionData == null || simulacionData.isEmpty()) {
-            Notification.show("No se encontraron datos de simulación para exportar.");
+            Notification.show("Error: Datos incompletos para la exportación.");
             return;
         }
 
+        SimulacionService simulacionService = new SimulacionService();
         simulacionService.exportarSimulacionPdf(simulacionData);
     }
-
 }
