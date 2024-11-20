@@ -24,6 +24,10 @@ public class Notificacion {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "pago_id", nullable = false)
+    private Pago pago;  // Relación con la entidad Pago
+
     @Column(nullable = false, length = 100)
     private String titulo;
 
@@ -39,4 +43,3 @@ public class Notificacion {
     @Column(nullable = true)
     private LocalDateTime fechaLeido;
 }
-

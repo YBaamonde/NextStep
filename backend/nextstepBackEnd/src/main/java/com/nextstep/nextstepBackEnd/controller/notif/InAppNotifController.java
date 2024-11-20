@@ -1,0 +1,62 @@
+package com.nextstep.nextstepBackEnd.controller.notif;
+
+import com.nextstep.nextstepBackEnd.model.Notificacion;
+import com.nextstep.nextstepBackEnd.model.NotificacionDTO;
+import com.nextstep.nextstepBackEnd.service.notif.InAppNotifService;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/notificaciones/inapp")
+public class InAppNotifController {
+
+    private final InAppNotifService inAppNotifService;
+
+    public InAppNotifController(InAppNotifService inAppNotifService) {
+        this.inAppNotifService = inAppNotifService;
+    }
+
+    // Crear una nueva notificación asociada a un pago
+    @PostMapping
+    public ResponseEntity<NotificacionDTO> crearNotificacion(
+            @RequestParam Integer usuarioId,
+            @RequestParam Integer pagoId,
+            @Valid @RequestBody NotificacionRequest request) {
+        Notificacion notificacion = inAppNotifService.crearNotificacion(
+                usuarioId, pagoId, request.getTitulo(), request.getMensaje()
+        );
+        return ResponseEntity.ok(inAppNotifService.convertirADTO(notificacion));
+    }
+
+
+    // Obtener todas las notificaciones de un usuario
+    @GetMapping("/{usuarioId}")
+    public ResponseEntity<List<Notificacion>> obtenerNotificaciones(@PathVariable Integer usuarioId) {
+        List<Notificacion> notificaciones = inAppNotifService.obtenerNotificacionesPorUsuario(usuarioId);
+        return ResponseEntity.ok(notificaciones);
+    }
+
+    // Contar las notificaciones no leídas de un usuario
+    @GetMapping("/{usuarioId}/no-leidas")
+    public ResponseEntity<Long> contarNotificacionesNoLeidas(@PathVariable Integer usuarioId) {
+        long noLeidas = inAppNotifService.contarNotificacionesNoLeidas(usuarioId);
+        return ResponseEntity.ok(noLeidas);
+    }
+
+    // Marcar una notificación como leída
+    @PutMapping("/{notificacionId}/leida")
+    public ResponseEntity<Notificacion> marcarComoLeida(@PathVariable Integer notificacionId) {
+        Notificacion notificacion = inAppNotifService.marcarComoLeida(notificacionId);
+        return ResponseEntity.ok(notificacion);
+    }
+
+    // Eliminar una notificación
+    @DeleteMapping("/{notificacionId}")
+    public ResponseEntity<Void> eliminarNotificacion(@PathVariable Integer notificacionId) {
+        inAppNotifService.eliminarNotificacion(notificacionId);
+        return ResponseEntity.ok().build();
+    }
+}
