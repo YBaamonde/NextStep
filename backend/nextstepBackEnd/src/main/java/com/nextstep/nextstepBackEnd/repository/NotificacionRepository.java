@@ -9,9 +9,8 @@ import java.util.List;
 @Repository
 public interface NotificacionRepository extends JpaRepository<Notificacion, Integer> {
 
-    // Obtener notificaciones de un usuario específico, ordenadas por fecha de creación (descendente)
-    List<Notificacion> findByUsuarioIdOrderByFechaCreacionDesc(Integer usuarioId);
+    List<Notificacion> findByUsuarioId(Integer usuarioId);
 
-    // Contar notificaciones no leídas de un usuario
-    Long countByUsuarioIdAndLeidoFalse(Integer usuarioId);
+    long countByUsuarioIdAndLeidoFalse(Integer usuarioId);
 }
+

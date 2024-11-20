@@ -62,7 +62,7 @@ public class InAppNotifService {
 
     // Obtener todas las notificaciones de un usuario
     public List<Notificacion> obtenerNotificacionesPorUsuario(Integer usuarioId) {
-        return notificacionRepository.findByUsuarioIdOrderByFechaCreacionDesc(usuarioId);
+        return notificacionRepository.findByUsuarioId(usuarioId);
     }
 
     // Contar las notificaciones no leídas de un usuario
@@ -80,6 +80,7 @@ public class InAppNotifService {
         notificacion.setFechaLeido(LocalDateTime.now());
         return notificacionRepository.save(notificacion);
     }
+
 
     // Eliminar una notificación
     @Transactional

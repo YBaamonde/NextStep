@@ -1,6 +1,5 @@
 package com.nextstep.nextstepBackEnd.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.*;
 
 import com.nextstep.nextstepBackEnd.model.Pago;
@@ -9,7 +8,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
