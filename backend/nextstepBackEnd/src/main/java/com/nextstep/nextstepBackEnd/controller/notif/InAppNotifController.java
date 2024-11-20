@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/notificaciones/inapp")
@@ -31,12 +32,14 @@ public class InAppNotifController {
         return ResponseEntity.ok(inAppNotifService.convertirADTO(notificacion));
     }
 
-
     // Obtener todas las notificaciones de un usuario
     @GetMapping("/{usuarioId}")
-    public ResponseEntity<List<Notificacion>> obtenerNotificaciones(@PathVariable Integer usuarioId) {
+    public ResponseEntity<List<NotificacionDTO>> obtenerNotificaciones(@PathVariable Integer usuarioId) {
         List<Notificacion> notificaciones = inAppNotifService.obtenerNotificacionesPorUsuario(usuarioId);
-        return ResponseEntity.ok(notificaciones);
+        List<NotificacionDTO> dtos = notificaciones.stream()
+                .map(inAppNotifService::convertirADTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
     // Contar las notificaciones no leídas de un usuario
@@ -48,9 +51,9 @@ public class InAppNotifController {
 
     // Marcar una notificación como leída
     @PutMapping("/{notificacionId}/leida")
-    public ResponseEntity<Notificacion> marcarComoLeida(@PathVariable Integer notificacionId) {
+    public ResponseEntity<NotificacionDTO> marcarComoLeida(@PathVariable Integer notificacionId) {
         Notificacion notificacion = inAppNotifService.marcarComoLeida(notificacionId);
-        return ResponseEntity.ok(notificacion);
+        return ResponseEntity.ok(inAppNotifService.convertirADTO(notificacion));
     }
 
     // Eliminar una notificación
