@@ -1,6 +1,7 @@
 package com.nextstep.views;
 
 import com.nextstep.services.AuthService;
+import com.nextstep.services.InAppNotifService;
 import com.nextstep.services.PerfilService;
 import com.nextstep.views.components.MainNavbar;
 import com.vaadin.flow.component.Key;
@@ -43,8 +44,11 @@ public class PerfilView extends VerticalLayout {
         setPadding(false);
         setSpacing(false);
 
-        // Cargar la barra de navegación
-        MainNavbar navbar = new MainNavbar(authService);
+        AuthService authService = new AuthService();
+        InAppNotifService inAppNotifService = new InAppNotifService();
+
+        // Agregar navbar en la parte superior
+        MainNavbar navbar = new MainNavbar(authService, inAppNotifService);
         add(navbar);
 
         // Obtener el usuario ID de la sesión

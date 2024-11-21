@@ -1,6 +1,7 @@
 package com.nextstep.views.simulacion;
 
 import com.nextstep.services.AuthService;
+import com.nextstep.services.InAppNotifService;
 import com.nextstep.services.SimulacionService;
 import com.nextstep.views.components.MainNavbar;
 import com.vaadin.flow.component.*;
@@ -43,9 +44,11 @@ public class SimulacionView extends VerticalLayout {
         setPadding(false);
         setSpacing(false);
 
-        // Navbar
         AuthService authService = new AuthService();
-        MainNavbar navbar = new MainNavbar(authService);
+        InAppNotifService inAppNotifService = new InAppNotifService();
+
+        // Agregar navbar en la parte superior
+        MainNavbar navbar = new MainNavbar(authService, inAppNotifService);
         add(navbar);
 
         // Contenedor principal
