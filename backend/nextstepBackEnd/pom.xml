@@ -84,6 +84,12 @@
 			<version>5.5.13.4</version>
 		</dependency>
 
+		<!--  Dependencia para enviar notificaciones por correo -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+
 
 
 		<!-- PRUEBAS -->
