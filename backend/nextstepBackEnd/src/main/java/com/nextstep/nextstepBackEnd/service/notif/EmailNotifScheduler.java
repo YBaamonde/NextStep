@@ -23,22 +23,25 @@ public class EmailNotifScheduler {
     //@Scheduled(cron = "0 0 8 * * ?") // Formato CRON para ejecutar a las 8:00 AM
     @Scheduled(cron = "0 * * * * ?") // Ejecutar cada minuto para pruebas
     public void enviarNotificacionesDePagos() {
+        // Obtener fecha del día siguiente
         LocalDate fechaManana = LocalDate.now().plusDays(1);
 
+        // Buscar todos los pagos con fecha igual a "mañana"
         List<Pago> pagosProximos = pagoRepository.findByFechaWithUsuario(fechaManana);
 
+        // Enviar correo por cada pago
         for (Pago pago : pagosProximos) {
             try {
                 String asunto = "Recordatorio de pago: " + pago.getNombre();
-                String mensaje = "Este es un recordatorio de que tienes un pago programado para mañana: " +
-                        pago.getNombre() + ", por un monto de " + pago.getMonto() + ".";
 
-                String destinatario = pago.getUsuario().getEmail();
+                // Generar el HTML del correo
+                String mensajeHtml = emailNotifService.generarPlantillaHtml(pago);
 
-                // Agregar la ruta del logo como cuarto argumento
+                // Ruta del logo
                 String logoPath = "src/main/resources/media/logo03.png";
-                emailNotifService.enviarEmailHtmlConLogo(destinatario, asunto, mensaje, logoPath);
 
+                // Enviar correo con el logo embebido
+                emailNotifService.enviarEmailHtml(pago.getUsuario().getEmail(), asunto, mensajeHtml);
             } catch (Exception e) {
                 System.err.println("Error al enviar correo para el pago ID: " + pago.getId() + " - " + e.getMessage());
             }

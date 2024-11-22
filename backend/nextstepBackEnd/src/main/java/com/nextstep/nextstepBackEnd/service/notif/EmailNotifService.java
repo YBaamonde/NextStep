@@ -21,20 +21,17 @@ public class EmailNotifService {
     }
 
     // Metodo para enviar correos en formato HTML con imágenes embebidas
-    public void enviarEmailHtmlConLogo(String destinatario, String asunto, String mensajeHtml, String logoPath) throws MessagingException {
+    public void enviarEmailHtml(String destinatario, String asunto, String mensajeHtml) throws MessagingException {
         MimeMessage mimeMessage = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true); // `true` permite agregar archivos adjuntos
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true); // `true` permite adjuntos y recursos embebidos
 
         helper.setTo(destinatario);
         helper.setSubject(asunto);
-        helper.setText(mensajeHtml, true); // HTML habilitado
-
-        // Adjuntar el logo como recurso embebido (CID)
-        FileSystemResource logo = new FileSystemResource(logoPath);
-        helper.addInline("logo", logo); // "logo" es el Content-ID (CID) usado en el HTML
+        helper.setText(mensajeHtml, true); // Activar HTML
 
         mailSender.send(mimeMessage);
     }
+
 
     // Metodo para generar la plantilla HTML del correo
     public String generarPlantillaHtml(Pago pago) {
@@ -50,9 +47,6 @@ public class EmailNotifService {
                 "</ul>" +
                 "<p>Asegúrate de realizarlo a tiempo para evitar inconvenientes.</p>" +
                 "<p>Gracias por confiar en <strong>NextStep</strong>.</p>" +
-                "<div style='text-align: center; margin-top: 20px;'>" +
-                "<img src='cid:logo' style='width: 120px; height: auto;' alt='Logo NextStep'>" +
-                "</div>" +
                 "</div>" +
                 "</body>" +
                 "</html>";

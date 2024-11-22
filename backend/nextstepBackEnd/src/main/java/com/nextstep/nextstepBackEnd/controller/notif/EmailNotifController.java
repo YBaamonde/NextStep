@@ -29,8 +29,7 @@ public class EmailNotifController {
             @RequestParam String mensajeHtml
     ) {
         try {
-            String logoPath = "src/main/resources/media/logo03.png";
-            emailNotifService.enviarEmailHtmlConLogo(destinatario, asunto, mensajeHtml, logoPath);
+            emailNotifService.enviarEmailHtml(destinatario, asunto, mensajeHtml);
             return ResponseEntity.ok("Correo HTML enviado correctamente a " + destinatario);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
