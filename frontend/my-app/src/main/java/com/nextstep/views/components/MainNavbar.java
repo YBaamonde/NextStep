@@ -108,6 +108,10 @@ public class MainNavbar extends VerticalLayout {
 
         // Obtener notificaciones desde el backend
         List<Map<String, Object>> notificaciones = notifService.obtenerNotificaciones(usuarioId);
+
+        // Filtrar notificaciones expiradas en el frontend
+        notificaciones = notifService.filtrarNotificacionesExpiradas(notificaciones);
+
         long noLeidas = notifService.contarNotificacionesNoLeidas(usuarioId);
 
         // Actualizar el contador de notificaciones no leídas
@@ -127,16 +131,18 @@ public class MainNavbar extends VerticalLayout {
             for (Map<String, Object> notificacion : notificaciones) {
                 String titulo = (String) notificacion.get("titulo");
                 String mensaje = (String) notificacion.get("mensaje");
+                Integer id = (Integer) notificacion.get("id");
 
+                // Agregar al menú
                 notificationMenu.addItem(titulo + ": " + mensaje, e -> {
-                    Notification.show("Notificación clicada: " + titulo);
                     // Lógica para marcar como leída
-                    notifService.marcarComoLeida((Integer) notificacion.get("id"));
+                    notifService.marcarComoLeida(id);
                     updateNotificationContent(); // Actualizar contenido después de marcar como leída
                 });
             }
         }
     }
+
 
 
 

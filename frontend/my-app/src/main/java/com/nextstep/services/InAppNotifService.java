@@ -10,9 +10,11 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class InAppNotifService {
     private final String baseUrl;
@@ -80,7 +82,7 @@ public class InAppNotifService {
     }
 
     // Marcar una notificación como leída
-    public boolean marcarComoLeida(Integer notificacionId) {
+    public void marcarComoLeida(Integer notificacionId) {
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(baseUrl + "/notificaciones/inapp/" + notificacionId + "/leida"))
@@ -92,38 +94,11 @@ public class InAppNotifService {
 
             if (response.statusCode() == 200) {
                 Notification.show("Notificación marcada como leída.");
-                return true;
             } else {
                 Notification.show("Error al marcar como leída: " + response.statusCode());
-                return false;
             }
         } catch (IOException | InterruptedException e) {
             Notification.show("Error al marcar como leída: " + e.getMessage());
-            return false;
-        }
-    }
-
-    // Eliminar una notificación
-    public boolean eliminarNotificacion(Integer notificacionId) {
-        try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(baseUrl + "/notificaciones/inapp/" + notificacionId))
-                    .header("Authorization", "Bearer " + getToken())
-                    .DELETE()
-                    .build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            if (response.statusCode() == 200) {
-                Notification.show("Notificación eliminada correctamente.");
-                return true;
-            } else {
-                Notification.show("Error al eliminar la notificación: " + response.statusCode());
-                return false;
-            }
-        } catch (IOException | InterruptedException e) {
-            Notification.show("Error al eliminar la notificación: " + e.getMessage());
-            return false;
         }
     }
 
@@ -149,6 +124,24 @@ public class InAppNotifService {
             return 0;
         }
     }
+
+    // Filtrar notificaciones expiradas
+    public List<Map<String, Object>> filtrarNotificacionesExpiradas(List<Map<String, Object>> notificaciones) {
+        LocalDateTime ahora = LocalDateTime.now();
+
+        // Filtra notificaciones cuya fecha de lectura supere los 30 segundos para pruebas
+        return notificaciones.stream()
+                .filter(notificacion -> {
+                    if ((boolean) notificacion.get("leido")) {
+                        LocalDateTime fechaLeido = LocalDateTime.parse((String) notificacion.get("fechaLeido"));
+                        return fechaLeido.plusSeconds(30).isAfter(ahora); // Para pruebas, 30 segundos
+                        // return fechaLeido.plusHours(5).isAfter(ahora); // Para producción, 5 horas
+                    }
+                    return true; // Si no está leída, mantener la notificación
+                })
+                .collect(Collectors.toList());
+    }
+
 
     // Obtener el token de autenticación
     private String getToken() {

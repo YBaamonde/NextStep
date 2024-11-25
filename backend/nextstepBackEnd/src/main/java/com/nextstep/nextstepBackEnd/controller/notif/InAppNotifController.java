@@ -55,11 +55,4 @@ public class InAppNotifController {
         Notificacion notificacion = inAppNotifService.marcarComoLeida(notificacionId);
         return ResponseEntity.ok(inAppNotifService.convertirADTO(notificacion));
     }
-
-    // Eliminar una notificación
-    @DeleteMapping("/{notificacionId}")
-    public ResponseEntity<Void> eliminarNotificacion(@PathVariable Integer notificacionId) {
-        inAppNotifService.eliminarNotificacion(notificacionId);
-        return ResponseEntity.ok().build();
-    }
 }

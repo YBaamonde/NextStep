@@ -81,7 +81,7 @@ public class RegisterView extends Div {
         layout.add(registerButton);
 
         // Enlace para volver al login
-        Button loginButton = new Button("Ya tengo cuenta", event -> getUI().ifPresent(ui -> ui.navigate("login")));
+        Button loginButton = new Button("Ya tengo una cuenta", event -> getUI().ifPresent(ui -> ui.navigate("login")));
         loginButton.addClassName("login-link");
         layout.add(loginButton);
 
