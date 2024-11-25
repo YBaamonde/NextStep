@@ -1,6 +1,6 @@
 package com.nextstep.nextstepBackEnd.repository;
 
-import com.nextstep.nextstepBackEnd.model.Notificacion;
+import com.nextstep.nextstepBackEnd.model.notif.Notificacion;
 import com.nextstep.nextstepBackEnd.model.Pago;
 import com.nextstep.nextstepBackEnd.model.Usuario;
 import org.junit.jupiter.api.BeforeEach;

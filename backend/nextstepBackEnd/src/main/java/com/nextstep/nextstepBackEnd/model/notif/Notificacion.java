@@ -1,5 +1,7 @@
-package com.nextstep.nextstepBackEnd.model;
+package com.nextstep.nextstepBackEnd.model.notif;
 
+import com.nextstep.nextstepBackEnd.model.Pago;
+import com.nextstep.nextstepBackEnd.model.Usuario;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

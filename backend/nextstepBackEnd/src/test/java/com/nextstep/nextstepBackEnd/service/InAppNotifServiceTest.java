@@ -1,7 +1,7 @@
 package com.nextstep.nextstepBackEnd.service;
 
-import com.nextstep.nextstepBackEnd.model.Notificacion;
-import com.nextstep.nextstepBackEnd.model.NotificacionDTO;
+import com.nextstep.nextstepBackEnd.model.notif.Notificacion;
+import com.nextstep.nextstepBackEnd.model.notif.NotificacionDTO;
 import com.nextstep.nextstepBackEnd.model.Pago;
 import com.nextstep.nextstepBackEnd.model.Usuario;
 import com.nextstep.nextstepBackEnd.repository.NotificacionRepository;

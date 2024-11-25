@@ -1,11 +1,9 @@
 package com.nextstep.nextstepBackEnd.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.nextstep.nextstepBackEnd.controller.notif.NotificacionRequest;
-import com.nextstep.nextstepBackEnd.model.Notificacion;
-import com.nextstep.nextstepBackEnd.model.NotificacionDTO;
+import com.nextstep.nextstepBackEnd.model.notif.Notificacion;
+import com.nextstep.nextstepBackEnd.model.notif.NotificacionDTO;
 import com.nextstep.nextstepBackEnd.model.Pago;
 import com.nextstep.nextstepBackEnd.model.Usuario;
 import com.nextstep.nextstepBackEnd.service.notif.InAppNotifService;

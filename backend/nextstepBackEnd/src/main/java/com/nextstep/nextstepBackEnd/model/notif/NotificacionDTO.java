@@ -1,4 +1,4 @@
-package com.nextstep.nextstepBackEnd.model;
+package com.nextstep.nextstepBackEnd.model.notif;
 
 import lombok.Data;
 

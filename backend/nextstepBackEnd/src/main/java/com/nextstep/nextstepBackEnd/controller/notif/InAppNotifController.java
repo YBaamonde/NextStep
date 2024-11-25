@@ -1,7 +1,7 @@
 package com.nextstep.nextstepBackEnd.controller.notif;
 
-import com.nextstep.nextstepBackEnd.model.Notificacion;
-import com.nextstep.nextstepBackEnd.model.NotificacionDTO;
+import com.nextstep.nextstepBackEnd.model.notif.Notificacion;
+import com.nextstep.nextstepBackEnd.model.notif.NotificacionDTO;
 import com.nextstep.nextstepBackEnd.service.notif.InAppNotifService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;

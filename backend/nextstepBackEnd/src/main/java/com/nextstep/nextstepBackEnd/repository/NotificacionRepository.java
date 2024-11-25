@@ -1,6 +1,6 @@
 package com.nextstep.nextstepBackEnd.repository;
 
-import com.nextstep.nextstepBackEnd.model.Notificacion;
+import com.nextstep.nextstepBackEnd.model.notif.Notificacion;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
