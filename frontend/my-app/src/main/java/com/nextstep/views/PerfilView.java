@@ -200,20 +200,31 @@ public class PerfilView extends VerticalLayout {
         return logoutButton;
     }
 
+    // Metodo para cargar la configuración inicial desde el backend
     private void cargarConfiguracion() {
         Optional<Map<String, Object>> configOpt = notifConfigService.obtenerConfiguracion(usuarioId);
 
         configOpt.ifPresent(config -> {
-            emailNotificationsCheckbox.setValue((Boolean) config.getOrDefault("emailActivas", true));
-            emailDaysBeforeField.setValue(String.valueOf(config.getOrDefault("emailDiasAntes", 1)));
-            inAppNotificationsCheckbox.setValue((Boolean) config.getOrDefault("inAppActivas", true));
-            inAppDaysBeforeField.setValue(String.valueOf(config.getOrDefault("inAppDiasAntes", 1)));
+            emailNotificationsCheckbox.setValue(config.containsKey("emailActivas")
+                    ? (Boolean) config.get("emailActivas")
+                    : true);
+            emailDaysBeforeField.setValue(config.containsKey("emailDiasAntes")
+                    ? String.valueOf(config.get("emailDiasAntes"))
+                    : "1");
+            inAppNotificationsCheckbox.setValue(config.containsKey("inAppActivas")
+                    ? (Boolean) config.get("inAppActivas")
+                    : true);
+            inAppDaysBeforeField.setValue(config.containsKey("inAppDiasAntes")
+                    ? String.valueOf(config.get("inAppDiasAntes"))
+                    : "1");
         });
     }
 
+
+
     private void guardarConfiguracion() {
         Map<String, Object> config = Map.of(
-                "usuarioId", usuarioId,
+                "usuario", Map.of("id", usuarioId), // Incluir el objeto usuario con su ID
                 "emailActivas", emailNotificationsCheckbox.getValue(),
                 "emailDiasAntes", Integer.parseInt(emailDaysBeforeField.getValue()),
                 "inAppActivas", inAppNotificationsCheckbox.getValue(),
@@ -227,6 +238,7 @@ public class PerfilView extends VerticalLayout {
             Notification.show("Error al guardar la configuración.");
         }
     }
+
 
     public void openDialogEditPassword(int usuarioId) {
         Dialog passwordDialog = new Dialog();
