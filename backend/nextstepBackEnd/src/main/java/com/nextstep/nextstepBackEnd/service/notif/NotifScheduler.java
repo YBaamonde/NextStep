@@ -31,37 +31,34 @@ public class NotifScheduler {
 
     // Programar para ejecutar cada minuto para pruebas
     @Scheduled(cron = "0 * * * * ?")
-    // Programar para ejecutar todos los días a las 8:00 AM
-    //@Scheduled(cron = "0 0 8 * * ?")
+    //@Scheduled(cron = "0 0 8 * * ?") // Programar para ejecutar todos los días a las 8:00 AM
     public void enviarNotificacionesDePagos() {
-        LocalDate inicio = LocalDate.now();
-        LocalDate fin = inicio.plusDays(7); // Configura el rango de fechas si es necesario
+        LocalDate hoy = LocalDate.now();
 
-        // Obtener pagos
-        List<Pago> pagosProximos = pagoRepository.findPagosWithUsuarioByFechaBetween(inicio, fin);
-
+        // Obtener pagos en el rango configurado para notificaciones
+        List<Pago> pagosProximos = pagoRepository.findPagosWithUsuarioByFechaBetween(hoy, hoy.plusDays(7));
 
         for (Pago pago : pagosProximos) {
             try {
-                // Forzar la inicialización de Usuario
                 Usuario usuario = pago.getUsuario();
                 if (usuario == null) {
                     throw new IllegalStateException("El usuario asociado al pago es nulo.");
                 }
 
-                // Acceder a las propiedades del usuario para asegurar su inicialización
-                String email = usuario.getEmail();
-                String username = usuario.getUsername();
+                // Cargar configuración de notificaciones del usuario
+                NotificacionConfig config = notificacionConfigRepository
+                        .findByUsuarioId(usuario.getId())
+                        .orElseThrow(() -> new IllegalStateException("Configuración de notificaciones no encontrada para el usuario ID: " + usuario.getId()));
 
-                // Notificación por correo
-                String asunto = "Recordatorio de pago: " + pago.getNombre();
-                String mensajeHtml = "<html><body>Recordatorio de pago: " + pago.getNombre() + "</body></html>";
-                emailNotifService.enviarEmailHtml(email, asunto, mensajeHtml);
+                // Evaluar notificaciones por email
+                if (config.isEmailActivas() && hoy.plusDays(config.getEmailDiasAntes()).equals(pago.getFecha())) {
+                    enviarNotificacionEmail(pago, config);
+                }
 
-                // Notificación In-App
-                String titulo = "Recordatorio de pago";
-                String mensaje = "Tienes un pago programado para el " + pago.getFecha() + ": " + pago.getNombre();
-                inAppNotifService.crearNotificacion(usuario.getId(), pago.getId(), titulo, mensaje);
+                // Evaluar notificaciones In-App
+                if (config.isInAppActivas() && hoy.plusDays(config.getInAppDiasAntes()).equals(pago.getFecha())) {
+                    enviarNotificacionInApp(pago, config);
+                }
 
             } catch (Exception e) {
                 System.err.println("Error al enviar notificación para el pago ID: " + pago.getId() + " - " + e.getMessage());
@@ -69,11 +66,12 @@ public class NotifScheduler {
         }
     }
 
-
     private void enviarNotificacionEmail(Pago pago, NotificacionConfig config) {
         try {
+            // Usar el metodo generarPlantillaHtml
             String asunto = "Recordatorio de pago: " + pago.getNombre();
             String mensajeHtml = emailNotifService.generarPlantillaHtml(pago);
+
             emailNotifService.enviarEmailHtml(pago.getUsuario().getEmail(), asunto, mensajeHtml);
             System.out.println("Correo enviado para pago ID: " + pago.getId());
         } catch (Exception e) {
@@ -85,6 +83,7 @@ public class NotifScheduler {
         try {
             String titulo = "Recordatorio de pago";
             String mensaje = "Tienes un pago programado para el " + pago.getFecha() + ": " + pago.getNombre();
+
             inAppNotifService.crearNotificacion(pago.getUsuario().getId(), pago.getId(), titulo, mensaje);
             System.out.println("Notificación In-App enviada para pago ID: " + pago.getId());
         } catch (Exception e) {
