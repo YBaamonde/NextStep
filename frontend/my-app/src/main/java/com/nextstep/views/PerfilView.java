@@ -77,6 +77,121 @@ public class PerfilView extends VerticalLayout {
         cargarPerfil();
     }
 
+    /* Metodos para el panel de configuración */
+
+    private Div crearConfiguracionPanel() {
+        Div configuracionPanel = new Div();
+        configuracionPanel.addClassName("config-panel");
+
+        configuracionPanel.add(crearTitulo("Configuración de Notificaciones"), crearFormularioConfiguracion(),
+                crearGuardarConfiguracionBoton());
+
+        cargarConfiguracion(); // Cargar configuración inicial desde el backend
+
+        return configuracionPanel;
+    }
+
+
+    private VerticalLayout crearFormularioConfiguracion() {
+        VerticalLayout configLayout = new VerticalLayout();
+        configLayout.addClassName("perfil-detalles");
+
+        // Notificaciones por Email
+        emailNotificationsCheckbox = new Checkbox("Recibir notificaciones por Email");
+        emailNotificationsCheckbox.setValue(true); // Activado por defecto
+        emailNotificationsCheckbox.addValueChangeListener(e -> emailDaysBeforeField.setEnabled(e.getValue()));
+
+        emailDaysBeforeField = new TextField("Días antes (Email)");
+        emailDaysBeforeField.setValue("1"); // Valor por defecto
+        emailDaysBeforeField.setEnabled(true);
+
+        // Notificaciones In-App
+        inAppNotificationsCheckbox = new Checkbox("Recibir notificaciones In-App");
+        inAppNotificationsCheckbox.setValue(true); // Activado por defecto
+        inAppNotificationsCheckbox.addValueChangeListener(e -> inAppDaysBeforeField.setEnabled(e.getValue()));
+
+        inAppDaysBeforeField = new TextField("Días antes (In-App)");
+        inAppDaysBeforeField.setValue("1"); // Valor por defecto
+        inAppDaysBeforeField.setEnabled(true);
+
+        // Llama a configurarListeners para agregar las validaciones
+        configurarListeners();
+
+        configLayout.add(emailNotificationsCheckbox, emailDaysBeforeField, inAppNotificationsCheckbox, inAppDaysBeforeField);
+
+        return configLayout;
+    }
+
+
+
+
+    // Metodo para cargar la configuración inicial desde el backend
+    private void cargarConfiguracion() {
+        Optional<Map<String, Object>> configOpt = notifConfigService.obtenerConfiguracion(usuarioId);
+
+        configOpt.ifPresent(config -> {
+            emailNotificationsCheckbox.setValue(config.containsKey("emailActivas")
+                    ? (Boolean) config.get("emailActivas")
+                    : true);
+            emailDaysBeforeField.setValue(config.containsKey("emailDiasAntes")
+                    ? String.valueOf(config.get("emailDiasAntes"))
+                    : "1");
+            inAppNotificationsCheckbox.setValue(config.containsKey("inAppActivas")
+                    ? (Boolean) config.get("inAppActivas")
+                    : true);
+            inAppDaysBeforeField.setValue(config.containsKey("inAppDiasAntes")
+                    ? String.valueOf(config.get("inAppDiasAntes"))
+                    : "1");
+        });
+    }
+
+    private void configurarListeners() {
+        emailDaysBeforeField.addValueChangeListener(e -> {
+            String value = e.getValue();
+            if (value.isEmpty() || Integer.parseInt(value) < 1) {
+                emailDaysBeforeField.setValue("1");
+                Notification.show("El valor mínimo permitido es 1.");
+            }
+        });
+
+        inAppDaysBeforeField.addValueChangeListener(e -> {
+            String value = e.getValue();
+            if (value.isEmpty() || Integer.parseInt(value) < 1) {
+                inAppDaysBeforeField.setValue("1");
+                Notification.show("El valor mínimo permitido es 1.");
+            }
+        });
+    }
+
+
+    private void guardarConfiguracion() {
+        Map<String, Object> config = Map.of(
+                "usuario", Map.of("id", usuarioId), // Incluir el objeto usuario con su ID
+                "emailActivas", emailNotificationsCheckbox.getValue(),
+                "emailDiasAntes", Integer.parseInt(emailDaysBeforeField.getValue()),
+                "inAppActivas", inAppNotificationsCheckbox.getValue(),
+                "inAppDiasAntes", Integer.parseInt(inAppDaysBeforeField.getValue())
+        );
+
+        boolean success = notifConfigService.guardarConfiguracion(config);
+        if (success) {
+            Notification.show("Configuración guardada correctamente.");
+        } else {
+            Notification.show("Error al guardar la configuración.");
+        }
+    }
+
+
+    private Button crearGuardarConfiguracionBoton() {
+        Button saveConfigButton = new Button("Guardar Configuración", e -> guardarConfiguracion());
+        saveConfigButton.addClassName("action-button");
+        return saveConfigButton;
+    }
+
+
+
+    /* Metodos para el panel de perfil */
+
     private void cargarPerfil() {
         if (usuarioId == null) {
             Notification.show("Error: Usuario no autenticado. Por favor, inicie sesión nuevamente.");
@@ -106,17 +221,6 @@ public class PerfilView extends VerticalLayout {
         return perfilPanel;
     }
 
-    private Div crearConfiguracionPanel() {
-        Div configuracionPanel = new Div();
-        configuracionPanel.addClassName("config-panel");
-
-        configuracionPanel.add(crearTitulo("Configuración de Notificaciones"), crearFormularioConfiguracion(),
-                crearGuardarConfiguracionBoton());
-
-        cargarConfiguracion(); // Cargar configuración inicial desde el backend
-
-        return configuracionPanel;
-    }
 
     private H2 crearTitulo(String texto) {
         H2 titulo = new H2(texto);
@@ -148,38 +252,6 @@ public class PerfilView extends VerticalLayout {
         return perfilLayout;
     }
 
-    private VerticalLayout crearFormularioConfiguracion() {
-        VerticalLayout configLayout = new VerticalLayout();
-        configLayout.addClassName("perfil-detalles");
-
-        // Notificaciones por Email
-        emailNotificationsCheckbox = new Checkbox("Recibir notificaciones por Email");
-        emailNotificationsCheckbox.setValue(true); // Activado por defecto
-        emailNotificationsCheckbox.addValueChangeListener(e -> emailDaysBeforeField.setEnabled(e.getValue()));
-
-        emailDaysBeforeField = new TextField("Días antes (Email)");
-        emailDaysBeforeField.setValue("1"); // Valor por defecto
-        emailDaysBeforeField.setEnabled(true);
-
-        // Notificaciones In-App
-        inAppNotificationsCheckbox = new Checkbox("Recibir notificaciones In-App");
-        inAppNotificationsCheckbox.setValue(true); // Activado por defecto
-        inAppNotificationsCheckbox.addValueChangeListener(e -> inAppDaysBeforeField.setEnabled(e.getValue()));
-
-        inAppDaysBeforeField = new TextField("Días antes (In-App)");
-        inAppDaysBeforeField.setValue("1"); // Valor por defecto
-        inAppDaysBeforeField.setEnabled(true);
-
-        configLayout.add(emailNotificationsCheckbox, emailDaysBeforeField, inAppNotificationsCheckbox, inAppDaysBeforeField);
-
-        return configLayout;
-    }
-
-    private Button crearGuardarConfiguracionBoton() {
-        Button saveConfigButton = new Button("Guardar Configuración", e -> guardarConfiguracion());
-        saveConfigButton.addClassName("action-button");
-        return saveConfigButton;
-    }
 
     private Button crearActualizarContrasenaBoton() {
         Button updatePasswordButton = new Button("Actualizar Contraseña", e -> openDialogEditPassword(usuarioId));
@@ -198,45 +270,6 @@ public class PerfilView extends VerticalLayout {
         Button logoutButton = new Button("Cerrar Sesión", e -> UI.getCurrent().navigate("login"));
         logoutButton.addClassName("logout-button");
         return logoutButton;
-    }
-
-    // Metodo para cargar la configuración inicial desde el backend
-    private void cargarConfiguracion() {
-        Optional<Map<String, Object>> configOpt = notifConfigService.obtenerConfiguracion(usuarioId);
-
-        configOpt.ifPresent(config -> {
-            emailNotificationsCheckbox.setValue(config.containsKey("emailActivas")
-                    ? (Boolean) config.get("emailActivas")
-                    : true);
-            emailDaysBeforeField.setValue(config.containsKey("emailDiasAntes")
-                    ? String.valueOf(config.get("emailDiasAntes"))
-                    : "1");
-            inAppNotificationsCheckbox.setValue(config.containsKey("inAppActivas")
-                    ? (Boolean) config.get("inAppActivas")
-                    : true);
-            inAppDaysBeforeField.setValue(config.containsKey("inAppDiasAntes")
-                    ? String.valueOf(config.get("inAppDiasAntes"))
-                    : "1");
-        });
-    }
-
-
-
-    private void guardarConfiguracion() {
-        Map<String, Object> config = Map.of(
-                "usuario", Map.of("id", usuarioId), // Incluir el objeto usuario con su ID
-                "emailActivas", emailNotificationsCheckbox.getValue(),
-                "emailDiasAntes", Integer.parseInt(emailDaysBeforeField.getValue()),
-                "inAppActivas", inAppNotificationsCheckbox.getValue(),
-                "inAppDiasAntes", Integer.parseInt(inAppDaysBeforeField.getValue())
-        );
-
-        boolean success = notifConfigService.guardarConfiguracion(config);
-        if (success) {
-            Notification.show("Configuración guardada correctamente.");
-        } else {
-            Notification.show("Error al guardar la configuración.");
-        }
     }
 
 
