@@ -1,8 +1,9 @@
 /* Fondo y contenedor principal */
 .perfil-view {
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: center;
     background-image: url('../../../resources/media/picoPerfil.jpg');
     background-size: cover;
     background-position: center;
@@ -11,6 +12,7 @@
     padding: 0;
     margin: 0;
     box-sizing: border-box;
+    gap: 20px; /* Espaciado entre los paneles */
 }
 
 /* Asegura que la navbar se posicione en la parte superior */
@@ -159,21 +161,37 @@
     .perfil-panel {
         max-width: 400px;
         padding: 50px 40px;
+        margin-top: 0;
     }
 
     .validate-button {
         width: 40%;
+    }
+
+    .perfil-view {
+        flex-direction: row; /* Coloca los paneles en paralelo */
+        align-items: flex-start; /* Alinea los paneles en la parte superior */
     }
 }
 
 /* Estilo para dispositivos móviles */
 @media (max-width: 767px) {
     .perfil-panel {
-        margin-top: 50%;
         padding: 30px 20px;
     }
 
     .validate-button {
         width: 100%;
+    }
+
+    .perfil-view {
+        flex-direction: column; /* Apila los paneles verticalmente */
+        align-items: center;
+    }
+
+    .config-panel{
+        padding: 30px 20px;
+        max-width: 85%;
+        margin-bottom: 150px;
     }
 }

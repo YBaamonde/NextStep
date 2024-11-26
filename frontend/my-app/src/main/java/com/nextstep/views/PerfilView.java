@@ -42,18 +42,17 @@ public class PerfilView extends VerticalLayout {
     private final TextField emailField = new TextField();
     private final AuthService authService = new AuthService();
 
+    // Componentes de configuración
+    private Checkbox emailNotificationsCheckbox;
+    private TextField emailDaysBeforeField;
+    private Checkbox inAppNotificationsCheckbox;
+    private TextField inAppDaysBeforeField;
+
     public PerfilView() {
         setClassName("perfil-view");
         setSizeFull();
         setPadding(false);
         setSpacing(false);
-
-        AuthService authService = new AuthService();
-        InAppNotifService inAppNotifService = new InAppNotifService();
-
-        // Agregar navbar en la parte superior
-        MainNavbar navbar = new MainNavbar(authService, inAppNotifService);
-        add(navbar);
 
         // Obtener el usuario ID de la sesión
         usuarioId = (Integer) VaadinSession.getCurrent().getAttribute("userId");
@@ -62,40 +61,43 @@ public class PerfilView extends VerticalLayout {
             return;
         }
 
-        // Cargar la información del usuario
-        cargarPerfil();
+        // Navbar
+        AuthService authService = new AuthService();
+        InAppNotifService inAppNotifService = new InAppNotifService();
+        MainNavbar navbar = new MainNavbar(authService, inAppNotifService);
+        add(navbar);
 
-        // Crear componentes de configuración de notificaciones
-        Div notifConfigPanel = crearPanelConfiguracion();
+        // Cargar los paneles
+        Div perfilPanel = crearPerfilPanel();
+        Div configuracionPanel = crearConfiguracionPanel();
 
-        // Botones de acción
-        Button updatePasswordButton = new Button("Actualizar Contraseña", e -> openDialogEditPassword(usuarioId));
-        updatePasswordButton.addClassName("action-button");
-
-        Button deleteAccountButton = new Button("Eliminar Cuenta", e -> eliminarCuenta());
-        deleteAccountButton.addClassName("action-button");
-        deleteAccountButton.addClassName("delete-button");
-
-        Button logoutButton = new Button("Cerrar Sesión", e -> UI.getCurrent().navigate("login"));
-        logoutButton.addClassName("logout-button");
-
-        // Panel de perfil
-        Div perfilPanel = new Div();
-        perfilPanel.addClassName("perfil-panel");
-        perfilPanel.add(
-                crearTituloPerfil(),
-                crearFormularioPerfil(),
-                notifConfigPanel,
-                updatePasswordButton,
-                deleteAccountButton,
-                logoutButton
-        );
-
-        add(perfilPanel);
+        add(perfilPanel, configuracionPanel);
     }
 
-    private H2 crearTituloPerfil() {
-        H2 titulo = new H2("Información de Perfil");
+    private Div crearPerfilPanel() {
+        Div perfilPanel = new Div();
+        perfilPanel.addClassName("perfil-panel");
+
+        perfilPanel.add(crearTitulo("Información de Perfil"), crearFormularioPerfil(),
+                crearActualizarContraseñaBoton(), crearEliminarCuentaBoton(), crearCerrarSesionBoton());
+
+        return perfilPanel;
+    }
+
+    private Div crearConfiguracionPanel() {
+        Div configuracionPanel = new Div();
+        configuracionPanel.addClassName("config-panel");
+
+        configuracionPanel.add(crearTitulo("Configuración de Notificaciones"), crearFormularioConfiguracion(),
+                crearGuardarConfiguracionBoton());
+
+        cargarConfiguracion(); // Cargar configuración inicial desde el backend
+
+        return configuracionPanel;
+    }
+
+    private H2 crearTitulo(String texto) {
+        H2 titulo = new H2(texto);
         titulo.addClassName("perfil-titulo");
         return titulo;
     }
@@ -110,72 +112,98 @@ public class PerfilView extends VerticalLayout {
 
         Button editUsernameButton = new Button("Editar", e -> openDialogEditUsername());
         editUsernameButton.addClassName("edit-button");
-        editUsernameButton.addClickShortcut(Key.ENTER);
 
         HorizontalLayout usernameLayout = new HorizontalLayout(usernameField, editUsernameButton);
         usernameLayout.setWidthFull();
         usernameLayout.setAlignItems(Alignment.CENTER);
 
         perfilLayout.add(usernameLayout, emailField);
+
+        emailField.setLabel("Correo Electrónico");
+        emailField.setReadOnly(true);
+        emailField.addClassName("perfil-input");
+
         return perfilLayout;
     }
 
-    private void cargarPerfil() {
-        Optional<Map<String, Object>> perfilOpt = perfilService.getPerfil(usuarioId);
-        perfilOpt.ifPresent(perfil -> {
-            usernameField.setValue((String) perfil.getOrDefault("username", ""));
-            emailField.setValue((String) perfil.getOrDefault("email", ""));
-            emailField.setReadOnly(true);
-        });
+    private VerticalLayout crearFormularioConfiguracion() {
+        VerticalLayout configLayout = new VerticalLayout();
+        configLayout.addClassName("perfil-detalles");
+
+        // Notificaciones por Email
+        emailNotificationsCheckbox = new Checkbox("Recibir notificaciones por Email");
+        emailNotificationsCheckbox.setValue(true); // Activado por defecto
+        emailNotificationsCheckbox.addValueChangeListener(e -> emailDaysBeforeField.setEnabled(e.getValue()));
+
+        emailDaysBeforeField = new TextField("Días antes (Email)");
+        emailDaysBeforeField.setValue("1"); // Valor por defecto
+        emailDaysBeforeField.setEnabled(true);
+
+        // Notificaciones In-App
+        inAppNotificationsCheckbox = new Checkbox("Recibir notificaciones In-App");
+        inAppNotificationsCheckbox.setValue(true); // Activado por defecto
+        inAppNotificationsCheckbox.addValueChangeListener(e -> inAppDaysBeforeField.setEnabled(e.getValue()));
+
+        inAppDaysBeforeField = new TextField("Días antes (In-App)");
+        inAppDaysBeforeField.setValue("1"); // Valor por defecto
+        inAppDaysBeforeField.setEnabled(true);
+
+        configLayout.add(emailNotificationsCheckbox, emailDaysBeforeField, inAppNotificationsCheckbox, inAppDaysBeforeField);
+
+        return configLayout;
     }
 
-    private Div crearPanelConfiguracion() {
-        Div panel = new Div();
-        panel.addClassName("notif-config-panel");
-
-        Checkbox emailCheckbox = new Checkbox("Recibir notificaciones por Email");
-        NumberField emailDiasAntesField = new NumberField("Días antes (Email)");
-        emailDiasAntesField.setMin(0);
-        emailDiasAntesField.setMax(30);
-
-        Checkbox inAppCheckbox = new Checkbox("Recibir notificaciones In-App");
-        NumberField inAppDiasAntesField = new NumberField("Días antes (In-App)");
-        inAppDiasAntesField.setMin(0);
-        inAppDiasAntesField.setMax(30);
-
-        Button saveButton = new Button("Guardar Configuración", e -> {
-            guardarConfiguracion("emailActivas", emailCheckbox.getValue());
-            guardarConfiguracion("emailDiasAntes", emailDiasAntesField.getValue().intValue());
-            guardarConfiguracion("inAppActivas", inAppCheckbox.getValue());
-            guardarConfiguracion("inAppDiasAntes", inAppDiasAntesField.getValue().intValue());
-            Notification.show("Configuración actualizada.");
-        });
-        saveButton.addClassName("action-button");
-
-        // Cargar configuraciones al inicializar
-        cargarConfiguracion(emailCheckbox, emailDiasAntesField, inAppCheckbox, inAppDiasAntesField);
-
-        panel.add(emailCheckbox, emailDiasAntesField, inAppCheckbox, inAppDiasAntesField, saveButton);
-        return panel;
+    private Button crearGuardarConfiguracionBoton() {
+        Button saveConfigButton = new Button("Guardar Configuración", e -> guardarConfiguracion());
+        saveConfigButton.addClassName("action-button");
+        return saveConfigButton;
     }
 
-    private void cargarConfiguracion(Checkbox emailCheckbox, NumberField emailDiasAntesField,
-                                     Checkbox inAppCheckbox, NumberField inAppDiasAntesField) {
+    private Button crearActualizarContraseñaBoton() {
+        Button updatePasswordButton = new Button("Actualizar Contraseña", e -> openDialogEditPassword(usuarioId));
+        updatePasswordButton.addClassName("action-button");
+        return updatePasswordButton;
+    }
+
+    private Button crearEliminarCuentaBoton() {
+        Button deleteAccountButton = new Button("Eliminar Cuenta", e -> eliminarCuenta());
+        deleteAccountButton.addClassName("action-button");
+        deleteAccountButton.addClassName("delete-button");
+        return deleteAccountButton;
+    }
+
+    private Button crearCerrarSesionBoton() {
+        Button logoutButton = new Button("Cerrar Sesión", e -> UI.getCurrent().navigate("login"));
+        logoutButton.addClassName("logout-button");
+        return logoutButton;
+    }
+
+    private void cargarConfiguracion() {
         Optional<Map<String, Object>> configOpt = notifConfigService.obtenerConfiguracion(usuarioId);
 
         configOpt.ifPresent(config -> {
-            emailCheckbox.setValue((Boolean) config.getOrDefault("emailActivas", true));
-            emailDiasAntesField.setValue(((Integer) config.getOrDefault("emailDiasAntes", 1)).doubleValue());
-            inAppCheckbox.setValue((Boolean) config.getOrDefault("inAppActivas", true));
-            inAppDiasAntesField.setValue(((Integer) config.getOrDefault("inAppDiasAntes", 1)).doubleValue());
+            emailNotificationsCheckbox.setValue((Boolean) config.getOrDefault("emailActivas", true));
+            emailDaysBeforeField.setValue(String.valueOf(config.getOrDefault("emailDiasAntes", 1)));
+            inAppNotificationsCheckbox.setValue((Boolean) config.getOrDefault("inAppActivas", true));
+            inAppDaysBeforeField.setValue(String.valueOf(config.getOrDefault("inAppDiasAntes", 1)));
         });
     }
 
-    private void guardarConfiguracion(String propiedad, Object valor) {
-        notifConfigService.obtenerConfiguracion(usuarioId).ifPresent(config -> {
-            config.put(propiedad, valor);
-            notifConfigService.guardarConfiguracion(config);
-        });
+    private void guardarConfiguracion() {
+        Map<String, Object> config = Map.of(
+                "usuarioId", usuarioId,
+                "emailActivas", emailNotificationsCheckbox.getValue(),
+                "emailDiasAntes", Integer.parseInt(emailDaysBeforeField.getValue()),
+                "inAppActivas", inAppNotificationsCheckbox.getValue(),
+                "inAppDiasAntes", Integer.parseInt(inAppDaysBeforeField.getValue())
+        );
+
+        boolean success = notifConfigService.guardarConfiguracion(config);
+        if (success) {
+            Notification.show("Configuración guardada correctamente.");
+        } else {
+            Notification.show("Error al guardar la configuración.");
+        }
     }
 
     public void openDialogEditPassword(int usuarioId) {
