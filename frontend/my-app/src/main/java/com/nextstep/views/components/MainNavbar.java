@@ -2,6 +2,7 @@ package com.nextstep.views.components;
 
 import com.nextstep.services.AuthService;
 import com.nextstep.services.InAppNotifService;
+import com.nextstep.services.NotifConfigService;
 import com.nextstep.views.GastosView;
 import com.nextstep.views.temp.InicioView;
 import com.nextstep.views.PagosView;
@@ -12,7 +13,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.RouterLink;
@@ -21,6 +21,7 @@ import com.vaadin.flow.theme.lumo.LumoIcon;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @CssImport("./themes/nextstepfrontend/navbar.css")
@@ -28,6 +29,7 @@ public class MainNavbar extends VerticalLayout {
 
     private final AuthService authService;
     private final InAppNotifService notifService; // Servicio para obtener notificaciones
+    private final NotifConfigService notifConfigService; // Servicio para configuración
     private Avatar profileAvatar;
     private Button bellButton; // Botón para la campana
     private ContextMenu notificationMenu; // Menú desplegable para notificaciones
@@ -35,6 +37,7 @@ public class MainNavbar extends VerticalLayout {
     public MainNavbar(AuthService authService, InAppNotifService notifService) {
         this.authService = authService;
         this.notifService = notifService;
+        this.notifConfigService = new NotifConfigService(); // Inicializar servicio de configuración
 
         setPadding(false);
         setSpacing(false);
@@ -81,27 +84,42 @@ public class MainNavbar extends VerticalLayout {
         avatarButton.getStyle().set("border", "none").set("background", "none").set("padding", "0");
         profileAvatar.addClassName("custom-avatar");
 
-        HorizontalLayout navbar = new HorizontalLayout(logo, links, bellButton, avatarButton);
+        HorizontalLayout navbar = new HorizontalLayout(logo, links);
         navbar.setAlignItems(Alignment.CENTER);
         navbar.setJustifyContentMode(JustifyContentMode.BETWEEN);
         navbar.setWidthFull();
+
+        // Agregar campana y avatar solo si corresponde
+        if (bellButton != null) {
+            navbar.add(bellButton);
+        }
+        navbar.add(avatarButton);
+
         return navbar;
     }
 
     private void createNotificationButton() {
-        // Crear el botón de la campana
-        bellButton = new Button(LumoIcon.BELL.create());
-        bellButton.addClassName("notification-button");
+        // Verificar configuración de notificaciones In-App
+        Integer usuarioId = authService.getUserId();
+        Optional<Map<String, Object>> configOpt = notifConfigService.obtenerConfiguracion(usuarioId);
 
-        // Crear el menú desplegable
-        notificationMenu = new ContextMenu();
-        notificationMenu.setOpenOnClick(true); // Configurar apertura al hacer clic
-        notificationMenu.setTarget(bellButton); // Asociar el menú al botón
+        if (configOpt.isPresent() && Boolean.TRUE.equals(configOpt.get().get("inAppActivas"))) {
+            // Crear el botón de la campana
+            bellButton = new Button(LumoIcon.BELL.create());
+            bellButton.addClassName("notification-button");
 
-        // Actualizar contenido del menú
-        updateNotificationContent();
+            // Crear el menú desplegable
+            notificationMenu = new ContextMenu();
+            notificationMenu.setOpenOnClick(true); // Configurar apertura al hacer clic
+            notificationMenu.setTarget(bellButton); // Asociar el menú al botón
+
+            // Actualizar contenido del menú
+            updateNotificationContent();
+        } else {
+            // Ocultar la campana si las notificaciones In-App están desactivadas
+            bellButton = null;
+        }
     }
-
 
     private void updateNotificationContent() {
         Integer usuarioId = authService.getUserId();
@@ -142,9 +160,6 @@ public class MainNavbar extends VerticalLayout {
             }
         }
     }
-
-
-
 
     private HorizontalLayout createMobileNavbar() {
         Button homeButton = new Button(VaadinIcon.HOME.create());

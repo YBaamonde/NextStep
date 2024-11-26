@@ -3,14 +3,17 @@ package com.nextstep.views;
 import com.nextstep.services.AuthService;
 import com.nextstep.services.InAppNotifService;
 import com.nextstep.services.PerfilService;
+import com.nextstep.services.NotifConfigService;
 import com.nextstep.views.components.MainNavbar;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.router.Route;
 
 import com.vaadin.flow.component.button.Button;
@@ -33,6 +36,7 @@ import java.util.Optional;
 public class PerfilView extends VerticalLayout {
 
     private final PerfilService perfilService = new PerfilService();
+    private final NotifConfigService notifConfigService = new NotifConfigService();
     private final Integer usuarioId;
     private final TextField usernameField = new TextField();
     private final TextField emailField = new TextField();
@@ -61,6 +65,9 @@ public class PerfilView extends VerticalLayout {
         // Cargar la información del usuario
         cargarPerfil();
 
+        // Crear componentes de configuración de notificaciones
+        Div notifConfigPanel = crearPanelConfiguracion();
+
         // Botones de acción
         Button updatePasswordButton = new Button("Actualizar Contraseña", e -> openDialogEditPassword(usuarioId));
         updatePasswordButton.addClassName("action-button");
@@ -75,7 +82,14 @@ public class PerfilView extends VerticalLayout {
         // Panel de perfil
         Div perfilPanel = new Div();
         perfilPanel.addClassName("perfil-panel");
-        perfilPanel.add(crearTituloPerfil(), crearFormularioPerfil(), updatePasswordButton, deleteAccountButton, logoutButton);
+        perfilPanel.add(
+                crearTituloPerfil(),
+                crearFormularioPerfil(),
+                notifConfigPanel,
+                updatePasswordButton,
+                deleteAccountButton,
+                logoutButton
+        );
 
         add(perfilPanel);
     }
@@ -99,13 +113,12 @@ public class PerfilView extends VerticalLayout {
         editUsernameButton.addClickShortcut(Key.ENTER);
 
         HorizontalLayout usernameLayout = new HorizontalLayout(usernameField, editUsernameButton);
-        usernameLayout.setWidthFull(); // Asegura que ocupe el ancho disponible
-        usernameLayout.setAlignItems(Alignment.CENTER); // Alinea verticalmente los elementos al centro
+        usernameLayout.setWidthFull();
+        usernameLayout.setAlignItems(Alignment.CENTER);
 
         perfilLayout.add(usernameLayout, emailField);
         return perfilLayout;
     }
-
 
     private void cargarPerfil() {
         Optional<Map<String, Object>> perfilOpt = perfilService.getPerfil(usuarioId);
@@ -113,6 +126,55 @@ public class PerfilView extends VerticalLayout {
             usernameField.setValue((String) perfil.getOrDefault("username", ""));
             emailField.setValue((String) perfil.getOrDefault("email", ""));
             emailField.setReadOnly(true);
+        });
+    }
+
+    private Div crearPanelConfiguracion() {
+        Div panel = new Div();
+        panel.addClassName("notif-config-panel");
+
+        Checkbox emailCheckbox = new Checkbox("Recibir notificaciones por Email");
+        NumberField emailDiasAntesField = new NumberField("Días antes (Email)");
+        emailDiasAntesField.setMin(0);
+        emailDiasAntesField.setMax(30);
+
+        Checkbox inAppCheckbox = new Checkbox("Recibir notificaciones In-App");
+        NumberField inAppDiasAntesField = new NumberField("Días antes (In-App)");
+        inAppDiasAntesField.setMin(0);
+        inAppDiasAntesField.setMax(30);
+
+        Button saveButton = new Button("Guardar Configuración", e -> {
+            guardarConfiguracion("emailActivas", emailCheckbox.getValue());
+            guardarConfiguracion("emailDiasAntes", emailDiasAntesField.getValue().intValue());
+            guardarConfiguracion("inAppActivas", inAppCheckbox.getValue());
+            guardarConfiguracion("inAppDiasAntes", inAppDiasAntesField.getValue().intValue());
+            Notification.show("Configuración actualizada.");
+        });
+        saveButton.addClassName("action-button");
+
+        // Cargar configuraciones al inicializar
+        cargarConfiguracion(emailCheckbox, emailDiasAntesField, inAppCheckbox, inAppDiasAntesField);
+
+        panel.add(emailCheckbox, emailDiasAntesField, inAppCheckbox, inAppDiasAntesField, saveButton);
+        return panel;
+    }
+
+    private void cargarConfiguracion(Checkbox emailCheckbox, NumberField emailDiasAntesField,
+                                     Checkbox inAppCheckbox, NumberField inAppDiasAntesField) {
+        Optional<Map<String, Object>> configOpt = notifConfigService.obtenerConfiguracion(usuarioId);
+
+        configOpt.ifPresent(config -> {
+            emailCheckbox.setValue((Boolean) config.getOrDefault("emailActivas", true));
+            emailDiasAntesField.setValue(((Integer) config.getOrDefault("emailDiasAntes", 1)).doubleValue());
+            inAppCheckbox.setValue((Boolean) config.getOrDefault("inAppActivas", true));
+            inAppDiasAntesField.setValue(((Integer) config.getOrDefault("inAppDiasAntes", 1)).doubleValue());
+        });
+    }
+
+    private void guardarConfiguracion(String propiedad, Object valor) {
+        notifConfigService.obtenerConfiguracion(usuarioId).ifPresent(config -> {
+            config.put(propiedad, valor);
+            notifConfigService.guardarConfiguracion(config);
         });
     }
 
