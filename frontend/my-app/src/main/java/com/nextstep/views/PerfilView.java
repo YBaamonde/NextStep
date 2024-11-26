@@ -72,14 +72,36 @@ public class PerfilView extends VerticalLayout {
         Div configuracionPanel = crearConfiguracionPanel();
 
         add(perfilPanel, configuracionPanel);
+
+        // Cargar la información del perfil
+        cargarPerfil();
     }
+
+    private void cargarPerfil() {
+        if (usuarioId == null) {
+            Notification.show("Error: Usuario no autenticado. Por favor, inicie sesión nuevamente.");
+            return;
+        }
+
+        // Obtener los datos del perfil desde el servicio
+        Optional<Map<String, Object>> perfilOpt = perfilService.getPerfil(usuarioId);
+
+        if (perfilOpt.isPresent()) {
+            Map<String, Object> perfil = perfilOpt.get();
+            usernameField.setValue((String) perfil.getOrDefault("username", ""));
+            emailField.setValue((String) perfil.getOrDefault("email", ""));
+        } else {
+            Notification.show("Error al cargar el perfil. Por favor, intente nuevamente.", 3000, Notification.Position.MIDDLE);
+        }
+    }
+
 
     private Div crearPerfilPanel() {
         Div perfilPanel = new Div();
         perfilPanel.addClassName("perfil-panel");
 
         perfilPanel.add(crearTitulo("Información de Perfil"), crearFormularioPerfil(),
-                crearActualizarContraseñaBoton(), crearEliminarCuentaBoton(), crearCerrarSesionBoton());
+                crearActualizarContrasenaBoton(), crearEliminarCuentaBoton(), crearCerrarSesionBoton());
 
         return perfilPanel;
     }
@@ -159,7 +181,7 @@ public class PerfilView extends VerticalLayout {
         return saveConfigButton;
     }
 
-    private Button crearActualizarContraseñaBoton() {
+    private Button crearActualizarContrasenaBoton() {
         Button updatePasswordButton = new Button("Actualizar Contraseña", e -> openDialogEditPassword(usuarioId));
         updatePasswordButton.addClassName("action-button");
         return updatePasswordButton;
