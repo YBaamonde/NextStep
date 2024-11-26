@@ -1,6 +1,8 @@
 package com.nextstep.nextstepBackEnd.service.notif;
 
 import com.nextstep.nextstepBackEnd.model.Pago;
+import com.nextstep.nextstepBackEnd.model.PagoDTO;
+import com.nextstep.nextstepBackEnd.model.Usuario;
 import com.nextstep.nextstepBackEnd.model.notif.NotificacionConfig;
 import com.nextstep.nextstepBackEnd.repository.NotificacionConfigRepository;
 import com.nextstep.nextstepBackEnd.repository.PagoRepository;
@@ -32,36 +34,41 @@ public class NotifScheduler {
     // Programar para ejecutar todos los días a las 8:00 AM
     //@Scheduled(cron = "0 0 8 * * ?")
     public void enviarNotificacionesDePagos() {
-        // Obtener la fecha de hoy
-        LocalDate fechaHoy = LocalDate.now();
+        LocalDate inicio = LocalDate.now();
+        LocalDate fin = inicio.plusDays(7); // Configura el rango de fechas si es necesario
 
-        // Buscar todos los pagos futuros (por ejemplo, en los próximos 7 días para eficiencia)
-        List<Pago> pagosProximos = pagoRepository.findPagosFuturos(fechaHoy.plusDays(7));
+        // Obtener pagos
+        List<Pago> pagosProximos = pagoRepository.findPagosWithUsuarioByFechaBetween(inicio, fin);
+
 
         for (Pago pago : pagosProximos) {
             try {
-                // Obtener configuración del usuario
-                NotificacionConfig config = notificacionConfigRepository
-                        .findByUsuarioId(pago.getUsuario().getId())
-                        .orElse(new NotificacionConfig()); // Configuración por defecto si no existe
-
-                // Calcular la diferencia en días entre hoy y la fecha del pago
-                long diasRestantes = ChronoUnit.DAYS.between(fechaHoy, pago.getFecha());
-
-                // Verificar si hay que enviar notificaciones según la configuración
-                if (config.isEmailActivas() && diasRestantes == config.getEmailDiasAntes()) {
-                    enviarNotificacionEmail(pago, config);
+                // Forzar la inicialización de Usuario
+                Usuario usuario = pago.getUsuario();
+                if (usuario == null) {
+                    throw new IllegalStateException("El usuario asociado al pago es nulo.");
                 }
 
-                if (config.isInAppActivas() && diasRestantes == config.getInAppDiasAntes()) {
-                    enviarNotificacionInApp(pago, config);
-                }
+                // Acceder a las propiedades del usuario para asegurar su inicialización
+                String email = usuario.getEmail();
+                String username = usuario.getUsername();
+
+                // Notificación por correo
+                String asunto = "Recordatorio de pago: " + pago.getNombre();
+                String mensajeHtml = "<html><body>Recordatorio de pago: " + pago.getNombre() + "</body></html>";
+                emailNotifService.enviarEmailHtml(email, asunto, mensajeHtml);
+
+                // Notificación In-App
+                String titulo = "Recordatorio de pago";
+                String mensaje = "Tienes un pago programado para el " + pago.getFecha() + ": " + pago.getNombre();
+                inAppNotifService.crearNotificacion(usuario.getId(), pago.getId(), titulo, mensaje);
 
             } catch (Exception e) {
-                System.err.println("Error al procesar notificación para el pago ID: " + pago.getId() + " - " + e.getMessage());
+                System.err.println("Error al enviar notificación para el pago ID: " + pago.getId() + " - " + e.getMessage());
             }
         }
     }
+
 
     private void enviarNotificacionEmail(Pago pago, NotificacionConfig config) {
         try {
