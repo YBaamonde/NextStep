@@ -26,16 +26,4 @@ public class AdminRegisterRequest {
 
     @NotBlank(message = "El rol no puede estar vacío")
     private String rol;
-
-    /*
-
-    // Metodo simple de validación
-    public boolean isValid() {
-        return username != null && !username.trim().isEmpty() &&
-                email != null && email.length() >= 4 &&
-                password != null && password.length() >= 8; // &&
-                // rol != null && !rol.trim().isEmpty();
-    }
-
-     */
 }

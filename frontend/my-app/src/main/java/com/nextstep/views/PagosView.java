@@ -1,6 +1,7 @@
 package com.nextstep.views;
 
 import com.nextstep.services.AuthService;
+import com.nextstep.services.InAppNotifService;
 import com.nextstep.services.PagoService;
 import com.nextstep.views.components.MainNavbar;
 import com.vaadin.flow.component.button.Button;
@@ -47,7 +48,10 @@ public class PagosView extends VerticalLayout {
         setSpacing(false);
 
         AuthService authService = new AuthService();
-        MainNavbar navbar = new MainNavbar(authService);
+        InAppNotifService inAppNotifService = new InAppNotifService();
+
+        // Agregar navbar en la parte superior
+        MainNavbar navbar = new MainNavbar(authService, inAppNotifService);
         add(navbar);
 
         pagosContainer = new VerticalLayout();

@@ -1,7 +1,6 @@
 package com.nextstep.nextstepBackEnd.service;
 
 import com.nextstep.nextstepBackEnd.model.SimulacionDTO;
-import com.nextstep.nextstepBackEnd.service.SimulacionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -70,9 +69,10 @@ class SimulacionServiceTest {
         assertEquals(6, balancePorMes.size(), "Debe calcularse el balance para 6 meses");
 
         for (int mes = 1; mes <= simulacionDTO.getMesesSimulacion(); mes++) {
-            assertEquals(900.0, balancePorMes.get(mes), "El balance mensual debe ser 900.0 (2500 - 1600)");
+            assertEquals(500.0, balancePorMes.get(mes), "El balance mensual debe ser 500.0 (2000 - 1500)");
         }
     }
+
 
     @Test
     void evaluarMetaAhorro_MetaAlcanzable() {
@@ -126,10 +126,11 @@ class SimulacionServiceTest {
 
         // Assert
         assertNotNull(resultado, "El resultado no debe ser nulo");
-        assertEquals(900.0, resultado.getBalanceProyectado(), "El balance proyectado debe ser correcto");
+        assertEquals(500.0, resultado.getBalanceProyectado(), "El balance proyectado debe ser correcto");
         assertNotNull(resultado.getBalancePorMes(), "El balance por mes no debe ser nulo");
         assertEquals(6, resultado.getBalancePorMes().size(), "Debe calcularse el balance para cada mes");
         assertNotNull(resultado.getRecomendaciones(), "Las recomendaciones no deben ser nulas");
         assertTrue(resultado.getRecomendaciones().size() >= 1, "Debe generar al menos una recomendación");
     }
+
 }

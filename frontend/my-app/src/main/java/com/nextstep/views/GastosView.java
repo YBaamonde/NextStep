@@ -3,6 +3,7 @@ package com.nextstep.views;
 import com.nextstep.services.AuthService;
 import com.nextstep.services.CategoriaService;
 import com.nextstep.services.GastoService;
+import com.nextstep.services.InAppNotifService;
 import com.nextstep.views.components.MainNavbar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -60,8 +61,10 @@ public class GastosView extends VerticalLayout {
         AuthService authService = new AuthService();
         this.categoriaService = new CategoriaService();
 
+        InAppNotifService inAppNotifService = new InAppNotifService();
+
         // Agregar navbar en la parte superior
-        MainNavbar navbar = new MainNavbar(authService);
+        MainNavbar navbar = new MainNavbar(authService, inAppNotifService);
         add(navbar);
 
         // Inicializar el contenedor de categorías

@@ -3,6 +3,7 @@ package com.nextstep.views.simulacion;
 // Vista con los resultados de la simulación
 
 import com.nextstep.services.AuthService;
+import com.nextstep.services.InAppNotifService;
 import com.nextstep.services.SimulacionService;
 import com.nextstep.views.components.MainNavbar;
 import com.vaadin.flow.component.UI;
@@ -41,7 +42,10 @@ public class ResultadosView extends VerticalLayout implements BeforeEnterObserve
         setSpacing(false);
 
         AuthService authService = new AuthService();
-        MainNavbar navbar = new MainNavbar(authService);
+        InAppNotifService inAppNotifService = new InAppNotifService();
+
+        // Agregar navbar en la parte superior
+        MainNavbar navbar = new MainNavbar(authService, inAppNotifService);
         add(navbar);
 
         Div resultadosContainer = new Div();

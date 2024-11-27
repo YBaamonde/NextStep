@@ -84,6 +84,11 @@
 			<version>5.5.13.4</version>
 		</dependency>
 
+		<!--  Dependencia para enviar notificaciones por correo -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
 
 
 
@@ -108,12 +113,14 @@
 			<scope>test</scope>
 		</dependency>
 
+
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.13.2</version>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<version>5.11.3</version>
 			<scope>test</scope>
 		</dependency>
+
 
 		<!-- Dependencia para Spring Security Test -->
 		<dependency>

@@ -55,6 +55,28 @@
     cursor: pointer;
 }
 
+.notification-button {
+    position: relative;
+    font-size: 1.5rem;
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: #838d99;
+}
+
+.num-notif {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #FF5722;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 0.8rem;
+}
+
+
+
 /* Mostrar mobile-navbar solo en pantallas pequeñas */
 @media (max-width: 767px) {
     .navbar {

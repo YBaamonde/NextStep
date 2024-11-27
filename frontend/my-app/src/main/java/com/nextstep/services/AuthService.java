@@ -6,6 +6,7 @@ import com.nextstep.views.helloworld.HelloWorldView;
 import com.vaadin.base.devserver.DevToolsInterface;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.server.VaadinSession;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -211,6 +212,11 @@ public class AuthService {
     // Metodo para obtener el nombre de usuario desde la sesión
     public String getUsername() {
         return (String) UI.getCurrent().getSession().getAttribute("username");
+    }
+
+    // Metodo para obtener el Id de un usuario desde la sesión
+    public Integer getUserId(){
+        return (Integer) VaadinSession.getCurrent().getAttribute("userId");
     }
 
 
