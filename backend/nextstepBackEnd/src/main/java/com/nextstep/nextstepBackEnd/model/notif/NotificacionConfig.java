@@ -28,6 +28,7 @@ public class NotificacionConfig {
     private boolean inAppActivas;
     private int inAppDiasAntes; // Días antes del evento para enviar notificaciones In-App
 
+    // Constructor con valores por defecto
     public NotificacionConfig() {
         this.emailActivas = true;
         this.emailDiasAntes = 1;

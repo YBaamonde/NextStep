@@ -31,7 +31,7 @@ public class NotifScheduler {
 
     // Programar para ejecutar cada minuto para pruebas
     @Scheduled(cron = "0 * * * * ?")
-    //@Scheduled(cron = "0 0 8 * * ?") // Programar para ejecutar todos los días a las 8:00 AM
+    //@Scheduled(cron = "0 0 */1 * * ?") // Programar para ejecutar cada hora
     public void enviarNotificacionesDePagos() {
         LocalDate hoy = LocalDate.now();
 
@@ -59,6 +59,13 @@ public class NotifScheduler {
                 if (config.isInAppActivas() && hoy.plusDays(config.getInAppDiasAntes()).equals(pago.getFecha())) {
                     enviarNotificacionInApp(pago, config);
                 }
+
+                // Mensajes de log para comprobar si cambia la configuración según el usuario
+                System.out.println("Configuración para usuario ID: " + usuario.getId() +
+                        " - Email anticipación: " + config.getEmailDiasAntes() +
+                        ", In-App anticipación: " + config.getInAppDiasAntes());
+                System.out.println("Pago ID: " + pago.getId() + " con fecha: " + pago.getFecha());
+
 
             } catch (Exception e) {
                 System.err.println("Error al enviar notificación para el pago ID: " + pago.getId() + " - " + e.getMessage());
