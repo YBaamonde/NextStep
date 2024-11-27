@@ -1,6 +1,6 @@
 package com.nextstep.nextstepBackEnd.repository;
 
-import static org.junit.Assert.*;
+
 
 import com.nextstep.nextstepBackEnd.model.Pago;
 import com.nextstep.nextstepBackEnd.model.Usuario;
@@ -12,6 +12,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 public class PagoRepositoryTest {

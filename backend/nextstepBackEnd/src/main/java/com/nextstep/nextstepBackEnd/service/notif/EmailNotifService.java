@@ -15,6 +15,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Locale;
 import java.util.Optional;
 
 @Service
@@ -48,6 +49,8 @@ public class EmailNotifService {
     }
 
     public String generarPlantillaHtml(Pago pago) {
+        String montoFormateado = String.format(Locale.US, "%.2f", pago.getMonto()); // Forzar el formato con punto decimal
+
         return "<html>" +
                 "<body style='font-family: Arial, sans-serif; color: #333; line-height: 1.6;'>" +
                 "<div style='max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;'>" +
@@ -56,7 +59,7 @@ public class EmailNotifService {
                 "<p>Este es un recordatorio de que tienes un pago programado para mañana:</p>" +
                 "<ul>" +
                 "<li><strong>Pago:</strong> " + pago.getNombre() + "</li>" +
-                "<li><strong>Monto:</strong> $" + pago.getMonto() + "</li>" +
+                "<li><strong>Monto:</strong> $" + montoFormateado + "</li>" +
                 "</ul>" +
                 "<p>Asegúrate de realizarlo a tiempo para evitar inconvenientes.</p>" +
                 "<p>Gracias por confiar en <strong>NextStep</strong>.</p>" +
@@ -64,6 +67,7 @@ public class EmailNotifService {
                 "</body>" +
                 "</html>";
     }
+
 
     @Transactional
     public boolean enviarCorreoSiNoEnviado(Integer usuarioId, Integer pagoId, String asunto, String mensajeHtml) {

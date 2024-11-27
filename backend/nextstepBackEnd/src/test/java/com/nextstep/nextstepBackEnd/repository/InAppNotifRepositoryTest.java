@@ -12,8 +12,10 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
-import static junit.framework.TestCase.*;
+import static org.junit.jupiter.api.Assertions.*;
+
 
 @DataJpaTest
 public class InAppNotifRepositoryTest {
@@ -29,15 +31,18 @@ public class InAppNotifRepositoryTest {
 
     private Usuario usuario;
     private Pago pago;
+    private InAppNotif inAppNotif;
 
     @BeforeEach
     public void setUp() {
+        // Crear y guardar un usuario
         usuario = new Usuario();
         usuario.setUsername("testuser");
         usuario.setEmail("testuser@example.com");
         usuario.setPassword("password123");
         usuario = userRepository.save(usuario);
 
+        // Crear y guardar un pago
         pago = new Pago();
         pago.setUsuario(usuario);
         pago.setNombre("Pago de Prueba");
@@ -46,19 +51,22 @@ public class InAppNotifRepositoryTest {
         pago.setRecurrente(true);
         pago.setFrecuencia(Pago.Frecuencia.MENSUAL);
         pago = pagoRepository.save(pago);
-    }
 
-    @Test
-    public void testFindByUsuarioId() {
-        InAppNotif inAppNotif = new InAppNotif();
+        // Crear y guardar una notificación
+        inAppNotif = new InAppNotif();
         inAppNotif.setUsuario(usuario);
         inAppNotif.setPago(pago);
         inAppNotif.setTitulo("Recordatorio");
         inAppNotif.setMensaje("Tienes un pago pendiente.");
         inAppNotif.setLeido(false);
-        inAppNotif.setFechaCreacion(LocalDateTime.now());
+        // Truncar los milisegundos para evitar problemas
+        inAppNotif.setFechaCreacion(LocalDateTime.now().withNano(0));
         inAppNotifRepository.save(inAppNotif);
+    }
 
+
+    @Test
+    public void testFindByUsuarioId() {
         List<InAppNotif> notificaciones = inAppNotifRepository.findByUsuarioId(usuario.getId());
 
         assertNotNull(notificaciones);
@@ -69,17 +77,27 @@ public class InAppNotifRepositoryTest {
 
     @Test
     public void testCountByUsuarioIdAndLeidoFalse() {
-        InAppNotif inAppNotif = new InAppNotif();
-        inAppNotif.setUsuario(usuario);
-        inAppNotif.setPago(pago);
-        inAppNotif.setTitulo("Recordatorio");
-        inAppNotif.setMensaje("Tienes un pago pendiente.");
-        inAppNotif.setLeido(false);
-        inAppNotif.setFechaCreacion(LocalDateTime.now());
-        inAppNotifRepository.save(inAppNotif);
-
         long count = inAppNotifRepository.countByUsuarioIdAndLeidoFalse(usuario.getId());
 
         assertEquals(1, count);
     }
+
+    @Test
+    public void testFindByUsuarioIdAndFechaCreacion() {
+        // Truncar los milisegundos al buscar
+        LocalDateTime fechaCreacion = inAppNotif.getFechaCreacion().withNano(0);
+
+        Optional<InAppNotif> resultado = inAppNotifRepository.findFirstByUsuarioIdAndPagoIdAndTituloAndMensajeAndFechaCreacion(
+                usuario.getId(),
+                pago.getId(),
+                inAppNotif.getTitulo(),
+                inAppNotif.getMensaje(),
+                fechaCreacion
+        );
+
+        // Verificar que la consulta encontró la notificación
+        assertTrue(resultado.isPresent());
+        assertEquals(inAppNotif.getId(), resultado.get().getId());
+    }
+
 }

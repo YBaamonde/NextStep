@@ -5,10 +5,9 @@ import com.nextstep.nextstepBackEnd.service.notif.EmailNotifService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/notificaciones")
@@ -37,4 +36,14 @@ public class EmailNotifController {
         }
     }
 
+    // Nuevo endpoint: Verificar si un correo ya fue enviado
+    @GetMapping("/email/enviado")
+    public ResponseEntity<Boolean> verificarCorreoEnviado(
+            @RequestParam Integer usuarioId,
+            @RequestParam Integer pagoId,
+            @RequestParam LocalDate fechaPago) {
+        boolean enviado = emailNotifService.enviarCorreoSiNoEnviado(
+                usuarioId, pagoId, "Recordatorio de pago", fechaPago.toString());
+        return ResponseEntity.ok(enviado);
+    }
 }

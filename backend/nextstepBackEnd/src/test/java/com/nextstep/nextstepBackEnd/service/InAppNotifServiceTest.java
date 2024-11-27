@@ -1,11 +1,12 @@
 package com.nextstep.nextstepBackEnd.service;
 
 import com.nextstep.nextstepBackEnd.model.notif.InAppNotif;
-import com.nextstep.nextstepBackEnd.model.notif.NotificacionDTO;
 import com.nextstep.nextstepBackEnd.model.Pago;
 import com.nextstep.nextstepBackEnd.model.Usuario;
+import com.nextstep.nextstepBackEnd.model.notif.InAppNotifDTO;
 import com.nextstep.nextstepBackEnd.repository.InAppNotifRepository;
 import com.nextstep.nextstepBackEnd.repository.PagoRepository;
+import com.nextstep.nextstepBackEnd.repository.UserRepository;
 import com.nextstep.nextstepBackEnd.service.notif.InAppNotifService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,13 +17,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
+import java.util.List;
 
-import static junit.framework.TestCase.assertNotNull;
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -35,6 +34,9 @@ class InAppNotifServiceTest {
 
     @Mock
     private PagoRepository pagoRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     @InjectMocks
     private InAppNotifService inAppNotifService;
@@ -62,12 +64,12 @@ class InAppNotifServiceTest {
         inAppNotif.setTitulo("Recordatorio");
         inAppNotif.setMensaje("Pago programado para mañana.");
         inAppNotif.setLeido(false);
-        inAppNotif.setFechaCreacion(LocalDateTime.now());
+        inAppNotif.setFechaCreacion(LocalDateTime.now().withNano(0));
     }
 
     @Test
     void convertirADTO() {
-        NotificacionDTO dto = inAppNotifService.convertirADTO(inAppNotif);
+        InAppNotifDTO dto = inAppNotifService.convertirADTO(inAppNotif);
 
         assertNotNull(dto);
         assertEquals(inAppNotif.getId(), dto.getId());
@@ -78,60 +80,37 @@ class InAppNotifServiceTest {
         assertEquals(inAppNotif.getPago().getId(), dto.getPagoId());
     }
 
-
     @Test
-    void crearNotificacion() {
+    void crearNotificacionConFechaPago() {
+        // Configurar mocks
+        when(userRepository.findById(1)).thenReturn(Optional.of(usuario));
         when(pagoRepository.findById(1)).thenReturn(Optional.of(pago));
         when(inAppNotifRepository.save(any(InAppNotif.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        InAppNotif result = inAppNotifService.crearNotificacion(1, 1, "Recordatorio", "Pago programado para mañana.");
+        // Ejecutar el metodo con fecha específica
+        LocalDateTime fechaPago = LocalDateTime.now().withNano(0);
+        InAppNotif resultado = inAppNotifService.crearNotificacion(1, 1, "Recordatorio", "Pago programado para mañana.", fechaPago);
 
-        assertNotNull(result);
-        assertEquals("Recordatorio", result.getTitulo());
+        // Validar los resultados
+        assertNotNull(resultado);
+        assertEquals("Recordatorio", resultado.getTitulo());
+        assertEquals(fechaPago, resultado.getFechaCreacion());
+        verify(userRepository, times(1)).findById(1);
         verify(pagoRepository, times(1)).findById(1);
         verify(inAppNotifRepository, times(1)).save(any(InAppNotif.class));
     }
 
     @Test
     void obtenerNotificacionesPorUsuario() {
-        when(inAppNotifRepository.findByUsuarioId(1)).thenReturn(List.of(inAppNotif));
+        when(inAppNotifRepository.findByUsuarioIdAndLeidoFalse(1)).thenReturn(List.of(inAppNotif));
 
         List<InAppNotif> notificaciones = inAppNotifService.obtenerNotificacionesPorUsuario(1);
 
         assertNotNull(notificaciones);
         assertEquals(1, notificaciones.size());
         assertEquals("Recordatorio", notificaciones.get(0).getTitulo());
-        verify(inAppNotifRepository, times(1)).findByUsuarioId(1);
+        verify(inAppNotifRepository, times(1)).findByUsuarioIdAndLeidoFalse(1);
     }
-
-
-    @Test
-    void marcarComoLeida() {
-        // Simula que findById devuelve la notificación correcta
-        when(inAppNotifRepository.findById(1)).thenReturn(Optional.of(inAppNotif));
-
-        // Simula que save devuelve la notificación actualizada
-        when(inAppNotifRepository.save(any(InAppNotif.class))).thenAnswer(invocation -> {
-            InAppNotif saved = invocation.getArgument(0);
-            saved.setLeido(true);
-            saved.setFechaLeido(LocalDateTime.now());
-            return saved;
-        });
-
-        // Invoca el metodo del servicio
-        InAppNotif result = inAppNotifService.marcarComoLeida(1);
-
-        // Verifica los resultados
-        assertNotNull(result);
-        assertTrue(result.getLeido());
-        assertNotNull(result.getFechaLeido());
-
-        // Verifica que los mocks se llamaron como se esperaba
-        verify(inAppNotifRepository, times(1)).findById(1);
-        verify(inAppNotifRepository, times(1)).save(any(InAppNotif.class));
-    }
-
-
 
     @Test
     void contarNotificacionesNoLeidas() {
@@ -143,10 +122,29 @@ class InAppNotifServiceTest {
         verify(inAppNotifRepository, times(1)).countByUsuarioIdAndLeidoFalse(1);
     }
 
+    @Test
+    void marcarComoLeida() {
+        when(inAppNotifRepository.findById(1)).thenReturn(Optional.of(inAppNotif));
+        when(inAppNotifRepository.save(any(InAppNotif.class))).thenAnswer(invocation -> {
+            InAppNotif notif = invocation.getArgument(0);
+            notif.setLeido(true);
+            notif.setFechaLeido(LocalDateTime.now());
+            return notif;
+        });
+
+        InAppNotif resultado = inAppNotifService.marcarComoLeida(1);
+
+        assertNotNull(resultado);
+        assertTrue(resultado.getLeido());
+        assertNotNull(resultado.getFechaLeido());
+        verify(inAppNotifRepository, times(1)).findById(1);
+        verify(inAppNotifRepository, times(1)).save(any(InAppNotif.class));
+    }
 
     @Test
     void eliminarNotificacion() {
         when(inAppNotifRepository.existsById(1)).thenReturn(true);
+        doNothing().when(inAppNotifRepository).deleteById(1);
 
         inAppNotifService.eliminarNotificacion(1);
 
@@ -155,7 +153,7 @@ class InAppNotifServiceTest {
     }
 
     @Test
-    void eliminarNotificacion_NotFound() {
+    void eliminarNotificacion_NoEncontrada() {
         when(inAppNotifRepository.existsById(1)).thenReturn(false);
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
@@ -166,6 +164,4 @@ class InAppNotifServiceTest {
         verify(inAppNotifRepository, times(1)).existsById(1);
         verify(inAppNotifRepository, never()).deleteById(any());
     }
-
 }
-

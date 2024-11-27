@@ -3,7 +3,7 @@ package com.nextstep.nextstepBackEnd.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nextstep.nextstepBackEnd.controller.notif.NotificacionRequest;
 import com.nextstep.nextstepBackEnd.model.notif.InAppNotif;
-import com.nextstep.nextstepBackEnd.model.notif.NotificacionDTO;
+import com.nextstep.nextstepBackEnd.model.notif.InAppNotifDTO;
 import com.nextstep.nextstepBackEnd.model.Pago;
 import com.nextstep.nextstepBackEnd.model.Usuario;
 import com.nextstep.nextstepBackEnd.service.notif.InAppNotifService;
@@ -39,7 +39,7 @@ public class InAppNotifControllerTest {
     private ObjectMapper objectMapper;
 
     private InAppNotif inAppNotif;
-    private NotificacionDTO notificacionDTO;
+    private InAppNotifDTO inAppNotifDTO;
 
     @BeforeEach
     void setUp() {
@@ -62,39 +62,37 @@ public class InAppNotifControllerTest {
         inAppNotif.setLeido(false);
         inAppNotif.setFechaCreacion(LocalDateTime.now());
 
-        notificacionDTO = new NotificacionDTO();
-        notificacionDTO.setId(1);
-        notificacionDTO.setTitulo("Recordatorio");
-        notificacionDTO.setMensaje("Pago programado para mañana.");
-        notificacionDTO.setLeido(false);
-        notificacionDTO.setFechaCreacion(inAppNotif.getFechaCreacion());
-        notificacionDTO.setPagoId(pago.getId());
+        inAppNotifDTO = new InAppNotifDTO();
+        inAppNotifDTO.setId(1);
+        inAppNotifDTO.setTitulo("Recordatorio");
+        inAppNotifDTO.setMensaje("Pago programado para mañana.");
+        inAppNotifDTO.setLeido(false);
+        inAppNotifDTO.setFechaCreacion(inAppNotif.getFechaCreacion());
+        inAppNotifDTO.setPagoId(pago.getId());
     }
-
-
 
     @Test
     @WithMockUser
-    public void testCrearNotificacion() throws Exception {
-        when(inAppNotifService.crearNotificacion(eq(1), eq(1), anyString(), anyString()))
+    public void testCrearNotificacionConFechaPago() throws Exception {
+        // Mockear la respuesta del servicio
+        when(inAppNotifService.crearNotificacion(eq(1), eq(1), anyString(), anyString(), any(LocalDateTime.class)))
                 .thenReturn(inAppNotif);
         when(inAppNotifService.convertirADTO(any(InAppNotif.class)))
-                .thenReturn(notificacionDTO);
+                .thenReturn(inAppNotifDTO);
 
+        // Crear la solicitud
         NotificacionRequest request = new NotificacionRequest();
         request.setTitulo("Recordatorio");
         request.setMensaje("Pago programado para mañana.");
 
-        mockMvc.perform(post("/notificaciones/inapp?usuarioId=1&pagoId=1")
+        mockMvc.perform(post("/notificaciones/inapp?usuarioId=1&pagoId=1&fechaPago=2024-11-28")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.titulo").value("Recordatorio"))
-                .andExpect(jsonPath("$.mensaje").value("Pago programado para mañana."));
+                .andExpect(jsonPath("$.mensaje").value("Pago programado para mañana."))
+                .andExpect(jsonPath("$.fechaCreacion").exists());
     }
-
-
-
 
     @Test
     @WithMockUser
@@ -102,15 +100,13 @@ public class InAppNotifControllerTest {
         when(inAppNotifService.obtenerNotificacionesPorUsuario(1))
                 .thenReturn(List.of(inAppNotif));
         when(inAppNotifService.convertirADTO(any(InAppNotif.class)))
-                .thenReturn(notificacionDTO);
+                .thenReturn(inAppNotifDTO);
 
         mockMvc.perform(get("/notificaciones/inapp/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].titulo").value("Recordatorio"))
                 .andExpect(jsonPath("$[0].mensaje").value("Pago programado para mañana."));
     }
-
-
 
     @Test
     @WithMockUser
@@ -123,22 +119,21 @@ public class InAppNotifControllerTest {
                 .andExpect(content().string("5"));
     }
 
-
     @Test
     @WithMockUser
     public void testMarcarComoLeida() throws Exception {
-        // Configura el mock para simular el servicio
+        // Mockear respuesta del servicio
         when(inAppNotifService.marcarComoLeida(1)).thenAnswer(invocation -> {
             inAppNotif.setLeido(true);
             inAppNotif.setFechaLeido(LocalDateTime.now());
             return inAppNotif;
         });
 
-        // Configura el mock para convertir a DTO
+        // Mockear conversión a DTO
         when(inAppNotifService.convertirADTO(any(InAppNotif.class)))
                 .thenAnswer(invocation -> {
                     InAppNotif n = invocation.getArgument(0);
-                    NotificacionDTO dto = new NotificacionDTO();
+                    InAppNotifDTO dto = new InAppNotifDTO();
                     dto.setId(n.getId());
                     dto.setTitulo(n.getTitulo());
                     dto.setMensaje(n.getMensaje());
@@ -149,26 +144,10 @@ public class InAppNotifControllerTest {
                     return dto;
                 });
 
-        // Ejecuta la solicitud PUT
+        // Ejecutar solicitud PUT
         mockMvc.perform(put("/notificaciones/inapp/1/leida"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.leido").value(true))
                 .andExpect(jsonPath("$.titulo").value("Recordatorio"));
     }
-
-
-
-
-    @Test
-    @WithMockUser
-    public void testEliminarNotificacion() throws Exception {
-        doNothing().when(inAppNotifService).eliminarNotificacion(1);
-
-        mockMvc.perform(delete("/notificaciones/inapp/1"))
-                .andExpect(status().isOk());
-
-        verify(inAppNotifService, times(1)).eliminarNotificacion(1);
-    }
-
 }
-

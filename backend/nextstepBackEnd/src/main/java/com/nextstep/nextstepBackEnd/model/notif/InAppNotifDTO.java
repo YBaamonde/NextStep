@@ -5,7 +5,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class NotificacionDTO {
+public class InAppNotifDTO {
     private Integer id;
     private String titulo;
     private String mensaje;

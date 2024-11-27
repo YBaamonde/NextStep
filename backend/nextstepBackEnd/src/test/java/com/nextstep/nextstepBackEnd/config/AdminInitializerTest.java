@@ -1,10 +1,7 @@
 package com.nextstep.nextstepBackEnd.config;
 
-import com.nextstep.nextstepBackEnd.config.AdminConfig;
-import com.nextstep.nextstepBackEnd.model.Rol;
 import com.nextstep.nextstepBackEnd.model.Usuario;
 import com.nextstep.nextstepBackEnd.repository.UserRepository;
-import com.nextstep.nextstepBackEnd.config.AdminInitializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

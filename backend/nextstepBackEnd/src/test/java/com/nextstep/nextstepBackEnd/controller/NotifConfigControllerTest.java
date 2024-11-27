@@ -53,14 +53,20 @@ public class NotifConfigControllerTest {
     @Test
     public void testGuardarConfiguracion_SavesConfigSuccessfully() {
         // Arrange
+        Usuario usuario = new Usuario();
+        usuario.setId(1);
+        usuario.setUsername("testuser");
+
         NotificacionConfig config = NotificacionConfig.builder()
+                .usuario(usuario) // Asegúrate de incluir relaciones si existen
                 .emailActivas(true)
                 .emailDiasAntes(2)
                 .inAppActivas(false)
                 .inAppDiasAntes(1)
                 .build();
 
-        when(notifConfigService.guardarConfiguracion(config)).thenReturn(config);
+        when(notifConfigService.guardarConfiguracion(any(NotificacionConfig.class)))
+                .thenReturn(config); // Configura el mock para devolver la entidad
 
         // Act
         ResponseEntity<NotificacionConfig> response = notifConfigController.guardarConfiguracion(config);

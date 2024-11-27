@@ -57,14 +57,14 @@ public class NotifScheduler {
 
                 // Evaluar notificaciones por email
                 if (config.isEmailActivas() && hoy.plusDays(config.getEmailDiasAntes()).equals(pago.getFecha())) {
-                    if (!correoYaEnviado(usuario.getId(), pago.getId())) {
+                    if (!correoYaEnviado(usuario.getId(), pago.getId(), pago.getFecha())) {
                         enviarNotificacionEmail(pago, config);
                     }
                 }
 
                 // Evaluar notificaciones In-App
                 if (config.isInAppActivas() && hoy.plusDays(config.getInAppDiasAntes()).equals(pago.getFecha())) {
-                    enviarNotificacionInApp(pago, config);
+                    enviarNotificacionInApp(pago, config, pago.getFecha());
                 }
 
             } catch (Exception e) {
@@ -75,45 +75,31 @@ public class NotifScheduler {
 
     private void enviarNotificacionEmail(Pago pago, NotificacionConfig config) {
         try {
-            // Usar el metodo generarPlantillaHtml
             String asunto = "Recordatorio de pago: " + pago.getNombre();
             String mensajeHtml = emailNotifService.generarPlantillaHtml(pago);
 
             // Enviar correo
-            emailNotifService.enviarEmailHtml(pago.getUsuario().getEmail(), asunto, mensajeHtml);
-
-            // Registrar en la tabla notificacion_email
-            registrarEnvioEmail(pago, asunto, mensajeHtml);
-            System.out.println("Correo enviado para pago ID: " + pago.getId());
+            emailNotifService.enviarCorreoSiNoEnviado(pago.getUsuario().getId(), pago.getId(), asunto, mensajeHtml);
         } catch (Exception e) {
             System.err.println("Error al enviar correo para el pago ID: " + pago.getId() + " - " + e.getMessage());
         }
     }
 
-    private void enviarNotificacionInApp(Pago pago, NotificacionConfig config) {
+    private boolean correoYaEnviado(Integer usuarioId, Integer pagoId, LocalDate fechaPago) {
+        return emailNotifRepository.existsByUsuarioIdAndPagoIdAndFechaEnvio(usuarioId, pagoId, fechaPago.atStartOfDay());
+    }
+
+
+
+
+    private void enviarNotificacionInApp(Pago pago, NotificacionConfig config, LocalDate fechaPago) {
         try {
             String titulo = "Recordatorio de pago";
             String mensaje = "Tienes un pago programado para el " + pago.getFecha() + ": " + pago.getNombre();
 
-            inAppNotifService.crearNotificacion(pago.getUsuario().getId(), pago.getId(), titulo, mensaje);
-            System.out.println("Notificación In-App enviada para pago ID: " + pago.getId());
+            inAppNotifService.crearNotificacion(pago.getUsuario().getId(), pago.getId(), titulo, mensaje, fechaPago.atStartOfDay());
         } catch (Exception e) {
             System.err.println("Error al enviar notificación In-App para el pago ID: " + pago.getId() + " - " + e.getMessage());
         }
-    }
-
-    private boolean correoYaEnviado(Integer usuarioId, Integer pagoId) {
-        return emailNotifRepository.existsByUsuarioIdAndPagoId(usuarioId, pagoId);
-    }
-
-    private void registrarEnvioEmail(Pago pago, String asunto, String mensaje) {
-        EmailNotif emailNotif = EmailNotif.builder()
-                .usuario(pago.getUsuario())
-                .pago(pago)
-                .asunto(asunto)
-                .mensaje(mensaje)
-                .fechaEnvio(LocalDateTime.now())
-                .build();
-        emailNotifRepository.save(emailNotif);
     }
 }

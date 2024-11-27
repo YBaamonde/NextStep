@@ -1,13 +1,14 @@
 package com.nextstep.nextstepBackEnd.service.notif;
 
 import com.nextstep.nextstepBackEnd.model.notif.InAppNotif;
-import com.nextstep.nextstepBackEnd.model.notif.NotificacionDTO;
+import com.nextstep.nextstepBackEnd.model.notif.InAppNotifDTO;
 import com.nextstep.nextstepBackEnd.repository.InAppNotifRepository;
 import com.nextstep.nextstepBackEnd.repository.PagoRepository;
 import com.nextstep.nextstepBackEnd.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -27,18 +28,19 @@ public class InAppNotifService {
 
     // Crear una nueva notificación asociada a un pago
     @Transactional
-    public InAppNotif crearNotificacion(Integer usuarioId, Integer pagoId, String titulo, String mensaje) {
-        // Buscar si ya existe una notificación activa (no leída) para este usuario, pago, título y mensaje
-        Optional<InAppNotif> notificacionExistente = inAppNotifRepository.findFirstByUsuarioIdAndPagoIdAndTituloAndMensajeAndLeidoFalse(
-                usuarioId, pagoId, titulo, mensaje);
+    public InAppNotif crearNotificacion(Integer usuarioId, Integer pagoId, String titulo, String mensaje, LocalDateTime fechaPago) {
+        // Buscar si ya existe una notificación activa para el mismo usuario, pago, título y fecha
+        Optional<InAppNotif> notificacionExistente = inAppNotifRepository.findFirstByUsuarioIdAndPagoIdAndTituloAndMensajeAndFechaCreacion(
+                usuarioId, pagoId, titulo, mensaje, fechaPago);
 
         if (notificacionExistente.isPresent()) {
-            // Si existe una notificación no leída, no hacemos nada
+            // Si existe una notificación, no creamos una nueva
+            System.out.println("Notificación ya existe para usuarioId: " + usuarioId + ", pagoId: " + pagoId);
             return notificacionExistente.get();
         }
 
-        // Crear una nueva notificación si no existe ninguna activa
-        InAppNotif nuevaInAppNotif = InAppNotif.builder()
+        // Crear una nueva notificación si no existe ninguna para esta combinación
+        InAppNotif nuevaNotificacion = InAppNotif.builder()
                 .usuario(userRepository.findById(usuarioId)
                         .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado.")))
                 .pago(pagoRepository.findById(pagoId)
@@ -46,17 +48,19 @@ public class InAppNotifService {
                 .titulo(titulo)
                 .mensaje(mensaje)
                 .leido(false)
-                .fechaCreacion(LocalDateTime.now())
+                .fechaCreacion(fechaPago)
                 .build();
 
-        return inAppNotifRepository.save(nuevaInAppNotif);
+        return inAppNotifRepository.save(nuevaNotificacion);
     }
 
 
 
+
+
     // Convertir a NotificacionDTO
-    public NotificacionDTO convertirADTO(InAppNotif inAppNotif) {
-        NotificacionDTO dto = new NotificacionDTO();
+    public InAppNotifDTO convertirADTO(InAppNotif inAppNotif) {
+        InAppNotifDTO dto = new InAppNotifDTO();
         dto.setId(inAppNotif.getId());
         dto.setTitulo(inAppNotif.getTitulo());
         dto.setMensaje(inAppNotif.getMensaje());
