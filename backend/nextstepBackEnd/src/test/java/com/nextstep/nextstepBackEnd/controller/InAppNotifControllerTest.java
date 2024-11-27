@@ -2,7 +2,7 @@ package com.nextstep.nextstepBackEnd.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nextstep.nextstepBackEnd.controller.notif.NotificacionRequest;
-import com.nextstep.nextstepBackEnd.model.notif.Notificacion;
+import com.nextstep.nextstepBackEnd.model.notif.InAppNotif;
 import com.nextstep.nextstepBackEnd.model.notif.NotificacionDTO;
 import com.nextstep.nextstepBackEnd.model.Pago;
 import com.nextstep.nextstepBackEnd.model.Usuario;
@@ -38,7 +38,7 @@ public class InAppNotifControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private Notificacion notificacion;
+    private InAppNotif inAppNotif;
     private NotificacionDTO notificacionDTO;
 
     @BeforeEach
@@ -53,21 +53,21 @@ public class InAppNotifControllerTest {
         pago.setNombre("Pago Mensual");
         pago.setMonto(BigDecimal.valueOf(50.00));
 
-        notificacion = new Notificacion();
-        notificacion.setId(1);
-        notificacion.setUsuario(usuario);
-        notificacion.setPago(pago);
-        notificacion.setTitulo("Recordatorio");
-        notificacion.setMensaje("Pago programado para mañana.");
-        notificacion.setLeido(false);
-        notificacion.setFechaCreacion(LocalDateTime.now());
+        inAppNotif = new InAppNotif();
+        inAppNotif.setId(1);
+        inAppNotif.setUsuario(usuario);
+        inAppNotif.setPago(pago);
+        inAppNotif.setTitulo("Recordatorio");
+        inAppNotif.setMensaje("Pago programado para mañana.");
+        inAppNotif.setLeido(false);
+        inAppNotif.setFechaCreacion(LocalDateTime.now());
 
         notificacionDTO = new NotificacionDTO();
         notificacionDTO.setId(1);
         notificacionDTO.setTitulo("Recordatorio");
         notificacionDTO.setMensaje("Pago programado para mañana.");
         notificacionDTO.setLeido(false);
-        notificacionDTO.setFechaCreacion(notificacion.getFechaCreacion());
+        notificacionDTO.setFechaCreacion(inAppNotif.getFechaCreacion());
         notificacionDTO.setPagoId(pago.getId());
     }
 
@@ -77,8 +77,8 @@ public class InAppNotifControllerTest {
     @WithMockUser
     public void testCrearNotificacion() throws Exception {
         when(inAppNotifService.crearNotificacion(eq(1), eq(1), anyString(), anyString()))
-                .thenReturn(notificacion);
-        when(inAppNotifService.convertirADTO(any(Notificacion.class)))
+                .thenReturn(inAppNotif);
+        when(inAppNotifService.convertirADTO(any(InAppNotif.class)))
                 .thenReturn(notificacionDTO);
 
         NotificacionRequest request = new NotificacionRequest();
@@ -100,8 +100,8 @@ public class InAppNotifControllerTest {
     @WithMockUser
     public void testObtenerNotificaciones() throws Exception {
         when(inAppNotifService.obtenerNotificacionesPorUsuario(1))
-                .thenReturn(List.of(notificacion));
-        when(inAppNotifService.convertirADTO(any(Notificacion.class)))
+                .thenReturn(List.of(inAppNotif));
+        when(inAppNotifService.convertirADTO(any(InAppNotif.class)))
                 .thenReturn(notificacionDTO);
 
         mockMvc.perform(get("/notificaciones/inapp/1"))
@@ -129,15 +129,15 @@ public class InAppNotifControllerTest {
     public void testMarcarComoLeida() throws Exception {
         // Configura el mock para simular el servicio
         when(inAppNotifService.marcarComoLeida(1)).thenAnswer(invocation -> {
-            notificacion.setLeido(true);
-            notificacion.setFechaLeido(LocalDateTime.now());
-            return notificacion;
+            inAppNotif.setLeido(true);
+            inAppNotif.setFechaLeido(LocalDateTime.now());
+            return inAppNotif;
         });
 
         // Configura el mock para convertir a DTO
-        when(inAppNotifService.convertirADTO(any(Notificacion.class)))
+        when(inAppNotifService.convertirADTO(any(InAppNotif.class)))
                 .thenAnswer(invocation -> {
-                    Notificacion n = invocation.getArgument(0);
+                    InAppNotif n = invocation.getArgument(0);
                     NotificacionDTO dto = new NotificacionDTO();
                     dto.setId(n.getId());
                     dto.setTitulo(n.getTitulo());

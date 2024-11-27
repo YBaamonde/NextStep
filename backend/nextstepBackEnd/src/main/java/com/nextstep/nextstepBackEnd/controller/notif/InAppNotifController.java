@@ -1,6 +1,6 @@
 package com.nextstep.nextstepBackEnd.controller.notif;
 
-import com.nextstep.nextstepBackEnd.model.notif.Notificacion;
+import com.nextstep.nextstepBackEnd.model.notif.InAppNotif;
 import com.nextstep.nextstepBackEnd.model.notif.NotificacionDTO;
 import com.nextstep.nextstepBackEnd.service.notif.InAppNotifService;
 import jakarta.validation.Valid;
@@ -26,16 +26,16 @@ public class InAppNotifController {
             @RequestParam Integer usuarioId,
             @RequestParam Integer pagoId,
             @Valid @RequestBody NotificacionRequest request) {
-        Notificacion notificacion = inAppNotifService.crearNotificacion(
+        InAppNotif inAppNotif = inAppNotifService.crearNotificacion(
                 usuarioId, pagoId, request.getTitulo(), request.getMensaje()
         );
-        return ResponseEntity.ok(inAppNotifService.convertirADTO(notificacion));
+        return ResponseEntity.ok(inAppNotifService.convertirADTO(inAppNotif));
     }
 
     // Obtener todas las notificaciones de un usuario
     @GetMapping("/{usuarioId}")
     public ResponseEntity<List<NotificacionDTO>> obtenerNotificaciones(@PathVariable Integer usuarioId) {
-        List<Notificacion> notificaciones = inAppNotifService.obtenerNotificacionesPorUsuario(usuarioId);
+        List<InAppNotif> notificaciones = inAppNotifService.obtenerNotificacionesPorUsuario(usuarioId);
         List<NotificacionDTO> dtos = notificaciones.stream()
                 .map(inAppNotifService::convertirADTO)
                 .collect(Collectors.toList());
@@ -52,7 +52,7 @@ public class InAppNotifController {
     // Marcar una notificación como leída
     @PutMapping("/{notificacionId}/leida")
     public ResponseEntity<NotificacionDTO> marcarComoLeida(@PathVariable Integer notificacionId) {
-        Notificacion notificacion = inAppNotifService.marcarComoLeida(notificacionId);
-        return ResponseEntity.ok(inAppNotifService.convertirADTO(notificacion));
+        InAppNotif inAppNotif = inAppNotifService.marcarComoLeida(notificacionId);
+        return ResponseEntity.ok(inAppNotifService.convertirADTO(inAppNotif));
     }
 }

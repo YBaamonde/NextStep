@@ -1,6 +1,6 @@
 package com.nextstep.nextstepBackEnd.repository;
 
-import com.nextstep.nextstepBackEnd.model.notif.Notificacion;
+import com.nextstep.nextstepBackEnd.model.notif.InAppNotif;
 import com.nextstep.nextstepBackEnd.model.Pago;
 import com.nextstep.nextstepBackEnd.model.Usuario;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,10 +16,10 @@ import java.util.List;
 import static junit.framework.TestCase.*;
 
 @DataJpaTest
-public class NotificacionRepositoryTest {
+public class InAppNotifRepositoryTest {
 
     @Autowired
-    private NotificacionRepository notificacionRepository;
+    private InAppNotifRepository inAppNotifRepository;
 
     @Autowired
     private PagoRepository pagoRepository;
@@ -50,16 +50,16 @@ public class NotificacionRepositoryTest {
 
     @Test
     public void testFindByUsuarioId() {
-        Notificacion notificacion = new Notificacion();
-        notificacion.setUsuario(usuario);
-        notificacion.setPago(pago);
-        notificacion.setTitulo("Recordatorio");
-        notificacion.setMensaje("Tienes un pago pendiente.");
-        notificacion.setLeido(false);
-        notificacion.setFechaCreacion(LocalDateTime.now());
-        notificacionRepository.save(notificacion);
+        InAppNotif inAppNotif = new InAppNotif();
+        inAppNotif.setUsuario(usuario);
+        inAppNotif.setPago(pago);
+        inAppNotif.setTitulo("Recordatorio");
+        inAppNotif.setMensaje("Tienes un pago pendiente.");
+        inAppNotif.setLeido(false);
+        inAppNotif.setFechaCreacion(LocalDateTime.now());
+        inAppNotifRepository.save(inAppNotif);
 
-        List<Notificacion> notificaciones = notificacionRepository.findByUsuarioId(usuario.getId());
+        List<InAppNotif> notificaciones = inAppNotifRepository.findByUsuarioId(usuario.getId());
 
         assertNotNull(notificaciones);
         assertFalse(notificaciones.isEmpty());
@@ -69,16 +69,16 @@ public class NotificacionRepositoryTest {
 
     @Test
     public void testCountByUsuarioIdAndLeidoFalse() {
-        Notificacion notificacion = new Notificacion();
-        notificacion.setUsuario(usuario);
-        notificacion.setPago(pago);
-        notificacion.setTitulo("Recordatorio");
-        notificacion.setMensaje("Tienes un pago pendiente.");
-        notificacion.setLeido(false);
-        notificacion.setFechaCreacion(LocalDateTime.now());
-        notificacionRepository.save(notificacion);
+        InAppNotif inAppNotif = new InAppNotif();
+        inAppNotif.setUsuario(usuario);
+        inAppNotif.setPago(pago);
+        inAppNotif.setTitulo("Recordatorio");
+        inAppNotif.setMensaje("Tienes un pago pendiente.");
+        inAppNotif.setLeido(false);
+        inAppNotif.setFechaCreacion(LocalDateTime.now());
+        inAppNotifRepository.save(inAppNotif);
 
-        long count = notificacionRepository.countByUsuarioIdAndLeidoFalse(usuario.getId());
+        long count = inAppNotifRepository.countByUsuarioIdAndLeidoFalse(usuario.getId());
 
         assertEquals(1, count);
     }

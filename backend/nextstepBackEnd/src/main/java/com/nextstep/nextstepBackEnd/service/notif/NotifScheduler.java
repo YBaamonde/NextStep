@@ -1,16 +1,17 @@
 package com.nextstep.nextstepBackEnd.service.notif;
 
 import com.nextstep.nextstepBackEnd.model.Pago;
-import com.nextstep.nextstepBackEnd.model.PagoDTO;
 import com.nextstep.nextstepBackEnd.model.Usuario;
+import com.nextstep.nextstepBackEnd.model.notif.EmailNotif;
 import com.nextstep.nextstepBackEnd.model.notif.NotificacionConfig;
+import com.nextstep.nextstepBackEnd.repository.EmailNotifRepository;
 import com.nextstep.nextstepBackEnd.repository.NotificacionConfigRepository;
 import com.nextstep.nextstepBackEnd.repository.PagoRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
@@ -20,18 +21,22 @@ public class NotifScheduler {
     private final EmailNotifService emailNotifService;
     private final InAppNotifService inAppNotifService;
     private final NotificacionConfigRepository notificacionConfigRepository;
+    private final EmailNotifRepository emailNotifRepository;
 
     public NotifScheduler(PagoRepository pagoRepository, EmailNotifService emailNotifService,
-                          InAppNotifService inAppNotifService, NotificacionConfigRepository notificacionConfigRepository) {
+                          InAppNotifService inAppNotifService,
+                          NotificacionConfigRepository notificacionConfigRepository,
+                          EmailNotifRepository emailNotifRepository) {
         this.pagoRepository = pagoRepository;
         this.emailNotifService = emailNotifService;
         this.inAppNotifService = inAppNotifService;
         this.notificacionConfigRepository = notificacionConfigRepository;
+        this.emailNotifRepository = emailNotifRepository;
     }
 
-    // Programar para ejecutar cada minuto para pruebas
-    @Scheduled(cron = "0 * * * * ?")
-    //@Scheduled(cron = "0 0 */1 * * ?") // Programar para ejecutar cada hora
+
+    //@Scheduled(cron = "0 0 * * * ?") // Programar para ejecutar cada hora
+    @Scheduled(cron = "0 * * * * ?") // Ejecutar cada minuto para pruebas
     public void enviarNotificacionesDePagos() {
         LocalDate hoy = LocalDate.now();
 
@@ -52,20 +57,15 @@ public class NotifScheduler {
 
                 // Evaluar notificaciones por email
                 if (config.isEmailActivas() && hoy.plusDays(config.getEmailDiasAntes()).equals(pago.getFecha())) {
-                    enviarNotificacionEmail(pago, config);
+                    if (!correoYaEnviado(usuario.getId(), pago.getId())) {
+                        enviarNotificacionEmail(pago, config);
+                    }
                 }
 
                 // Evaluar notificaciones In-App
                 if (config.isInAppActivas() && hoy.plusDays(config.getInAppDiasAntes()).equals(pago.getFecha())) {
                     enviarNotificacionInApp(pago, config);
                 }
-
-                // Mensajes de log para comprobar si cambia la configuración según el usuario
-                System.out.println("Configuración para usuario ID: " + usuario.getId() +
-                        " - Email anticipación: " + config.getEmailDiasAntes() +
-                        ", In-App anticipación: " + config.getInAppDiasAntes());
-                System.out.println("Pago ID: " + pago.getId() + " con fecha: " + pago.getFecha());
-
 
             } catch (Exception e) {
                 System.err.println("Error al enviar notificación para el pago ID: " + pago.getId() + " - " + e.getMessage());
@@ -79,7 +79,11 @@ public class NotifScheduler {
             String asunto = "Recordatorio de pago: " + pago.getNombre();
             String mensajeHtml = emailNotifService.generarPlantillaHtml(pago);
 
+            // Enviar correo
             emailNotifService.enviarEmailHtml(pago.getUsuario().getEmail(), asunto, mensajeHtml);
+
+            // Registrar en la tabla notificacion_email
+            registrarEnvioEmail(pago, asunto, mensajeHtml);
             System.out.println("Correo enviado para pago ID: " + pago.getId());
         } catch (Exception e) {
             System.err.println("Error al enviar correo para el pago ID: " + pago.getId() + " - " + e.getMessage());
@@ -96,5 +100,20 @@ public class NotifScheduler {
         } catch (Exception e) {
             System.err.println("Error al enviar notificación In-App para el pago ID: " + pago.getId() + " - " + e.getMessage());
         }
+    }
+
+    private boolean correoYaEnviado(Integer usuarioId, Integer pagoId) {
+        return emailNotifRepository.existsByUsuarioIdAndPagoId(usuarioId, pagoId);
+    }
+
+    private void registrarEnvioEmail(Pago pago, String asunto, String mensaje) {
+        EmailNotif emailNotif = EmailNotif.builder()
+                .usuario(pago.getUsuario())
+                .pago(pago)
+                .asunto(asunto)
+                .mensaje(mensaje)
+                .fechaEnvio(LocalDateTime.now())
+                .build();
+        emailNotifRepository.save(emailNotif);
     }
 }

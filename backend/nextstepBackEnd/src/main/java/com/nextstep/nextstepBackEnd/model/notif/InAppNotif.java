@@ -15,8 +15,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "notificacion")
-public class Notificacion {
+@Table(name = "inapp_notif")
+public class InAppNotif {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
