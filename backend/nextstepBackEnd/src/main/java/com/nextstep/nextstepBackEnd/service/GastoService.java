@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -96,4 +97,27 @@ public class GastoService {
             throw new IllegalArgumentException("Gasto no encontrado.");
         }
     }
+
+
+    // Obtener gastos de un usuario agrupados por categoría
+    public Map<String, Double> getGastosPorCategoria(Integer usuarioId) {
+        List<Object[]> resultados = gastoRepository.findGastosGroupedByCategoria(usuarioId);
+        return resultados.stream()
+                .collect(Collectors.toMap(
+                        resultado -> (String) resultado[0], // Nombre de la categoría
+                        resultado -> (Double) resultado[1]  // Total de gastos
+                ));
+    }
+
+
+    // Obtener gastos de un usuario por trimestre
+    public Map<String, Double> getGastosPorTrimestre(Integer usuarioId) {
+        // Filtrar gastos por usuario y agruparlos por trimestre
+        return gastoRepository.findByUsuarioId(usuarioId).stream()
+                .collect(Collectors.groupingBy(
+                        gasto -> "Q" + ((gasto.getFecha().getMonthValue() - 1) / 3 + 1), // Calcular el trimestre
+                        Collectors.summingDouble(gasto -> gasto.getMonto().doubleValue()) // Convertir BigDecimal a double
+                ));
+    }
+
 }

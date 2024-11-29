@@ -24,5 +24,3 @@ public class PagoDTO {
         this.frecuencia = frecuencia;
     }
 }
-
-

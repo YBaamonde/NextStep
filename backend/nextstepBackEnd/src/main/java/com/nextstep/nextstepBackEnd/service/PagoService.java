@@ -133,4 +133,5 @@ public class PagoService {
             throw new IllegalArgumentException("No se puede asignar una frecuencia a un pago no recurrente.");
         }
     }
+
 }
