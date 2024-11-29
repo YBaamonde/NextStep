@@ -52,4 +52,11 @@ public class GastoController {
         gastoService.deleteGasto(gastoId);
         return ResponseEntity.ok().build();
     }
+
+    // Obtener gastos históricos agrupados por categoría
+    @GetMapping("/categoria/{categoriaId}/historicos")
+    public ResponseEntity<List<GastoDTO>> getGastosHistoricosPorCategoria(@PathVariable Integer categoriaId) {
+        List<GastoDTO> gastos = gastoService.getGastosByCategoriaConLimite(categoriaId, Integer.MAX_VALUE); // Sin límite
+        return ResponseEntity.ok(gastos);
+    }
 }

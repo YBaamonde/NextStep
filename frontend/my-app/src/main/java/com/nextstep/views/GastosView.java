@@ -377,7 +377,7 @@ public class GastosView extends VerticalLayout {
 
         Div gastoDiv = new Div();
         gastoDiv.setClassName("gasto-item");
-        System.out.println("Creando GastoDiv con gastoId: " + gastoId); // Depuración
+        //System.out.println("Creando GastoDiv con gastoId: " + gastoId); // Depuración
 
 
         // Etiquetas de información del gasto

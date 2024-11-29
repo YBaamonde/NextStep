@@ -172,6 +172,22 @@ body, #outlet {
 }
 
 
+.ver-mas-button {
+    background-color: #0074DB;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.ver-mas-button:hover {
+    background-color: #005BB5;
+}
+
+
+
 /* Estilo en pantallas grandes */
 @media (min-width: 768px) {
     .categories-container {
