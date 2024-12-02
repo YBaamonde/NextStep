@@ -32,5 +32,11 @@ public interface GastoRepository extends JpaRepository<Gasto, Integer> {
     @Query("SELECT g FROM Gasto g WHERE g.categoria.id = :categoriaId ORDER BY g.fecha DESC")
     Page<Gasto> findTopGastosByCategoria(@Param("categoriaId") Integer categoriaId, Pageable pageable); // Pageable limita la búsqueda a un número de resultados
 
+    // Obtener gastos agrupados por trimestre para un usuario
+    @Query("SELECT QUARTER(g.fecha) AS trimestre, SUM(g.monto) AS total " +
+            "FROM Gasto g WHERE g.usuario.id = :usuarioId GROUP BY QUARTER(g.fecha) " +
+            "ORDER BY QUARTER(g.fecha)")
+    List<Object[]> findGastosByTrimestre(@Param("usuarioId") Integer usuarioId);
+
 }
 

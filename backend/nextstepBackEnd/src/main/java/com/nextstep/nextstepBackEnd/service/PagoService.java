@@ -8,6 +8,7 @@ import com.nextstep.nextstepBackEnd.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -132,6 +133,25 @@ public class PagoService {
         if (!pagoDTO.getRecurrente() && pagoDTO.getFrecuencia() != null) {
             throw new IllegalArgumentException("No se puede asignar una frecuencia a un pago no recurrente.");
         }
+    }
+
+    // Obtener pagos dentro de los próximos 15 días
+    public List<PagoDTO> getPagosProximosByUsuarioId(Integer usuarioId) {
+        Usuario usuario = userRepository.findById(usuarioId)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado."));
+
+        LocalDate fechaFin = LocalDate.now().plusDays(15);
+        List<Pago> pagos = pagoRepository.findPagosFuturosByUsuarioIdWithinDays(usuario.getId(), fechaFin);
+
+        return pagos.stream()
+                .map(pago -> new PagoDTO(
+                        pago.getId(),
+                        pago.getNombre(),
+                        pago.getMonto(),
+                        pago.getFecha(),
+                        pago.getRecurrente(),
+                        pago.getFrecuencia()))
+                .collect(Collectors.toList());
     }
 
 }

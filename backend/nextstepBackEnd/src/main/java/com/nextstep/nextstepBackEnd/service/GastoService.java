@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import org.springframework.data.domain.Pageable;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -104,12 +105,14 @@ public class GastoService {
 
 
     // Obtener gastos de un usuario agrupados por categoría
-    public Map<String, Double> getGastosPorCategoria(Integer usuarioId) {
+    public Map<String, BigDecimal> getGastosPorCategoria(Integer usuarioId) {
         List<Object[]> resultados = gastoRepository.findGastosGroupedByCategoria(usuarioId);
+
+        // Cambiar a BigDecimal en lugar de Double
         return resultados.stream()
                 .collect(Collectors.toMap(
                         resultado -> (String) resultado[0], // Nombre de la categoría
-                        resultado -> (Double) resultado[1]  // Total de gastos
+                        resultado -> (BigDecimal) resultado[1] // Total de gastos como BigDecimal
                 ));
     }
 
@@ -134,12 +137,13 @@ public class GastoService {
 
 
     // Obtener gastos de un usuario por trimestre
-    public Map<String, Double> getGastosPorTrimestre(Integer usuarioId) {
-        // Filtrar gastos por usuario y agruparlos por trimestre
-        return gastoRepository.findByUsuarioId(usuarioId).stream()
-                .collect(Collectors.groupingBy(
-                        gasto -> "Q" + ((gasto.getFecha().getMonthValue() - 1) / 3 + 1), // Calcular el trimestre
-                        Collectors.summingDouble(gasto -> gasto.getMonto().doubleValue()) // Convertir BigDecimal a double
+    public Map<Integer, BigDecimal> getGastosPorTrimestre(Integer usuarioId) {
+        List<Object[]> resultados = gastoRepository.findGastosByTrimestre(usuarioId);
+
+        return resultados.stream()
+                .collect(Collectors.toMap(
+                        resultado -> (Integer) resultado[0], // Trimestre
+                        resultado -> (BigDecimal) resultado[1]  // Total de gastos
                 ));
     }
 

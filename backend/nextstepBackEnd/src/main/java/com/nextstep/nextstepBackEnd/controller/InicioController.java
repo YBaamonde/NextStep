@@ -12,8 +12,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/inicio")
+@RequestMapping("/inicio")
 public class InicioController {
+
     private final GastoService gastoService;
     private final PagoService pagoService;
 
@@ -26,10 +27,16 @@ public class InicioController {
     @GetMapping("/{usuarioId}")
     public ResponseEntity<?> getInicioData(@PathVariable Integer usuarioId) {
         Map<String, Object> response = new HashMap<>();
-        response.put("pagosProximos", pagoService.getPagosByUsuarioId(usuarioId));
+
+        // Agregar pagos próximos
+        response.put("pagosProximos", pagoService.getPagosProximosByUsuarioId(usuarioId));
+
+        // Agregar gastos por categoría
         response.put("gastosPorCategoria", gastoService.getGastosPorCategoria(usuarioId));
+
+        // Agregar evolución trimestral de gastos
         response.put("evolucionTrimestral", gastoService.getGastosPorTrimestre(usuarioId));
+
         return ResponseEntity.ok(response);
     }
-
 }
