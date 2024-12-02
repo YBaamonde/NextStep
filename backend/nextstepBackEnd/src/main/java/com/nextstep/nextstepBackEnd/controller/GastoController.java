@@ -1,6 +1,5 @@
 package com.nextstep.nextstepBackEnd.controller;
 
-import com.nextstep.nextstepBackEnd.model.Gasto;
 import com.nextstep.nextstepBackEnd.model.GastoDTO;
 import com.nextstep.nextstepBackEnd.service.GastoService;
 import org.springframework.http.ResponseEntity;
