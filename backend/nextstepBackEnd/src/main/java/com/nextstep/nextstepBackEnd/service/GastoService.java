@@ -7,6 +7,7 @@ import com.nextstep.nextstepBackEnd.model.Usuario;
 import com.nextstep.nextstepBackEnd.repository.CategoriaRepository;
 import com.nextstep.nextstepBackEnd.repository.GastoRepository;
 import com.nextstep.nextstepBackEnd.repository.UserRepository;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -115,23 +116,20 @@ public class GastoService {
 
     // Obtener gastos de un usuario con un límite de resultados
     public List<GastoDTO> getGastosByCategoriaConLimite(Integer categoriaId, int limite) {
-        // Crear un Pageable con un límite y orden descendente por fecha
-        Pageable pageable = PageRequest.of(0, limite, Sort.by(Sort.Direction.DESC, "fecha"));
+        Pageable pageable = PageRequest.of(0, limite); // Define la paginación con el límite especificado
+        Page<Gasto> gastosPaginados = gastoRepository.findTopGastosByCategoria(categoriaId, pageable);
 
-        // Obtener los gastos desde el repositorio usando el Pageable
-        List<Gasto> gastos = gastoRepository.findTopGastosByCategoria(categoriaId, pageable).getContent();
-
-        // Convertir los resultados a DTOs
-        return gastos.stream()
+        // Mapea los resultados a DTO
+        return gastosPaginados.stream()
                 .map(gasto -> new GastoDTO(
                         gasto.getId(),
                         gasto.getNombre(),
                         gasto.getMonto(),
                         gasto.getFecha(),
-                        gasto.getCategoria().getId()
-                ))
+                        gasto.getCategoria().getId()))
                 .collect(Collectors.toList());
     }
+
 
 
 

@@ -206,9 +206,6 @@ public class GastosView extends VerticalLayout {
         // Añadir elementos al panel
         panel.add(title, description, addGastoButton, menuIcon, gastosContainer);
 
-        // Cargar los gastos de la categoría si es necesario
-        // cargarGastosPorUsuario(usuarioId); // Eliminar para evitar duplicados
-
         return panel;
     }
 
@@ -347,24 +344,60 @@ public class GastosView extends VerticalLayout {
 
     // Metodo para actualizar el panel de gastos
     private void cargarGastosPorUsuario(int usuarioId) {
-        List<Map<String, Object>> gastos = gastoService.getGastosPorUsuario(usuarioId);
+        List<Map<String, Object>> categorias = categoriaService.getCategoriasPorUsuario(usuarioId);
 
-        for (Map<String, Object> gasto : gastos) {
-            Integer gastoId = (Integer) gasto.get("id");
-            String nombreGasto = (String) gasto.get("nombre");
-            Double montoGasto = (Double) gasto.get("monto");
-            String fechaGasto = (String) gasto.get("fecha");
-            Integer categoriaId = (Integer) gasto.get("categoriaId");
+        for (Map<String, Object> categoria : categorias) {
+            int categoriaId = (Integer) categoria.get("id");
+
+            // Obtener los últimos 10 gastos de la categoría
+            List<Map<String, Object>> gastos = gastoService.getGastosPorCategoriaConLimite(categoriaId, 10);
 
             VerticalLayout gastosContainer = categoriaRefs.get(categoriaId);
             if (gastosContainer != null) {
-                // Limpia el contenedor antes de agregar los gastos, para evitar duplicación
+                // Limpiar contenedor antes de agregar gastos
                 gastosContainer.removeAll();
 
-                Div gastoDiv = createGastoDiv(gastoId, nombreGasto, montoGasto, fechaGasto);
-                gastosContainer.add(gastoDiv);
+                // Crear elementos para los gastos
+                for (Map<String, Object> gasto : gastos) {
+                    Div gastoDiv = createGastoDiv(
+                            (Integer) gasto.get("id"),
+                            (String) gasto.get("nombre"),
+                            (Double) gasto.get("monto"),
+                            (String) gasto.get("fecha")
+                    );
+                    gastosContainer.add(gastoDiv);
+                }
+
+                // Agregar botón "Ver más" para mostrar datos históricos
+                Button verMasButton = new Button("Ver más", event -> cargarGastosHistoricos(categoriaId, gastosContainer));
+                verMasButton.addClassName("ver-mas-button");
+                gastosContainer.add(verMasButton);
             }
         }
+    }
+
+    // Cargar gastos históricos con el metodo de GastoService
+    private void cargarGastosHistoricos(int categoriaId, VerticalLayout gastosContainer) {
+        List<Map<String, Object>> gastosHistoricos = gastoService.getGastosHistoricosPorCategoria(categoriaId);
+
+        // Limpiar contenedor antes de agregar gastos
+        gastosContainer.removeAll();
+
+        // Crear elementos para los gastos
+        for (Map<String, Object> gasto : gastosHistoricos) {
+            Div gastoDiv = createGastoDiv(
+                    (Integer) gasto.get("id"),
+                    (String) gasto.get("nombre"),
+                    (Double) gasto.get("monto"),
+                    (String) gasto.get("fecha")
+            );
+            gastosContainer.add(gastoDiv);
+        }
+
+        // Agregar botón "Ver menos" para mostrar los últimos 10 gastos
+        Button verMenosButton = new Button("Ver menos", event -> cargarGastosPorUsuario(usuarioId));
+        verMenosButton.addClassName("ver-menos-button");
+        gastosContainer.add(verMenosButton);
     }
 
 

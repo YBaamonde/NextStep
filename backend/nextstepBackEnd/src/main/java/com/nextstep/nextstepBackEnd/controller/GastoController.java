@@ -59,4 +59,14 @@ public class GastoController {
         List<GastoDTO> gastos = gastoService.getGastosByCategoriaConLimite(categoriaId, Integer.MAX_VALUE); // Sin límite
         return ResponseEntity.ok(gastos);
     }
+
+    @GetMapping("/categoria/{categoriaId}")
+    public ResponseEntity<List<GastoDTO>> getGastosPorCategoriaConLimite(
+            @PathVariable Integer categoriaId,
+            @RequestParam(defaultValue = "10") int limite) {
+        List<GastoDTO> gastos = gastoService.getGastosByCategoriaConLimite(categoriaId, limite);
+        return ResponseEntity.ok(gastos);
+    }
+
+
 }

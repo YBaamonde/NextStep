@@ -27,19 +27,18 @@ public class GastoService {
         this.objectMapper = new ObjectMapper(); // Mapeador JSON
     }
 
-    // Obtener todos los gastos de un usuario por su ID
-    public List<Map<String, Object>> getGastosPorUsuario(int usuarioId) {
+    // Obtener todos los gastos de un usuario por categoría con un límite
+    public List<Map<String, Object>> getGastosPorCategoriaConLimite(int categoriaId, int limite) {
         try {
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(baseUrl + "/gastos/" + usuarioId))
-                    .header("Authorization", "Bearer " + getToken()) // Agregar token JWT para la autenticación
+                    .uri(URI.create(baseUrl + "/gastos/categoria/" + categoriaId + "?limite=" + limite))
+                    .header("Authorization", "Bearer " + getToken())
                     .GET()
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() == 200) {
-                // Convertir la respuesta a una lista de mapas
                 return objectMapper.readValue(response.body(), new TypeReference<>() {});
             } else {
                 Notification.show("Error al cargar los gastos: " + response.statusCode());
@@ -47,7 +46,6 @@ public class GastoService {
         } catch (IOException | InterruptedException e) {
             Notification.show("Error al cargar los gastos: " + e.getMessage());
         }
-
         return Collections.emptyList();
     }
 
@@ -120,21 +118,30 @@ public class GastoService {
     }
 
 
-    // Obtener el último gasto creado
-    public Map<String, Object> getLastCreatedGasto() {
+    public List<Map<String, Object>> getGastosHistoricosPorCategoria(int categoriaId) {
         try {
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(baseUrl + "/gastos/lastCreated"))
+                    .uri(URI.create(baseUrl + "/gastos/categoria/" + categoriaId + "/historicos"))
                     .header("Authorization", "Bearer " + getToken())
                     .GET()
                     .build();
+
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return objectMapper.readValue(response.body(), new TypeReference<>() {});
+
+            if (response.statusCode() == 200) {
+                return objectMapper.readValue(response.body(), new TypeReference<>() {});
+            } else {
+                Notification.show("Error al cargar los gastos históricos: " + response.statusCode());
+            }
         } catch (IOException | InterruptedException e) {
-            Notification.show("Error al obtener el último gasto creado: " + e.getMessage());
+            Notification.show("Error al cargar los gastos históricos: " + e.getMessage());
         }
-        return null;
+        return Collections.emptyList();
     }
+
+
+
+
 
 
     // Metodo para obtener el token de autenticación
@@ -142,4 +149,5 @@ public class GastoService {
         // Implementación para obtener el token JWT de la sesión o almacenamiento
         return (String) UI.getCurrent().getSession().getAttribute("authToken");
     }
+
 }

@@ -186,6 +186,19 @@ body, #outlet {
     background-color: #005BB5;
 }
 
+.ver-menos-button {
+    background-color: #FF5722;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.ver-menos-button:hover {
+    background-color: #e64a19;
+}
 
 
 /* Estilo en pantallas grandes */
