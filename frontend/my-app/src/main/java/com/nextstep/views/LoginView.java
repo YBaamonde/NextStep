@@ -1,7 +1,6 @@
 package com.nextstep.views;
 
 import com.nextstep.services.AuthService;
-import com.nextstep.views.helloworld.HelloWorldView;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -77,7 +76,7 @@ public class LoginView extends Div {
                 if (success) {
                     System.out.println("Login exitoso, redirigiendo..."); // Debug
                     // Redirigir a la página principal si el login es exitoso
-                    UI.getCurrent().navigate(HelloWorldView.class);
+                    UI.getCurrent().navigate(InicioView.class);
                 } else {
                     // Mostrar una notificación de error
                     Notification.show("Error en el inicio de sesión. Por favor, revisa tus credenciales.");

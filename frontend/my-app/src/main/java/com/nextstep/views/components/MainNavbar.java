@@ -4,7 +4,7 @@ import com.nextstep.services.AuthService;
 import com.nextstep.services.InAppNotifService;
 import com.nextstep.services.NotifConfigService;
 import com.nextstep.views.GastosView;
-import com.nextstep.views.temp.InicioView;
+import com.nextstep.views.InicioView;
 import com.nextstep.views.PagosView;
 import com.nextstep.views.PerfilView;
 import com.nextstep.views.simulacion.SimulacionView;
