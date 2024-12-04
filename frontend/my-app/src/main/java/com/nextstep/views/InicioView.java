@@ -4,8 +4,8 @@ import com.github.appreciated.apexcharts.ApexCharts;
 import com.github.appreciated.apexcharts.ApexChartsBuilder;
 import com.github.appreciated.apexcharts.config.builder.ChartBuilder;
 import com.github.appreciated.apexcharts.config.builder.XAxisBuilder;
-import com.github.appreciated.apexcharts.config.chart.Type;
 import com.github.appreciated.apexcharts.helper.Series;
+import com.github.appreciated.apexcharts.config.chart.Type;
 import com.nextstep.services.InicioService;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -56,56 +56,36 @@ public class InicioView extends VerticalLayout {
     }
 
     private void agregarElementosVista(Map<String, Object> datosInicio) {
-        List<Map<String, Object>> pagos = (List<Map<String, Object>>) datosInicio.getOrDefault("pagos", List.of());
+        // Obtén los datos de las distintas secciones
+        List<Map<String, Object>> pagos = (List<Map<String, Object>>) datosInicio.getOrDefault("pagosProximos", List.of());
         Map<String, Double> gastosPorCategoria = (Map<String, Double>) datosInicio.getOrDefault("gastosPorCategoria", Map.of());
-        Map<String, Double> gastosPorTrimestre = (Map<String, Double>) datosInicio.getOrDefault("gastosPorTrimestre", Map.of());
+        Map<String, Double> gastosPorTrimestre = (Map<String, Double>) datosInicio.getOrDefault("evolucionTrimestral", Map.of());
 
-        // Panel con pagos próximos
+        // Crear contenedor para los paneles
+        VerticalLayout layout = new VerticalLayout();
+        layout.addClassName("inicio-view");
+
+        // Agregar panel de pagos próximos
         Div panelPagos = crearPanelPagosProximos(pagos);
-        add(panelPagos);
+        layout.add(panelPagos);
 
-        // Gráfico de categorías
+        // Agregar gráfico de categorías
         ApexCharts graficoCategorias = crearGraficoCategorias(gastosPorCategoria);
-        add(crearPanelConGrafico("Gastos por Categoría", graficoCategorias));
+        Div panelCategorias = crearPanelConGrafico("Gastos por Categoría", graficoCategorias);
+        layout.add(panelCategorias);
 
-        // Gráfico de trimestres
+        // Agregar gráfico de trimestres
         ApexCharts graficoTrimestres = crearGraficoTrimestres(gastosPorTrimestre);
-        add(crearPanelConGrafico("Gastos por Trimestre", graficoTrimestres));
+        Div panelTrimestres = crearPanelConGrafico("Gastos por Trimestre", graficoTrimestres);
+        layout.add(panelTrimestres);
+
+        add(layout);
     }
 
-    private Div crearPanelPagosProximos(List<Map<String, Object>> pagos) {
-        Div panel = new Div();
-        panel.addClassName("panel");
-
-        H2 titulo = new H2("Pagos Próximos");
-        panel.add(titulo);
-
-        if (pagos.isEmpty()) {
-            panel.add(new Text("No hay pagos próximos."));
-        } else {
-            pagos.forEach(pago -> {
-                Div pagoDiv = new Div(new Text(pago.get("nombre") + " - " + pago.get("fecha")));
-                pagoDiv.addClassName("pago-item");
-                panel.add(pagoDiv);
-            });
-        }
-
-        return panel;
-    }
-
-    private Div crearPanelConGrafico(String titulo, ApexCharts grafico) {
-        Div panel = new Div();
-        panel.addClassName("panel");
-
-        H2 tituloPanel = new H2(titulo);
-        panel.add(tituloPanel, grafico);
-
-        return panel;
-    }
-
-    private ApexCharts crearGraficoCategorias(Map<String, Double> gastosPorCategoria) {
-        String[] categorias = gastosPorCategoria.keySet().toArray(new String[0]);
-        Double[] valores = gastosPorCategoria.values().toArray(new Double[0]);
+    // Crear gráfico de categorías
+    private ApexCharts crearGraficoCategorias(Map<String, Double> datos) {
+        String[] categorias = datos.keySet().toArray(new String[0]);
+        Double[] valores = datos.values().toArray(new Double[0]);
 
         return ApexChartsBuilder.get()
                 .withChart(ChartBuilder.get().withType(Type.PIE).build())
@@ -114,14 +94,51 @@ public class InicioView extends VerticalLayout {
                 .build();
     }
 
-    private ApexCharts crearGraficoTrimestres(Map<String, Double> gastosPorTrimestre) {
-        String[] trimestres = gastosPorTrimestre.keySet().toArray(new String[0]);
-        Double[] valores = gastosPorTrimestre.values().toArray(new Double[0]);
+    // Crear gráfico de trimestres
+    private ApexCharts crearGraficoTrimestres(Map<String, Double> datos) {
+        String[] trimestres = datos.keySet().toArray(new String[0]);
+        Double[] valores = datos.values().toArray(new Double[0]);
 
         return ApexChartsBuilder.get()
                 .withChart(ChartBuilder.get().withType(Type.BAR).build())
                 .withXaxis(XAxisBuilder.get().withCategories(trimestres).build())
-                .withSeries(new Series<>("Gastos", valores))
+                .withSeries(new Series<>("Evolución", valores))
                 .build();
     }
+
+    // Crear panel contenedor de gráficos
+    private Div crearPanelConGrafico(String titulo, ApexCharts grafico) {
+        Div panel = new Div();
+        panel.addClassName("panel-grafico");
+
+        H2 tituloPanel = new H2(titulo);
+        tituloPanel.addClassName("panel-title");
+
+        panel.add(tituloPanel, grafico);
+        return panel;
+    }
+
+    // Crear panel de pagos
+    private Div crearPanelPagosProximos(List<Map<String, Object>> pagos) {
+        Div panel = new Div();
+        panel.addClassName("panel");
+
+        H2 titulo = new H2("Pagos Próximos");
+        titulo.addClassName("panel-title");
+        panel.add(titulo);
+
+        if (pagos.isEmpty()) {
+            panel.add(new Text("No hay pagos próximos."));
+        } else {
+            pagos.forEach(pago -> {
+                String detalle = pago.get("nombre") + " - " + pago.get("fecha");
+                Div pagoDiv = new Div(new Text(detalle));
+                pagoDiv.addClassName("pago-item");
+                panel.add(pagoDiv);
+            });
+        }
+
+        return panel;
+    }
+
 }
