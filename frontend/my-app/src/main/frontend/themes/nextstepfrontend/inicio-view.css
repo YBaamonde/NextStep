@@ -5,55 +5,37 @@
     background: url('../../../resources/media/edificiosLogin.jpg') no-repeat center center fixed;
     background-size: cover;
     min-height: 100vh;
-}
-
-/* Header */
-.header {
-    display: flex;
-    align-items: center;
-    padding: 0.5rem 1rem;
-    background-color: rgba(255, 255, 255, 0.8);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-}
-
-.header-title {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #FF5722;
-}
-
-.header-nav a {
-    text-decoration: none;
-    color: #333;
-    margin-right: 1rem;
-    font-weight: 500;
-}
-
-.header-nav a:hover {
-    color: #FF5722;
+    padding: 0;
+    margin: 0;
 }
 
 .paneles-container {
     display: flex;
-    justify-content: space-around;
-    gap: 1rem;
+    justify-content: space-evenly;
+    width: 90%;
+    margin-top: 2rem;
 }
 
-.acrylic-panel {
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border-radius: 12px;
-    padding: 1.5rem;
-    min-width: 25%;
+
+/* Efecto de panel acrílico en pago-item */
+.panel {
+    background: rgba(255, 255, 255, 0.22);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(6.1px);
+    -webkit-backdrop-filter: blur(6.1px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
 .panel-title {
     font-size: 1.5rem;
     color: #FF5722;
-    margin-bottom: 0.5rem;
     text-align: center;
+    margin-bottom: 1rem;
 }
 
 .pago-item {

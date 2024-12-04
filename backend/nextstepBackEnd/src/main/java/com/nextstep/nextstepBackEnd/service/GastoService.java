@@ -137,14 +137,15 @@ public class GastoService {
 
 
     // Obtener gastos de un usuario por trimestre
-    public Map<Integer, BigDecimal> getGastosPorTrimestre(Integer usuarioId) {
+    public Map<String, Double> getGastosPorTrimestre(Integer usuarioId) {
         List<Object[]> resultados = gastoRepository.findGastosByTrimestre(usuarioId);
 
         return resultados.stream()
                 .collect(Collectors.toMap(
-                        resultado -> (Integer) resultado[0], // Trimestre
-                        resultado -> (BigDecimal) resultado[1]  // Total de gastos
+                        resultado -> "Q" + resultado[0], // Convierte el trimestre (Integer) a String con prefijo "Q"
+                        resultado -> ((BigDecimal) resultado[1]).doubleValue() // Convierte BigDecimal a Double
                 ));
     }
+
 
 }
