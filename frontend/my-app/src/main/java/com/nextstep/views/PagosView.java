@@ -141,7 +141,7 @@ public class PagosView extends VerticalLayout {
 
 
 
-    private void openAddPagoDialog() {
+    void openAddPagoDialog() {
         Dialog addPagoDialog = new Dialog();
         addPagoDialog.setHeaderTitle("Nuevo Pago");
 

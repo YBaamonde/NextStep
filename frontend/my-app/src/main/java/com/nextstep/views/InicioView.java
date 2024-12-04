@@ -10,6 +10,7 @@ import com.nextstep.services.InAppNotifService;
 import com.nextstep.services.InicioService;
 import com.nextstep.views.components.MainNavbar;
 import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
@@ -21,10 +22,14 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.server.VaadinSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.stefan.fullcalendar.Entry;
+import org.vaadin.stefan.fullcalendar.FullCalendar;
+import org.vaadin.stefan.fullcalendar.FullCalendarBuilder;
+import org.vaadin.stefan.fullcalendar.dataprovider.InMemoryEntryProvider;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @Route("")
 @RouteAlias("inicio")
@@ -34,7 +39,6 @@ public class InicioView extends VerticalLayout {
 
     @Autowired
     public InicioView(InicioService inicioService) {
-
         setClassName("inicio-view");
         setSizeFull();
         setPadding(false);
@@ -59,13 +63,13 @@ public class InicioView extends VerticalLayout {
         // Construir la vista según los datos
         if (inicioData.isPresent()) {
             Map<String, Object> data = inicioData.get();
-            agregarElementosVista(data);
+            agregarElementosVista(data, usuarioId);
         } else {
             Notification.show("Error al cargar los datos de inicio.");
         }
     }
 
-    private void agregarElementosVista(Map<String, Object> datosInicio) {
+    private void agregarElementosVista(Map<String, Object> datosInicio, Integer usuarioId) {
         List<Map<String, Object>> pagos = (List<Map<String, Object>>) datosInicio.getOrDefault("pagosProximos", List.of());
         Map<String, Double> gastosPorCategoria = (Map<String, Double>) datosInicio.getOrDefault("gastosPorCategoria", Map.of());
         Map<String, Double> evolucionTrimestral = (Map<String, Double>) datosInicio.getOrDefault("evolucionTrimestral", Map.of());
@@ -74,33 +78,98 @@ public class InicioView extends VerticalLayout {
         HorizontalLayout panelesContainer = new HorizontalLayout();
         panelesContainer.setClassName("paneles-container");
 
-        Div panelPagos = crearPanelPagos(pagos);
+        // Panel de pagos con botón para agregar pago
+        Div panelPagos = crearPanelPagos(pagos, usuarioId);
+
+        // Panel de categorías con botones para agregar categoría y gasto
         Div panelCategorias = crearPanelConGrafico("Gastos por Categoría", crearGraficoCircular(gastosPorCategoria));
+        Button addGastoButton = new Button("Añadir Gasto", e -> new GastosView().openAddGastoDialog(1, new VerticalLayout()));
+        addGastoButton.setClassName("boton-panel");
+        panelCategorias.add(addGastoButton);
+
+        // Panel de trimestres con botón para crear informe
         Div panelTrimestres = crearPanelConGrafico("Evolución por Trimestre", crearGraficoBarra(evolucionTrimestral));
+        Button createInformeButton = new Button("Crear Informe");
+        createInformeButton.setClassName("boton-panel");
+        panelTrimestres.add(createInformeButton);
 
         panelesContainer.add(panelPagos, panelCategorias, panelTrimestres);
         add(panelesContainer);
     }
 
-    private Div crearPanelPagos(List<Map<String, Object>> pagos) {
+    private Div crearPanelPagos(List<Map<String, Object>> pagos, Integer usuarioId) {
         Div panel = new Div();
         panel.setClassName("panel");
 
+        // Configurar idioma español
+        Locale spanish = new Locale("es", "ES");
+
+        // Título del panel
         H2 titulo = new H2("Pagos Próximos");
         titulo.addClassName("panel-title");
         panel.add(titulo);
 
-        if (pagos.isEmpty()) {
-            panel.add(new Text("No hay pagos próximos."));
-        } else {
+        // Crear el calendario
+        FullCalendar calendar = FullCalendarBuilder.create().build();
+
+        // Configurar idioma del calendario
+        calendar.setLocale(spanish);
+
+        // Obtener el EntryProvider como InMemory
+        InMemoryEntryProvider<Entry> entryProvider = calendar.getEntryProvider().asInMemory();
+
+        // Agregar las entradas de los pagos al EntryProvider
+        if (!pagos.isEmpty()) {
             pagos.forEach(pago -> {
-                Div pagoDiv = new Div(new Text(pago.get("nombre") + " - " + pago.get("fecha")));
-                pagoDiv.addClassName("pago-item");
-                panel.add(pagoDiv);
+                try {
+                    // Extraer datos del pago
+                    String nombre = (String) pago.get("nombre");
+                    String fechaStr = (String) pago.get("fecha");
+
+                    // Parsear la fecha
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                    LocalDate fecha = LocalDate.parse(fechaStr, formatter);
+
+                    // Crear la entrada del calendario
+                    Entry entry = new Entry();
+                    entry.setTitle(nombre);
+                    entry.setStart(fecha.atStartOfDay()); // Convertir LocalDate a LocalDateTime
+                    entry.setEnd(fecha.plusDays(1).atStartOfDay()); // Opcional: marcar el final del día
+                    entry.setAllDay(true); // Evento de día completo
+                    entry.setColor("#0074DB"); // Color distintivo para los pagos
+
+                    // Log para depuración
+                    System.out.println("Agregando entrada: " + entry.getTitle() + " - " + entry.getStart());
+
+                    // Agregar la entrada al EntryProvider
+                    entryProvider.addEntry(entry);
+                } catch (Exception e) {
+                    System.err.println("Error al procesar el pago: " + pago + ". Detalle: " + e.getMessage());
+                }
             });
+        } else {
+            panel.add(new Text("No hay pagos próximos."));
         }
+
+        // Refrescar manualmente el EntryProvider
+        entryProvider.refreshAll();
+
+        // Botón para añadir pago
+        Button addPagoButton = new Button("Añadir Pago", e -> new PagosView().openAddPagoDialog());
+        addPagoButton.setClassName("boton-panel");
+
+        // Agregar elementos al panel
+        panel.add(calendar, addPagoButton);
+
+        // Logs finales para depuración
+        System.out.println("Calendario HTML generado: " + calendar.getElement().getOuterHTML());
+        entryProvider.fetchAll().forEach(entry -> {
+            System.out.println("Entrada visible: " + entry.getTitle() + " - " + entry.getStart());
+        });
+
         return panel;
     }
+
 
     private Div crearPanelConGrafico(String titulo, ApexCharts grafico) {
         Div panel = new Div();
@@ -118,23 +187,20 @@ public class InicioView extends VerticalLayout {
         Double[] valores = datos.values().toArray(new Double[0]);
 
         return ApexChartsBuilder.get()
-                .withChart(ChartBuilder.get().withType(Type.DONUT).build()) // Se construye un objeto Chart
+                .withChart(ChartBuilder.get().withType(Type.DONUT).build())
                 .withLabels(categorias)
                 .withSeries(valores)
                 .build();
     }
 
     private ApexCharts crearGraficoBarra(Map<String, Double> datos) {
-        // Convertir las claves del mapa en nombres de trimestres
         String[] trimestres = datos.keySet().toArray(new String[0]);
         Double[] valores = datos.values().toArray(new Double[0]);
 
         return ApexChartsBuilder.get()
-                .withChart(ChartBuilder.get().withType(Type.BAR).build()) // Construir el objeto Chart
+                .withChart(ChartBuilder.get().withType(Type.BAR).build())
                 .withLabels(trimestres)
                 .withSeries(new Series<>("Gastos", valores))
                 .build();
     }
-
-
 }

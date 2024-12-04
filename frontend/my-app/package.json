@@ -3,6 +3,14 @@
   "license": "UNLICENSED",
   "type": "module",
   "dependencies": {
+    "@fullcalendar/core": "6.1.6",
+    "@fullcalendar/daygrid": "6.1.6",
+    "@fullcalendar/interaction": "6.1.6",
+    "@fullcalendar/list": "6.1.6",
+    "@fullcalendar/moment": "6.1.6",
+    "@fullcalendar/moment-timezone": "6.1.6",
+    "@fullcalendar/multimonth": "6.1.6",
+    "@fullcalendar/timegrid": "6.1.6",
     "@polymer/polymer": "3.5.1",
     "@vaadin/bundles": "24.4.9",
     "@vaadin/common-frontend": "0.0.19",
@@ -19,6 +27,8 @@
     "construct-style-sheets-polyfill": "3.1.0",
     "date-fns": "2.29.3",
     "lit": "3.1.4",
+    "moment": "2.29.4",
+    "moment-timezone": "0.5.40",
     "onecolor": "4.1.0",
     "proj4": "2.11.0",
     "react": "18.3.1",
@@ -47,6 +57,14 @@
   },
   "vaadin": {
     "dependencies": {
+      "@fullcalendar/core": "6.1.6",
+      "@fullcalendar/daygrid": "6.1.6",
+      "@fullcalendar/interaction": "6.1.6",
+      "@fullcalendar/list": "6.1.6",
+      "@fullcalendar/moment": "6.1.6",
+      "@fullcalendar/moment-timezone": "6.1.6",
+      "@fullcalendar/multimonth": "6.1.6",
+      "@fullcalendar/timegrid": "6.1.6",
       "@polymer/polymer": "3.5.1",
       "@vaadin/bundles": "24.4.9",
       "@vaadin/common-frontend": "0.0.19",
@@ -63,6 +81,8 @@
       "construct-style-sheets-polyfill": "3.1.0",
       "date-fns": "2.29.3",
       "lit": "3.1.4",
+      "moment": "2.29.4",
+      "moment-timezone": "0.5.40",
       "onecolor": "4.1.0",
       "proj4": "2.11.0",
       "react": "18.3.1",
@@ -89,7 +109,7 @@
       "workbox-core": "7.1.0",
       "workbox-precaching": "7.1.0"
     },
-    "hash": "1147909bf7203fe51c6e4f1606f800c11ac53ac1abb64b5b7d8be7ac2c231a76"
+    "hash": "9786f9f7cbb91052a15a8f3f038cc369f81331e9b493b53a0c3d879b7bb0558c"
   },
   "overrides": {
     "@vaadin/bundles": "$@vaadin/bundles",
@@ -112,6 +132,16 @@
     "@vaadin/vaadin-lumo-styles": "$@vaadin/vaadin-lumo-styles",
     "@vaadin/vaadin-material-styles": "$@vaadin/vaadin-material-styles",
     "apexcharts": "$apexcharts",
-    "onecolor": "$onecolor"
+    "onecolor": "$onecolor",
+    "@fullcalendar/interaction": "$@fullcalendar/interaction",
+    "@fullcalendar/timegrid": "$@fullcalendar/timegrid",
+    "@fullcalendar/core": "$@fullcalendar/core",
+    "@fullcalendar/list": "$@fullcalendar/list",
+    "moment": "$moment",
+    "moment-timezone": "$moment-timezone",
+    "@fullcalendar/multimonth": "$@fullcalendar/multimonth",
+    "@fullcalendar/moment": "$@fullcalendar/moment",
+    "@fullcalendar/moment-timezone": "$@fullcalendar/moment-timezone",
+    "@fullcalendar/daygrid": "$@fullcalendar/daygrid"
   }
 }

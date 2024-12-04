@@ -124,7 +124,7 @@ public class GastosView extends VerticalLayout {
 
 
 
-    private void agregarNuevaCategoria() {
+    void agregarNuevaCategoria() {
         if (categoriaCount >= MAX_CATEGORIES) {
             Notification.show("Has alcanzado el límite de 15 categorías.");
             return;
@@ -278,7 +278,7 @@ public class GastosView extends VerticalLayout {
     /* Metodos para gastos */
 
     // Abrir el diálogo de añadir gasto
-    private void openAddGastoDialog(int categoriaId, VerticalLayout gastosContainer) {
+    void openAddGastoDialog(int categoriaId, VerticalLayout gastosContainer) {
         Dialog addGastoDialog = new Dialog();
         addGastoDialog.setHeaderTitle("Nuevo Gasto");
 
