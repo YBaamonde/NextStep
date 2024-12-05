@@ -2,6 +2,7 @@ package com.nextstep.nextstepBackEnd.controller;
 
 import com.nextstep.nextstepBackEnd.model.PagoDTO;
 import com.nextstep.nextstepBackEnd.service.PagoService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,19 +19,18 @@ public class PagoController {
         this.pagoService = pagoService;
     }
 
-    // Obtener todos los pagos de un usuario
+    // Obtener todos los pagos sin su recurrencia
     @GetMapping("/{usuarioId}")
-    public List<PagoDTO> getPagosByUsuario(@PathVariable Integer usuarioId) {
-        return pagoService.getPagosByUsuarioId(usuarioId)
-                .stream()
-                .map(pago -> new PagoDTO(
-                        pago.getId(),
-                        pago.getNombre(),
-                        pago.getMonto(),
-                        pago.getFecha(),
-                        pago.getRecurrente(),
-                        pago.getFrecuencia()))
-                .collect(Collectors.toList());
+    public ResponseEntity<List<PagoDTO>> getPagosByUsuario(@PathVariable Integer usuarioId) {
+        List<PagoDTO> pagosConRecurrencia = pagoService.getPagosByUsuarioId(usuarioId);
+        return ResponseEntity.ok(pagosConRecurrencia);
+    }
+
+    // Obtener todos los pagos con su recurrencia
+    @GetMapping("/recurrentes/{usuarioId}")
+    public ResponseEntity<List<PagoDTO>> getPagosRecurrentesByUsuario(@PathVariable Integer usuarioId) {
+        List<PagoDTO> pagosRecurrentes = pagoService.getPagosConRecurrencia(usuarioId);
+        return ResponseEntity.ok(pagosRecurrentes);
     }
 
     // Crear un nuevo pago
@@ -38,7 +38,7 @@ public class PagoController {
     public ResponseEntity<PagoDTO> createPago(@PathVariable Integer usuarioId,
                                               @RequestBody PagoDTO pagoDTO) {
         PagoDTO createdPago = pagoService.createPago(usuarioId, pagoDTO);
-        return ResponseEntity.ok(createdPago);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdPago);
     }
 
     // Actualizar un pago existente
@@ -53,22 +53,15 @@ public class PagoController {
     @DeleteMapping("/{pagoId}")
     public ResponseEntity<Void> deletePago(@PathVariable Integer pagoId) {
         pagoService.deletePago(pagoId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
+    /*
     // Obtener todos los pagos recurrentes de un usuario
     @GetMapping("/recurrentes/{usuarioId}")
-    public List<PagoDTO> getPagosRecurrentesByUsuario(@PathVariable Integer usuarioId) {
-        return pagoService.getPagosRecurrentesByUsuarioId(usuarioId)
-                .stream()
-                .map(pago -> new PagoDTO(
-                        pago.getId(),
-                        pago.getNombre(),
-                        pago.getMonto(),
-                        pago.getFecha(),
-                        pago.getRecurrente(),
-                        pago.getFrecuencia()))
-                .collect(Collectors.toList());
+    public ResponseEntity<List<PagoDTO>> getPagosRecurrentesByUsuario(@PathVariable Integer usuarioId) {
+        List<PagoDTO> pagosRecurrentes = pagoService.getPagosRecurrentesByUsuarioId(usuarioId);
+        return ResponseEntity.ok(pagosRecurrentes);
     }
+     */
 }
-

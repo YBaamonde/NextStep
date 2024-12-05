@@ -2,6 +2,7 @@ package com.nextstep.nextstepBackEnd.controller;
 
 import com.nextstep.nextstepBackEnd.service.GastoService;
 import com.nextstep.nextstepBackEnd.service.PagoService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,18 +26,27 @@ public class InicioController {
 
     // Obtener datos para la página de inicio
     @GetMapping("/{usuarioId}")
-    public ResponseEntity<?> getInicioData(@PathVariable Integer usuarioId) {
+    public ResponseEntity<Map<String, Object>> getInicioData(@PathVariable Integer usuarioId) {
         Map<String, Object> response = new HashMap<>();
 
-        // Agregar pagos próximos
-        response.put("pagosProximos", pagoService.getPagosProximosByUsuarioId(usuarioId));
+        try {
+            // Agregar pagos próximos (incluyendo recurrencias)
+            response.put("pagosProximos", pagoService.getPagosConRecurrencia(usuarioId));
 
-        // Agregar gastos por categoría
-        response.put("gastosPorCategoria", gastoService.getGastosPorCategoria(usuarioId));
+            // Agregar gastos por categoría
+            response.put("gastosPorCategoria", gastoService.getGastosPorCategoria(usuarioId));
 
-        // Agregar evolución trimestral de gastos
-        response.put("evolucionTrimestral", gastoService.getGastosPorTrimestre(usuarioId));
+            // Agregar evolución trimestral de gastos
+            response.put("evolucionTrimestral", gastoService.getGastosPorTrimestre(usuarioId));
 
-        return ResponseEntity.ok(response);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error inesperado: " + e.getMessage()));
+        }
     }
 }
+

@@ -30,6 +30,7 @@ import org.vaadin.stefan.fullcalendar.dataprovider.InMemoryEntryProvider;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Route("")
 @RouteAlias("inicio")
@@ -101,18 +102,6 @@ public class InicioView extends VerticalLayout {
         Div panel = new Div();
         panel.setClassName("panel");
 
-        // Definir una paleta de colores relacionados con la estética de la aplicación
-        List<String> palette = Arrays.asList(
-                "#FF5722", // Naranja principal de la app
-                "#0074DB", // Azul
-                "#FFC107", // Amarillo
-                "#4CAF50", // Verde
-                "#E91E63"  // Rosa
-        );
-
-        // Configurar idioma español
-        Locale spanish = new Locale("es", "ES");
-
         // Título del panel
         H2 titulo = new H2("Pagos Próximos");
         titulo.addClassName("panel-title");
@@ -120,67 +109,60 @@ public class InicioView extends VerticalLayout {
 
         // Crear el calendario
         FullCalendar calendar = FullCalendarBuilder.create().build();
-
-        // Configurar idioma del calendario
-        calendar.setLocale(spanish);
-        // Eliminar número de semana
+        calendar.setLocale(new Locale("es", "ES"));
         calendar.setWeekNumbersVisible(false);
 
         // Obtener el EntryProvider como InMemory
         InMemoryEntryProvider<Entry> entryProvider = calendar.getEntryProvider().asInMemory();
 
-        // Agregar las entradas de los pagos al EntryProvider
+        // Paleta de colores
+        List<String> palette = Arrays.asList(
+                "#FF5722", // Naranja
+                "#0074DB", // Azul
+                "#FFC107", // Amarillo
+                "#4CAF50", // Verde
+                "#E91E63"  // Rosa
+        );
+
+        // Mapa para asociar colores únicos a cada pago
+        Map<Integer, String> pagoColorMap = new HashMap<>();
+        AtomicInteger colorIndex = new AtomicInteger(0); // Índice para recorrer la paleta
+
+        // Agregar los pagos al calendario
         if (!pagos.isEmpty()) {
             pagos.forEach(pago -> {
                 try {
-                    // Extraer datos del pago
-                    //String nombre = (String) pago.get("nombre");
+                    Integer pagoId = (Integer) pago.get("id"); // ID del pago original
+                    String nombre = (String) pago.get("nombre");
                     String fechaStr = (String) pago.get("fecha");
+                    LocalDate fecha = LocalDate.parse(fechaStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
-                    // Parsear la fecha
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                    LocalDate fecha = LocalDate.parse(fechaStr, formatter);
+                    // Asignar un color único al pago
+                    String color = pagoColorMap.computeIfAbsent(pagoId, id -> {
+                        return palette.get(colorIndex.getAndIncrement() % palette.size());
+                    });
 
-                    // Crear la entrada del calendario
+                    // Crear la entrada en el calendario
                     Entry entry = new Entry();
-                    entry.setTitle("");
-                    entry.setStart(fecha.atStartOfDay()); // Convertir LocalDate a LocalDateTime
-                    entry.setEnd(fecha.plusDays(1).atStartOfDay()); // Opcional: marcar el final del día
-                    entry.setAllDay(true); // Evento de día completo
-                    // Color distinto para cada pago
-                    entry.setColor(palette.get(pagos.indexOf(pago) % palette.size()));
+                    entry.setTitle(nombre);
+                    entry.setStart(fecha.atStartOfDay());
+                    entry.setEnd(fecha.plusDays(1).atStartOfDay());
+                    entry.setAllDay(true);
+                    entry.setColor(color); // Aplicar color único
 
-                    // Log para depuración
-                    //System.out.println("Agregando entrada: " + entry.getTitle() + " - " + entry.getStart());
-
-                    // Agregar la entrada al EntryProvider
                     entryProvider.addEntry(entry);
                 } catch (Exception e) {
                     System.err.println("Error al procesar el pago: " + pago + ". Detalle: " + e.getMessage());
                 }
             });
-        } else {
-            panel.add(new Text("No hay pagos próximos."));
         }
 
         // Botón para añadir pago
         Button addPagoButton = new Button("Añadir Pago", e -> new PagosView().openAddPagoDialog());
         addPagoButton.setClassName("boton-panel");
 
-
         // Agregar elementos al panel
         panel.add(calendar, addPagoButton);
-
-        // Logs finales para depuración
-        /*
-        System.out.println("Calendario HTML generado: " + calendar.getElement().getOuterHTML());
-        entryProvider.fetchAll().forEach(entry -> {
-            System.out.println("Entrada visible: " + entry.getTitle() + " - " + entry.getStart());
-        });
-         */
-
-        // Refrescar manualmente el EntryProvider
-        entryProvider.refreshAll();
 
         return panel;
     }

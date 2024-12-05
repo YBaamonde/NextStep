@@ -26,6 +26,7 @@ import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.component.html.NativeLabel;
 
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -80,7 +81,7 @@ public class PagosView extends VerticalLayout {
         for (Map<String, Object> pago : pagos) {
             Integer pagoId = (Integer) pago.get("id");
             String nombrePago = (String) pago.get("nombre");
-            Double montoPago = (Double) pago.get("monto");
+            BigDecimal montoPago = new BigDecimal(pago.get("monto").toString());
             String fechaPago = (String) pago.get("fecha");
             Boolean recurrente = (Boolean) pago.get("recurrente");
             String frecuencia = (String) pago.get("frecuencia");
@@ -96,7 +97,7 @@ public class PagosView extends VerticalLayout {
     }
 
 
-    private Div createPagoDiv(Integer pagoId, String nombre, Double monto, String fecha, Boolean recurrente, String frecuencia) {
+    private Div createPagoDiv(Integer pagoId, String nombre, BigDecimal monto, String fecha, Boolean recurrente, String frecuencia) {
         Div pagoDiv = new Div();
         pagoDiv.setClassName("pago-item");
 
@@ -172,10 +173,12 @@ public class PagosView extends VerticalLayout {
             Boolean recurrente = recurrenteCheckbox.getValue();
             String frecuencia = recurrente ? frecuenciaComboBox.getValue().toUpperCase() : null; // Convierte el valor recibido en mayusc para que lo entienda el backend
 
-            if (nombre.isEmpty() || monto == null || fecha == null || (recurrente && frecuencia == null)) {
-                Notification.show("Todos los campos son obligatorios.");
+            if (nombre.isEmpty() || monto == null || monto <= 0 || fecha == null ||
+                    (recurrente && (frecuencia == null || frecuencia.isEmpty()))) {
+                Notification.show("Todos los campos son obligatorios y el monto debe ser mayor a 0.");
                 return;
             }
+
 
             Map<String, Object> pagoData = new HashMap<>();
             pagoData.put("nombre", nameField.getValue());
@@ -190,14 +193,12 @@ public class PagosView extends VerticalLayout {
 
             Optional<Map<String, Object>> result = pagoService.createPago(usuarioId, pagoData);
             if (result.isPresent()) {
-                Map<String, Object> newPago = result.get();
-                Integer newPagoId = (Integer) newPago.get("id");
-                Div pagoDiv = createPagoDiv(newPagoId, nombre, monto, fecha.toString(), recurrente, frecuencia);
-                pagosContainer.add(pagoDiv);
+                cargarPagosPorUsuario(usuarioId); // Refrescar la lista completa
                 addPagoDialog.close();
             } else {
                 Notification.show("Error al agregar el pago. Inténtalo nuevamente.");
             }
+
         });
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         saveButton.addClassName("botones-menu");
@@ -275,10 +276,12 @@ public class PagosView extends VerticalLayout {
         boolean success = pagoService.deletePago(pagoId);
         if (success) {
             Notification.show("Pago eliminado con éxito.");
-            pagosContainer.remove(pagoDiv);
+            pagosContainer.remove(pagoDiv); // Eliminar visualmente el pago
+            cargarPagosPorUsuario(usuarioId); // Refrescar la lista para evitar inconsistencias
         } else {
-            Notification.show("Error al eliminar el pago.");
+            Notification.show("Error al eliminar el pago. Inténtalo nuevamente.");
         }
     }
+
 }
 

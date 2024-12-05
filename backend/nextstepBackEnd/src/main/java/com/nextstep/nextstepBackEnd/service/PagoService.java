@@ -9,6 +9,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,15 +31,8 @@ public class PagoService {
 
         List<Pago> pagos = pagoRepository.findByUsuarioId(usuario.getId());
 
-        // Convertir cada Pago a PagoDTO
         return pagos.stream()
-                .map(pago -> new PagoDTO(
-                        pago.getId(),
-                        pago.getNombre(),
-                        pago.getMonto(),
-                        pago.getFecha(),
-                        pago.getRecurrente(),
-                        pago.getFrecuencia()))
+                .map(this::convertirAPagoDTO)
                 .collect(Collectors.toList());
     }
 
@@ -51,23 +45,17 @@ public class PagoService {
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado."));
 
         Pago pago = new Pago();
+
+        pago.setUsuario(usuario);
         pago.setNombre(pagoDTO.getNombre());
         pago.setMonto(pagoDTO.getMonto());
         pago.setFecha(pagoDTO.getFecha());
         pago.setRecurrente(pagoDTO.getRecurrente());
-        pago.setFrecuencia(pagoDTO.getRecurrente() ? pagoDTO.getFrecuencia() : null); // Asigna frecuencia solo si es recurrente
-        pago.setUsuario(usuario);
+        pago.setFrecuencia(pagoDTO.getRecurrente() ? pagoDTO.getFrecuencia() : null);
 
         Pago savedPago = pagoRepository.save(pago);
 
-        return new PagoDTO(
-                savedPago.getId(),
-                savedPago.getNombre(),
-                savedPago.getMonto(),
-                savedPago.getFecha(),
-                savedPago.getRecurrente(),
-                savedPago.getFrecuencia()
-        );
+        return convertirAPagoDTO(savedPago);
     }
 
     // Actualizar un pago existente
@@ -79,26 +67,16 @@ public class PagoService {
             existingPago.setFecha(pagoDTO.getFecha());
             existingPago.setRecurrente(pagoDTO.getRecurrente());
 
-            // Solo asigna frecuencia si el pago es recurrente y frecuencia no es null
             if (pagoDTO.getRecurrente() && pagoDTO.getFrecuencia() != null) {
                 existingPago.setFrecuencia(pagoDTO.getFrecuencia());
             } else {
-                existingPago.setFrecuencia(null); // Asegura que se elimine la frecuencia si el pago ya no es recurrente
+                existingPago.setFrecuencia(null);
             }
 
             Pago updatedPago = pagoRepository.save(existingPago);
-
-            return new PagoDTO(
-                    updatedPago.getId(),
-                    updatedPago.getNombre(),
-                    updatedPago.getMonto(),
-                    updatedPago.getFecha(),
-                    updatedPago.getRecurrente(),
-                    updatedPago.getFrecuencia()  // Frecuencia puede ser null para no recurrentes
-            );
+            return convertirAPagoDTO(updatedPago);
         }).orElseThrow(() -> new IllegalArgumentException("Pago no encontrado."));
     }
-
 
     // Eliminar un pago
     @Transactional
@@ -118,40 +96,94 @@ public class PagoService {
         List<Pago> pagos = pagoRepository.findByUsuarioIdAndRecurrenteTrue(usuario.getId());
 
         return pagos.stream()
-                .map(pago -> new PagoDTO(
-                        pago.getId(),
-                        pago.getNombre(),
-                        pago.getMonto(),
-                        pago.getFecha(),
-                        pago.getRecurrente(),
-                        pago.getFrecuencia()))
+                .map(this::convertirAPagoDTO)
                 .collect(Collectors.toList());
     }
 
-    // Validación de frecuencia solo para pagos recurrentes
+    // Obtener todos los pagos con sus recurrencias incluidas
+    public List<PagoDTO> getPagosConRecurrencia(Integer usuarioId) {
+        Usuario usuario = userRepository.findById(usuarioId)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado."));
+
+        List<Pago> pagos = pagoRepository.findByUsuarioId(usuario.getId());
+        List<PagoDTO> pagosConRecurrencia = new ArrayList<>();
+
+        for (Pago pago : pagos) {
+            if (pago.getRecurrente() && pago.getFrecuencia() != null) {
+                pagosConRecurrencia.addAll(generarRecurrencias(pago, pago.getFrecuencia()));
+            } else {
+                pagosConRecurrencia.add(convertirAPagoDTO(pago));
+            }
+        }
+
+        return pagosConRecurrencia;
+    }
+
+    // Generar las ocurrencias de pagos recurrentes
+    private List<PagoDTO> generarRecurrencias(Pago pago, Pago.Frecuencia frecuencia) {
+        List<PagoDTO> recurrencias = new ArrayList<>();
+        LocalDate fechaActual = pago.getFecha();
+
+        for (int i = 0; i < 12; i++) { // Generar 12 ocurrencias
+            recurrencias.add(new PagoDTO(
+                    pago.getId(),
+                    pago.getNombre(),
+                    pago.getMonto(),
+                    fechaActual,
+                    true,
+                    pago.getFrecuencia()
+            ));
+            fechaActual = avanzarFecha(fechaActual, frecuencia);
+        }
+
+        return recurrencias;
+    }
+
+    // Avanzar la fecha según la frecuencia
+    private LocalDate avanzarFecha(LocalDate fecha, Pago.Frecuencia frecuencia) {
+        switch (frecuencia) {
+            case DIARIA:
+                return fecha.plusDays(1);
+            case SEMANAL:
+                return fecha.plusWeeks(1);
+            case MENSUAL:
+                return fecha.plusMonths(1);
+            case ANUAL:
+                return fecha.plusYears(1);
+            default:
+                throw new IllegalArgumentException("Frecuencia no soportada: " + frecuencia);
+        }
+    }
+
+    // Convertir Pago a PagoDTO
+    private PagoDTO convertirAPagoDTO(Pago pago) {
+        return new PagoDTO(
+                pago.getId(),
+                pago.getNombre(),
+                pago.getMonto(),
+                pago.getFecha(),
+                pago.getRecurrente(),
+                pago.getFrecuencia() != null ? Pago.Frecuencia.valueOf(pago.getFrecuencia().name()) : null
+        );
+    }
+
+
+    // Parsear frecuencia desde String a enum
+    private Pago.Frecuencia parseFrecuencia(String frecuencia) {
+        if (frecuencia == null) {
+            return null;
+        }
+        try {
+            return Pago.Frecuencia.valueOf(frecuencia.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Frecuencia desconocida: " + frecuencia);
+        }
+    }
+
+    // Validar frecuencia solo para pagos recurrentes
     private void validarFrecuenciaRecurrente(PagoDTO pagoDTO) {
         if (!pagoDTO.getRecurrente() && pagoDTO.getFrecuencia() != null) {
             throw new IllegalArgumentException("No se puede asignar una frecuencia a un pago no recurrente.");
         }
     }
-
-    // Obtener pagos dentro de los próximos 15 días
-    public List<PagoDTO> getPagosProximosByUsuarioId(Integer usuarioId) {
-        Usuario usuario = userRepository.findById(usuarioId)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado."));
-
-        LocalDate fechaFin = LocalDate.now().plusDays(15);
-        List<Pago> pagos = pagoRepository.findPagosFuturosByUsuarioIdWithinDays(usuario.getId(), fechaFin);
-
-        return pagos.stream()
-                .map(pago -> new PagoDTO(
-                        pago.getId(),
-                        pago.getNombre(),
-                        pago.getMonto(),
-                        pago.getFecha(),
-                        pago.getRecurrente(),
-                        pago.getFrecuencia()))
-                .collect(Collectors.toList());
-    }
-
 }
