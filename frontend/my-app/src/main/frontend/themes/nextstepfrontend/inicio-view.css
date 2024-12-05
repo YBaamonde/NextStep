@@ -35,7 +35,7 @@
 
 .panel-title {
     font-size: 1.8rem;
-    color: #FF5722;
+    color: black;
     text-align: center;
     margin-bottom: 1.5rem;
     font-weight: bold;
@@ -66,11 +66,12 @@
 }
 
 .fc-daygrid-event {
-    background-color: #FF5722;
+    /*background-color: #0074DB;*/
     border: none;
     color: white;
-    padding: 2px 5px;
-    font-size: 0.9rem;
-    font-weight: bold;
-    border-radius: 5px;
+    padding: 0;
+    font-size: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
 }

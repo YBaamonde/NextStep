@@ -101,6 +101,15 @@ public class InicioView extends VerticalLayout {
         Div panel = new Div();
         panel.setClassName("panel");
 
+        // Definir una paleta de colores relacionados con la estética de la aplicación
+        List<String> palette = Arrays.asList(
+                "#FF5722", // Naranja principal de la app
+                "#0074DB", // Azul
+                "#FFC107", // Amarillo
+                "#4CAF50", // Verde
+                "#E91E63"  // Rosa
+        );
+
         // Configurar idioma español
         Locale spanish = new Locale("es", "ES");
 
@@ -114,6 +123,8 @@ public class InicioView extends VerticalLayout {
 
         // Configurar idioma del calendario
         calendar.setLocale(spanish);
+        // Eliminar número de semana
+        calendar.setWeekNumbersVisible(false);
 
         // Obtener el EntryProvider como InMemory
         InMemoryEntryProvider<Entry> entryProvider = calendar.getEntryProvider().asInMemory();
@@ -123,7 +134,7 @@ public class InicioView extends VerticalLayout {
             pagos.forEach(pago -> {
                 try {
                     // Extraer datos del pago
-                    String nombre = (String) pago.get("nombre");
+                    //String nombre = (String) pago.get("nombre");
                     String fechaStr = (String) pago.get("fecha");
 
                     // Parsear la fecha
@@ -132,14 +143,15 @@ public class InicioView extends VerticalLayout {
 
                     // Crear la entrada del calendario
                     Entry entry = new Entry();
-                    entry.setTitle(nombre);
+                    entry.setTitle("");
                     entry.setStart(fecha.atStartOfDay()); // Convertir LocalDate a LocalDateTime
                     entry.setEnd(fecha.plusDays(1).atStartOfDay()); // Opcional: marcar el final del día
                     entry.setAllDay(true); // Evento de día completo
-                    entry.setColor("#0074DB"); // Color distintivo para los pagos
+                    // Color distinto para cada pago
+                    entry.setColor(palette.get(pagos.indexOf(pago) % palette.size()));
 
                     // Log para depuración
-                    System.out.println("Agregando entrada: " + entry.getTitle() + " - " + entry.getStart());
+                    //System.out.println("Agregando entrada: " + entry.getTitle() + " - " + entry.getStart());
 
                     // Agregar la entrada al EntryProvider
                     entryProvider.addEntry(entry);
@@ -151,21 +163,24 @@ public class InicioView extends VerticalLayout {
             panel.add(new Text("No hay pagos próximos."));
         }
 
-        // Refrescar manualmente el EntryProvider
-        entryProvider.refreshAll();
-
         // Botón para añadir pago
         Button addPagoButton = new Button("Añadir Pago", e -> new PagosView().openAddPagoDialog());
         addPagoButton.setClassName("boton-panel");
+
 
         // Agregar elementos al panel
         panel.add(calendar, addPagoButton);
 
         // Logs finales para depuración
+        /*
         System.out.println("Calendario HTML generado: " + calendar.getElement().getOuterHTML());
         entryProvider.fetchAll().forEach(entry -> {
             System.out.println("Entrada visible: " + entry.getTitle() + " - " + entry.getStart());
         });
+         */
+
+        // Refrescar manualmente el EntryProvider
+        entryProvider.refreshAll();
 
         return panel;
     }
