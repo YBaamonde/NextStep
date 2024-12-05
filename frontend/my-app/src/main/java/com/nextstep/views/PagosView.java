@@ -139,7 +139,7 @@ public class PagosView extends VerticalLayout {
 
     void openAddPagoDialog() {
         Dialog addPagoDialog = new Dialog();
-        addPagoDialog.addClassName("add-pago-dialog");
+        addPagoDialog.addClassName("pago-dialog");
         addPagoDialog.setHeaderTitle("Nuevo Pago");
 
         // Campos de entrada
@@ -219,6 +219,7 @@ public class PagosView extends VerticalLayout {
 
     private void openEditPagoDialog(Integer pagoId, Div pagoDiv, NativeLabel nombreLabel, NativeLabel montoLabel, NativeLabel fechaLabel, NativeLabel recurrenteLabel, NativeLabel frecuenciaLabel) {
         Dialog editDialog = new Dialog();
+        editDialog.addClassName("pago-dialog");
         editDialog.setHeaderTitle("Editar Pago");
 
         // Campos del formulario para editar el pago
