@@ -9,7 +9,6 @@ import com.nextstep.services.AuthService;
 import com.nextstep.services.InAppNotifService;
 import com.nextstep.services.InicioService;
 import com.nextstep.views.components.MainNavbar;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
@@ -38,8 +37,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 @CssImport("./themes/nextstepfrontend/inicio-view.css")
 public class InicioView extends VerticalLayout {
 
+    private final InicioService inicioService;
+    private final Integer usuarioId;
+    private FullCalendar calendar;
+    private InMemoryEntryProvider<Entry> entryProvider;
+
     @Autowired
     public InicioView(InicioService inicioService) {
+        this.inicioService = inicioService;
+
         setClassName("inicio-view");
         setSizeFull();
         setPadding(false);
@@ -52,7 +58,7 @@ public class InicioView extends VerticalLayout {
         add(navbar);
 
         // Obtener datos del usuario
-        Integer usuarioId = (Integer) VaadinSession.getCurrent().getAttribute("userId");
+        usuarioId = (Integer) VaadinSession.getCurrent().getAttribute("userId");
         if (usuarioId == null) {
             Notification.show("Usuario no autenticado. Por favor, inicia sesión.");
             return;
@@ -64,13 +70,13 @@ public class InicioView extends VerticalLayout {
         // Construir la vista según los datos
         if (inicioData.isPresent()) {
             Map<String, Object> data = inicioData.get();
-            agregarElementosVista(data, usuarioId);
+            agregarElementosVista(data);
         } else {
             Notification.show("Error al cargar los datos de inicio.");
         }
     }
 
-    private void agregarElementosVista(Map<String, Object> datosInicio, Integer usuarioId) {
+    private void agregarElementosVista(Map<String, Object> datosInicio) {
         List<Map<String, Object>> pagos = (List<Map<String, Object>>) datosInicio.getOrDefault("pagosProximos", List.of());
         Map<String, Double> gastosPorCategoria = (Map<String, Double>) datosInicio.getOrDefault("gastosPorCategoria", Map.of());
         Map<String, Double> evolucionTrimestral = (Map<String, Double>) datosInicio.getOrDefault("evolucionTrimestral", Map.of());
@@ -80,7 +86,7 @@ public class InicioView extends VerticalLayout {
         panelesContainer.setClassName("paneles-container");
 
         // Panel de pagos con botón para agregar pago
-        Div panelPagos = crearPanelPagos(pagos, usuarioId);
+        Div panelPagos = crearPanelPagos(pagos);
 
         // Panel de categorías con botones para agregar categoría y gasto
         Div panelCategorias = crearPanelConGrafico("Gastos por Categoría", crearGraficoCircular(gastosPorCategoria));
@@ -98,7 +104,7 @@ public class InicioView extends VerticalLayout {
         add(panelesContainer);
     }
 
-    private Div crearPanelPagos(List<Map<String, Object>> pagos, Integer usuarioId) {
+    private Div crearPanelPagos(List<Map<String, Object>> pagos) {
         Div panel = new Div();
         panel.setClassName("panel");
 
@@ -108,12 +114,12 @@ public class InicioView extends VerticalLayout {
         panel.add(titulo);
 
         // Crear el calendario
-        FullCalendar calendar = FullCalendarBuilder.create().build();
+        calendar = FullCalendarBuilder.create().build();
         calendar.setLocale(new Locale("es", "ES"));
         calendar.setWeekNumbersVisible(false);
 
         // Obtener el EntryProvider como InMemory
-        InMemoryEntryProvider<Entry> entryProvider = calendar.getEntryProvider().asInMemory();
+        entryProvider = calendar.getEntryProvider().asInMemory();
 
         // Paleta de colores
         List<String> palette = Arrays.asList(
@@ -158,7 +164,10 @@ public class InicioView extends VerticalLayout {
         }
 
         // Botón para añadir pago
-        Button addPagoButton = new Button("Añadir Pago", e -> new PagosView().openAddPagoDialog());
+        Button addPagoButton = new Button("Añadir Pago", e -> {
+            new PagosView().openAddPagoDialog();
+            actualizarCalendario();
+        });
         addPagoButton.setClassName("boton-panel");
 
         // Agregar elementos al panel
@@ -166,7 +175,6 @@ public class InicioView extends VerticalLayout {
 
         return panel;
     }
-
 
     private Div crearPanelConGrafico(String titulo, ApexCharts grafico) {
         Div panel = new Div();
@@ -199,5 +207,44 @@ public class InicioView extends VerticalLayout {
                 .withLabels(trimestres)
                 .withSeries(new Series<>("Gastos", valores))
                 .build();
+    }
+
+    void actualizarCalendario() {
+        inicioService.getInicioData(usuarioId).ifPresent(datos -> {
+            List<Map<String, Object>> pagos = (List<Map<String, Object>>) datos.getOrDefault("pagosProximos", List.of());
+            entryProvider.removeAllEntries();
+            agregarPagosACalendario(pagos);
+        });
+    }
+
+    private void agregarPagosACalendario(List<Map<String, Object>> pagos) {
+        List<String> palette = Arrays.asList(
+                "#FF5722", "#0074DB", "#FFC107", "#4CAF50", "#E91E63"
+        );
+        AtomicInteger colorIndex = new AtomicInteger(0);
+
+        Map<Integer, String> pagoColorMap = new HashMap<>();
+
+        pagos.forEach(pago -> {
+            try {
+                Integer pagoId = (Integer) pago.get("id");
+                String nombre = (String) pago.get("nombre");
+                String fechaStr = (String) pago.get("fecha");
+                LocalDate fecha = LocalDate.parse(fechaStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+                String color = pagoColorMap.computeIfAbsent(pagoId, id -> palette.get(colorIndex.getAndIncrement() % palette.size()));
+
+                Entry entry = new Entry();
+                entry.setTitle(nombre);
+                entry.setStart(fecha.atStartOfDay());
+                entry.setEnd(fecha.plusDays(1).atStartOfDay());
+                entry.setAllDay(true);
+                entry.setColor(color);
+
+                entryProvider.addEntry(entry);
+            } catch (Exception e) {
+                System.err.println("Error al actualizar el calendario: " + pago + ". Detalle: " + e.getMessage());
+            }
+        });
     }
 }

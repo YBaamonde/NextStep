@@ -113,11 +113,19 @@
     transition: background-color 0.3s;
 }
 
-
-/* Espaciador al final del contenedor de pagos */
-.pago-spacer {
-    height: 50px; /* Menor altura en pantallas grandes */
+/* Efecto acrílico en el diálogo de añadir/editar pago */
+.add-pago-dialog {
+    background: rgba(255, 255, 255, 0.22);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(6.1px);
+    -webkit-backdrop-filter: blur(6.1px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
+
 
 /* Ajuste de tamaño para botones y fuentes en dispositivos móviles */
 @media (max-width: 767px) {
