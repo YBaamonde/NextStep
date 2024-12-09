@@ -78,7 +78,7 @@ public class PagosView extends VerticalLayout {
 
         // Espaciador para pantallas móviles
         Div spacer = new Div();
-        spacer.setHeight("100px"); // Ajusta la altura según sea necesario
+        spacer.setHeight("150px");
         add(spacer);
     }
 

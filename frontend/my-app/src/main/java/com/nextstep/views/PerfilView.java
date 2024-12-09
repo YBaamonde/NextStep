@@ -273,6 +273,7 @@ public class PerfilView extends VerticalLayout {
 
     public void openDialogEditPassword(int usuarioId) {
         Dialog passwordDialog = new Dialog();
+        passwordDialog.addClassName("perfil-dialog");
         passwordDialog.setWidth("500px");
         passwordDialog.setMinWidth("300px");
         passwordDialog.setModal(true);
@@ -316,6 +317,7 @@ public class PerfilView extends VerticalLayout {
             }
         });
         saveButton.addClassName("edit-buttons");
+        saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
         Button cancelButton = new Button("Cancelar", event -> passwordDialog.close());
         cancelButton.addClassName("edit-buttons");
@@ -347,6 +349,7 @@ public class PerfilView extends VerticalLayout {
 
         // Crear el diálogo de confirmación
         Dialog confirmDialog = new Dialog();
+        confirmDialog.addClassName("perfil-dialog");
         confirmDialog.setWidth("400px");
         confirmDialog.setModal(true);
         confirmDialog.setDraggable(false);
@@ -383,16 +386,16 @@ public class PerfilView extends VerticalLayout {
             confirmDialog.close();
         });
         confirmButton.setEnabled(false);
-        confirmButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
 
         // Activar el botón solo si el texto coincide con la frase
         confirmField.addValueChangeListener(event -> {
             confirmButton.setEnabled(event.getValue().equals(fraseAleatoria));
+            confirmButton.addClassName("confirm-delete-button");
         });
 
         // Botón de cancelación
         Button cancelButton = new Button("Cancelar", event -> confirmDialog.close());
-        cancelButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        //cancelButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 
         // Añadir los componentes al diálogo
         VerticalLayout dialogLayout = new VerticalLayout(dialogTitle, instructions, fraseConfirmacion, confirmField, new HorizontalLayout(confirmButton, cancelButton));
@@ -407,6 +410,7 @@ public class PerfilView extends VerticalLayout {
     // Metodo para abrir el diálogo de edición de nombre de usuario
     private void openDialogEditUsername() {
         Dialog usernameDialog = new Dialog();
+        usernameDialog.addClassName("perfil-dialog");
         usernameDialog.setWidth("400px");
         usernameDialog.setMinWidth("300px");
 

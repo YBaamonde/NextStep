@@ -74,6 +74,11 @@ public class InicioView extends VerticalLayout {
         } else {
             Notification.show("Error al cargar los datos de inicio.");
         }
+
+        // Espaciador para pantallas móviles
+        Div spacer = new Div();
+        spacer.setHeight("150px");
+        add(spacer);
     }
 
     private void agregarElementosVista(Map<String, Object> datosInicio) {
@@ -84,17 +89,18 @@ public class InicioView extends VerticalLayout {
         // Paneles
         HorizontalLayout panelesContainer = new HorizontalLayout();
         panelesContainer.setClassName("paneles-container");
+        panelesContainer.getStyle().set("height", "100%").set("align-items", "stretch");
 
-        // Panel de pagos con botón para agregar pago
+        // Panel de pagos
         Div panelPagos = crearPanelPagos(pagos);
 
-        // Panel de categorías con botones para agregar categoría y gasto
+        // Panel de categorías
         Div panelCategorias = crearPanelConGrafico("Gastos por Categoría", crearGraficoCircular(gastosPorCategoria));
         Button addGastoButton = new Button("Añadir Gasto", e -> new GastosView().openAddGastoDialog(1, new VerticalLayout()));
         addGastoButton.setClassName("boton-panel");
         panelCategorias.add(addGastoButton);
 
-        // Panel de trimestres con botón para crear informe
+        // Panel de trimestres
         Div panelTrimestres = crearPanelConGrafico("Evolución por Trimestre", crearGraficoBarra(evolucionTrimestral));
         Button createInformeButton = new Button("Crear Informe");
         createInformeButton.setClassName("boton-panel");
@@ -104,9 +110,11 @@ public class InicioView extends VerticalLayout {
         add(panelesContainer);
     }
 
+
     private Div crearPanelPagos(List<Map<String, Object>> pagos) {
         Div panel = new Div();
         panel.setClassName("panel");
+        panel.getStyle().set("display", "flex").set("flex-direction", "column").set("justify-content", "space-between").set("height", "100%");
 
         // Título del panel
         H2 titulo = new H2("Pagos Próximos");
@@ -122,39 +130,29 @@ public class InicioView extends VerticalLayout {
         entryProvider = calendar.getEntryProvider().asInMemory();
 
         // Paleta de colores
-        List<String> palette = Arrays.asList(
-                "#FF5722", // Naranja
-                "#0074DB", // Azul
-                "#FFC107", // Amarillo
-                "#4CAF50", // Verde
-                "#E91E63"  // Rosa
-        );
+        List<String> palette = Arrays.asList("#FF5722", "#0074DB", "#FFC107", "#4CAF50", "#E91E63");
 
         // Mapa para asociar colores únicos a cada pago
         Map<Integer, String> pagoColorMap = new HashMap<>();
-        AtomicInteger colorIndex = new AtomicInteger(0); // Índice para recorrer la paleta
+        AtomicInteger colorIndex = new AtomicInteger(0);
 
         // Agregar los pagos al calendario
         if (!pagos.isEmpty()) {
             pagos.forEach(pago -> {
                 try {
-                    Integer pagoId = (Integer) pago.get("id"); // ID del pago original
-                    String nombre = (String) pago.get("nombre");
+                    Integer pagoId = (Integer) pago.get("id");
+                    String nombre = (String) pago.get("");
                     String fechaStr = (String) pago.get("fecha");
                     LocalDate fecha = LocalDate.parse(fechaStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
-                    // Asignar un color único al pago
-                    String color = pagoColorMap.computeIfAbsent(pagoId, id -> {
-                        return palette.get(colorIndex.getAndIncrement() % palette.size());
-                    });
+                    String color = pagoColorMap.computeIfAbsent(pagoId, id -> palette.get(colorIndex.getAndIncrement() % palette.size()));
 
-                    // Crear la entrada en el calendario
                     Entry entry = new Entry();
                     entry.setTitle(nombre);
                     entry.setStart(fecha.atStartOfDay());
                     entry.setEnd(fecha.plusDays(1).atStartOfDay());
                     entry.setAllDay(true);
-                    entry.setColor(color); // Aplicar color único
+                    entry.setColor(color);
 
                     entryProvider.addEntry(entry);
                 } catch (Exception e) {
@@ -170,22 +168,28 @@ public class InicioView extends VerticalLayout {
         });
         addPagoButton.setClassName("boton-panel");
 
-        // Agregar elementos al panel
         panel.add(calendar, addPagoButton);
 
         return panel;
     }
 
+
     private Div crearPanelConGrafico(String titulo, ApexCharts grafico) {
         Div panel = new Div();
         panel.setClassName("panel");
+        panel.getStyle().set("display", "flex").set("flex-direction", "column").set("justify-content", "space-between").set("height", "100%");
 
         H2 tituloPanel = new H2(titulo);
         tituloPanel.addClassName("panel-title");
+
+        // Espaciador para ajustar los gráficos
+        grafico.getStyle().set("margin-bottom", "auto");
+
         panel.add(tituloPanel, grafico);
 
         return panel;
     }
+
 
     private ApexCharts crearGraficoCircular(Map<String, Double> datos) {
         String[] categorias = datos.keySet().toArray(new String[0]);
@@ -206,6 +210,7 @@ public class InicioView extends VerticalLayout {
                 .withChart(ChartBuilder.get().withType(Type.BAR).build())
                 .withLabels(trimestres)
                 .withSeries(new Series<>("Gastos", valores))
+                .withColors("#FF5722")
                 .build();
     }
 
@@ -228,7 +233,7 @@ public class InicioView extends VerticalLayout {
         pagos.forEach(pago -> {
             try {
                 Integer pagoId = (Integer) pago.get("id");
-                String nombre = (String) pago.get("nombre");
+                String nombre = (String) pago.get("");
                 String fechaStr = (String) pago.get("fecha");
                 LocalDate fecha = LocalDate.parse(fechaStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 

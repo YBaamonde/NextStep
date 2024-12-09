@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @CssImport("./themes/nextstepfrontend/navbar.css")
 public class MainNavbar extends VerticalLayout {
@@ -162,11 +163,20 @@ public class MainNavbar extends VerticalLayout {
     }
 
     private HorizontalLayout createMobileNavbar() {
+        // Crear botones con iconos
         Button homeButton = new Button(VaadinIcon.HOME.create());
         Button gastosButton = new Button(VaadinIcon.WALLET.create());
         Button pagosButton = new Button(VaadinIcon.CREDIT_CARD.create());
         Button simulacionButton = new Button(VaadinIcon.LINE_BAR_CHART.create());
         Button perfilButton = new Button(VaadinIcon.USER.create());
+
+        // Aplicar estilos a los iconos para que sean negros
+        Stream.of(homeButton, gastosButton, pagosButton, simulacionButton, perfilButton)
+                .forEach(button -> {
+                    button.getStyle().set("color", "black"); // Cambiar el color del icono a negro
+                    button.getStyle().set("background-color", "transparent"); // Hacer que el fondo sea transparente
+                    button.getStyle().set("border", "none"); // Eliminar bordes
+                });
 
         // Establecer navegaciones
         homeButton.addClickListener(e -> homeButton.getUI().ifPresent(ui -> ui.navigate(InicioView.class)));
@@ -175,12 +185,15 @@ public class MainNavbar extends VerticalLayout {
         simulacionButton.addClickListener(e -> simulacionButton.getUI().ifPresent(ui -> ui.navigate(SimulacionView.class)));
         perfilButton.addClickListener(e -> perfilButton.getUI().ifPresent(ui -> ui.navigate(PerfilView.class)));
 
+        // Crear la barra de navegación
         HorizontalLayout mobileNavbar = new HorizontalLayout(homeButton, gastosButton, pagosButton, simulacionButton, perfilButton);
         mobileNavbar.setWidthFull();
         mobileNavbar.setJustifyContentMode(JustifyContentMode.AROUND);
         mobileNavbar.setAlignItems(Alignment.CENTER);
+
         return mobileNavbar;
     }
+
 
     private void setAvatarWithUsername() {
         String username = authService.getUsername();
