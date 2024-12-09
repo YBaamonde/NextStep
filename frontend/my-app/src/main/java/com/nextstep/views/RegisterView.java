@@ -9,6 +9,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.nextstep.services.AuthService;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 @CssImport("./themes/nextstepfrontend/login-view.css")
 @Route("register")
+@PageTitle("Registro | NextStep")
 public class RegisterView extends Div {
 
     private final AuthService authService;

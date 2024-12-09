@@ -9,12 +9,14 @@ import com.vaadin.flow.component.login.LoginForm;
 import com.vaadin.flow.component.login.LoginI18n;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.server.VaadinSession;
 
 @CssImport("./themes/nextstepfrontend/login-view.css")
 @Route("login")
+@PageTitle("Login | NextStep")
 public class LoginView extends Div {
 
     public LoginView() {
