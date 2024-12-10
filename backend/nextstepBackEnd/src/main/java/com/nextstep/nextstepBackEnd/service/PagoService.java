@@ -140,7 +140,7 @@ public class PagoService {
     }
 
     // Avanzar la fecha según la frecuencia
-    private LocalDate avanzarFecha(LocalDate fecha, Pago.Frecuencia frecuencia) {
+    LocalDate avanzarFecha(LocalDate fecha, Pago.Frecuencia frecuencia) {
         switch (frecuencia) {
             case DIARIA:
                 return fecha.plusDays(1);
@@ -167,18 +167,6 @@ public class PagoService {
         );
     }
 
-
-    // Parsear frecuencia desde String a enum
-    private Pago.Frecuencia parseFrecuencia(String frecuencia) {
-        if (frecuencia == null) {
-            return null;
-        }
-        try {
-            return Pago.Frecuencia.valueOf(frecuencia.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Frecuencia desconocida: " + frecuencia);
-        }
-    }
 
     // Validar frecuencia solo para pagos recurrentes
     private void validarFrecuenciaRecurrente(PagoDTO pagoDTO) {

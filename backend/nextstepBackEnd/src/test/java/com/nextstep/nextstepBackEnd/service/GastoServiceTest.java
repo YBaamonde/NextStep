@@ -152,17 +152,18 @@ class GastoServiceTest {
     @Test
     void getGastosPorTrimestre() {
         List<Object[]> mockResult = new ArrayList<>();
-        mockResult.add(new Object[]{1, BigDecimal.valueOf(200)});
+        mockResult.add(new Object[]{1, BigDecimal.valueOf(2000)});
         when(gastoRepository.findGastosByTrimestre(1)).thenReturn(mockResult);
 
-        Map<Integer, BigDecimal> result = gastoService.getGastosPorTrimestre(1);
+        Map<String, Double> result = gastoService.getGastosPorTrimestre(1);
 
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(BigDecimal.valueOf(200), result.get(1));
+        assertEquals(2000.0, result.get("Q1"), 0.01);
 
         verify(gastoRepository, times(1)).findGastosByTrimestre(1);
     }
+
 
     @Test
     void getGastosPorCategoria() {
@@ -178,6 +179,7 @@ class GastoServiceTest {
 
         verify(gastoRepository, times(1)).findGastosGroupedByCategoria(1);
     }
+
 
     @Test
     void createGastoThrowsExceptionWhenUserNotFound() {

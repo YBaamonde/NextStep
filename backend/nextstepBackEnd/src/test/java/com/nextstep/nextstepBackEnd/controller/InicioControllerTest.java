@@ -43,49 +43,68 @@ public class InicioControllerTest {
     @BeforeEach
     public void setUp() {
         inicioData = new HashMap<>();
-        inicioData.put("pagosProximos", List.of(new PagoDTO(
-                1,
-                "Internet",
-                BigDecimal.valueOf(50.00),
-                LocalDate.now().plusDays(5),
-                true,
-                Pago.Frecuencia.MENSUAL
-        )));
-        inicioData.put("gastosPorCategoria", Map.of("Casa", BigDecimal.valueOf(1000)));
-        inicioData.put("evolucionTrimestral", Map.of(1, BigDecimal.valueOf(2000)));
+        inicioData.put("pagosProximos", List.of(
+                new PagoDTO(
+                        1,
+                        "Internet",
+                        BigDecimal.valueOf(50.00),
+                        LocalDate.now().plusDays(5),
+                        true,
+                        Pago.Frecuencia.MENSUAL
+                )
+        ));
+        inicioData.put("gastosPorCategoria", Map.of("Casa", 1000.0));
+        inicioData.put("evolucionTrimestral", Map.of("Q1", 2000.0));
     }
 
     @Test
     @WithMockUser(roles = "normal")
     public void testGetInicioData() throws Exception {
-        when(pagoService.getPagosProximosByUsuarioId(1)).thenReturn((List<PagoDTO>) inicioData.get("pagosProximos"));
-        when(gastoService.getGastosPorCategoria(1)).thenReturn((Map<String, BigDecimal>) inicioData.get("gastosPorCategoria"));
-        when(gastoService.getGastosPorTrimestre(1)).thenReturn((Map<Integer, BigDecimal>) inicioData.get("evolucionTrimestral"));
+        when(pagoService.getPagosConRecurrencia(eq(1))).thenReturn((List<PagoDTO>) inicioData.get("pagosProximos"));
+        when(gastoService.getGastosPorCategoria(eq(1))).thenReturn(new HashMap<>(Map.of("Casa", BigDecimal.valueOf(1000))));
+        when(gastoService.getGastosPorTrimestre(eq(1))).thenReturn(new HashMap<>(Map.of("Q1", 2000.0)));
 
         mockMvc.perform(get("/inicio/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.pagosProximos[0].nombre").value("Internet"))
-                .andExpect(jsonPath("$.gastosPorCategoria.Casa").value(1000))
-                .andExpect(jsonPath("$.evolucionTrimestral['1']").value(2000));
+                .andExpect(jsonPath("$.gastosPorCategoria.Casa").value(1000.0))
+                .andExpect(jsonPath("$.evolucionTrimestral.Q1").value(2000.0));
 
-
-        verify(pagoService, times(1)).getPagosProximosByUsuarioId(1);
-        verify(gastoService, times(1)).getGastosPorCategoria(1);
-        verify(gastoService, times(1)).getGastosPorTrimestre(1);
+        verify(pagoService, times(1)).getPagosConRecurrencia(eq(1));
+        verify(gastoService, times(1)).getGastosPorCategoria(eq(1));
+        verify(gastoService, times(1)).getGastosPorTrimestre(eq(1));
     }
 
-    /*
 
     @Test
     @WithMockUser(roles = "normal")
     void testGetInicioDataThrowsExceptionWhenUserNotFound() throws Exception {
-        when(gastoService.getGastosPorCategoria(99)).thenThrow(new IllegalArgumentException("Usuario no encontrado."));
+        // Mockear excepción para un usuario no encontrado
+        when(pagoService.getPagosConRecurrencia(99)).thenThrow(new IllegalArgumentException("Usuario no encontrado."));
 
+        // Ejecutar y verificar el manejo de la excepción
         mockMvc.perform(get("/inicio/99"))
-                .andExpect(status().isBadRequest()) // Verifica que el estado HTTP sea 400
-                .andExpect(content().string("Usuario no encontrado.")); // Verifica el mensaje de error
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Usuario no encontrado."));
+
+        // Verificar interacciones
+        verify(pagoService, times(1)).getPagosConRecurrencia(99);
+        verifyNoInteractions(gastoService); // gastoService no debería ser llamado si el usuario no existe
     }
 
-     */
+    @Test
+    @WithMockUser(roles = "normal")
+    void testGetInicioDataHandlesUnexpectedException() throws Exception {
+        // Mockear una excepción genérica
+        when(pagoService.getPagosConRecurrencia(1)).thenThrow(new RuntimeException("Error inesperado"));
 
+        // Ejecutar y verificar el manejo de la excepción genérica
+        mockMvc.perform(get("/inicio/1"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.error").value("Error inesperado: Error inesperado"));
+
+        // Verificar interacciones
+        verify(pagoService, times(1)).getPagosConRecurrencia(1);
+        verifyNoInteractions(gastoService); // gastoService no debería ser llamado si ocurre un error inesperado
+    }
 }

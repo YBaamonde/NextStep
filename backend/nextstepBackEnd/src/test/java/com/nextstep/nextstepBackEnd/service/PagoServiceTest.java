@@ -98,7 +98,7 @@ class PagoServiceTest {
     }
 
     @Test
-    void updatePago() {
+    void updatePago_ShouldUpdateExistingPago() {
         when(pagoRepository.findById(1)).thenReturn(Optional.of(pago));
         when(pagoRepository.save(any(Pago.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -116,7 +116,20 @@ class PagoServiceTest {
     }
 
     @Test
-    void deletePago() {
+    void updatePago_ShouldThrowExceptionWhenPagoNotFound() {
+        when(pagoRepository.findById(1)).thenReturn(Optional.empty());
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            pagoService.updatePago(1, pagoDTO);
+        });
+
+        assertEquals("Pago no encontrado.", exception.getMessage());
+        verify(pagoRepository, times(1)).findById(1);
+        verifyNoMoreInteractions(pagoRepository);
+    }
+
+    @Test
+    void deletePago_ShouldDeleteExistingPago() {
         when(pagoRepository.existsById(1)).thenReturn(true);
 
         pagoService.deletePago(1);
@@ -126,7 +139,20 @@ class PagoServiceTest {
     }
 
     @Test
-    void getPagosRecurrentesByUsuarioId() {
+    void deletePago_ShouldThrowExceptionWhenPagoNotFound() {
+        when(pagoRepository.existsById(1)).thenReturn(false);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            pagoService.deletePago(1);
+        });
+
+        assertEquals("Pago no encontrado.", exception.getMessage());
+        verify(pagoRepository, times(1)).existsById(1);
+        verifyNoMoreInteractions(pagoRepository);
+    }
+
+    @Test
+    void getPagosRecurrentesByUsuarioId_ShouldReturnRecurrentPayments() {
         when(userRepository.findById(1)).thenReturn(Optional.of(usuario));
         when(pagoRepository.findByUsuarioIdAndRecurrenteTrue(1)).thenReturn(List.of(pago));
 
@@ -143,61 +169,94 @@ class PagoServiceTest {
     }
 
     @Test
-    void getPagosProximosByUsuarioId() {
-        LocalDate now = LocalDate.now();
-        LocalDate limit = now.plusDays(15);
-
-        when(userRepository.findById(1)).thenReturn(Optional.of(usuario));
-        when(pagoRepository.findPagosFuturosByUsuarioIdWithinDays(1, limit)).thenReturn(List.of(pago));
-
-        List<PagoDTO> result = pagoService.getPagosProximosByUsuarioId(1);
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("Internet", result.get(0).getNombre());
-        assertEquals(BigDecimal.valueOf(50.00), result.get(0).getMonto());
-        assertEquals(LocalDate.now().plusDays(5), result.get(0).getFecha());
-
-        verify(userRepository, times(1)).findById(1);
-        verify(pagoRepository, times(1)).findPagosFuturosByUsuarioIdWithinDays(1, limit);
-    }
-
-    @Test
-    void createPago_ShouldThrowExceptionWhenFrecuenciaIsSetForNonRecurrentPayment() {
-        PagoDTO nonRecurrentPagoDTO = new PagoDTO(
-                null,
-                "Pago Único",
-                BigDecimal.valueOf(100.00),
-                LocalDate.now(),
-                false,
-                Pago.Frecuencia.MENSUAL
-        );
+    void getPagosRecurrentesByUsuarioId_ShouldThrowExceptionWhenUserNotFound() {
+        when(userRepository.findById(1)).thenReturn(Optional.empty());
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            pagoService.createPago(1, nonRecurrentPagoDTO);
+            pagoService.getPagosRecurrentesByUsuarioId(1);
         });
 
-        assertEquals("No se puede asignar una frecuencia a un pago no recurrente.", exception.getMessage());
-        verifyNoInteractions(userRepository, pagoRepository);
-    }
-
-    @Test
-    void getPagosByUsuarioIdThrowsExceptionWhenUserNotFound() {
-        when(userRepository.findById(1)).thenReturn(Optional.empty());
-
-        assertThrows(IllegalArgumentException.class, () -> pagoService.getPagosByUsuarioId(1));
-
+        assertEquals("Usuario no encontrado.", exception.getMessage());
         verify(userRepository, times(1)).findById(1);
         verifyNoInteractions(pagoRepository);
     }
 
     @Test
-    void getPagosProximosByUsuarioIdThrowsExceptionWhenUserNotFound() {
-        when(userRepository.findById(1)).thenReturn(Optional.empty());
+    void getPagosConRecurrencia_ShouldHandleRecurrentAndNonRecurrentPagos() {
+        Pago nonRecurrentPago = new Pago();
+        nonRecurrentPago.setId(2);
+        nonRecurrentPago.setNombre("Gym");
+        nonRecurrentPago.setMonto(BigDecimal.valueOf(30.00));
+        nonRecurrentPago.setFecha(LocalDate.now().plusDays(3));
+        nonRecurrentPago.setUsuario(usuario);
+        nonRecurrentPago.setRecurrente(false);
 
-        assertThrows(IllegalArgumentException.class, () -> pagoService.getPagosProximosByUsuarioId(1));
+        when(userRepository.findById(1)).thenReturn(Optional.of(usuario));
+        when(pagoRepository.findByUsuarioId(1)).thenReturn(List.of(pago, nonRecurrentPago));
+
+        List<PagoDTO> result = pagoService.getPagosConRecurrencia(1);
+
+        assertNotNull(result);
+        assertTrue(result.size() > 2); // Recurrent payments generate additional entries
+        assertTrue(result.stream().anyMatch(dto -> dto.getNombre().equals("Gym") && !dto.getRecurrente()));
 
         verify(userRepository, times(1)).findById(1);
-        verifyNoInteractions(pagoRepository);
+        verify(pagoRepository, times(1)).findByUsuarioId(1);
     }
+
+    @Test
+    void avanzarFecha_ShouldGenerateCorrectDatesForFrequencies() {
+        LocalDate initialDate = LocalDate.of(2024, 1, 1);
+
+        assertEquals(initialDate.plusDays(1), pagoService.avanzarFecha(initialDate, Pago.Frecuencia.DIARIA));
+        assertEquals(initialDate.plusWeeks(1), pagoService.avanzarFecha(initialDate, Pago.Frecuencia.SEMANAL));
+        assertEquals(initialDate.plusMonths(1), pagoService.avanzarFecha(initialDate, Pago.Frecuencia.MENSUAL));
+        assertEquals(initialDate.plusYears(1), pagoService.avanzarFecha(initialDate, Pago.Frecuencia.ANUAL));
+    }
+
+    @Test
+    void convertirAPagoDTO_ShouldMapPagoToPagoDTOCorrectly() {
+        // Configurar usuario
+        when(userRepository.findById(1)).thenReturn(Optional.of(usuario));
+
+        // Configurar pago recurrente
+        Pago testPago = new Pago();
+        testPago.setId(10);
+        testPago.setNombre("Test Pago");
+        testPago.setMonto(BigDecimal.valueOf(100.00));
+        testPago.setFecha(LocalDate.of(2024, 1, 15));
+        testPago.setRecurrente(true);
+        testPago.setFrecuencia(Pago.Frecuencia.MENSUAL);
+        testPago.setUsuario(usuario);
+
+        when(pagoRepository.findByUsuarioId(1)).thenReturn(List.of(testPago));
+
+        // Ejecutar el metodo
+        List<PagoDTO> result = pagoService.getPagosConRecurrencia(1);
+
+        // Validar que se generaron 12 ocurrencias
+        assertNotNull(result);
+        assertEquals(12, result.size()); // Verifica las 12 ocurrencias generadas
+
+        // Validar los datos del primer pago
+        PagoDTO pagoDTO = result.get(0);
+        assertEquals(testPago.getId(), pagoDTO.getId());
+        assertEquals(testPago.getNombre(), pagoDTO.getNombre());
+        assertEquals(testPago.getMonto(), pagoDTO.getMonto());
+        assertEquals(testPago.getFecha(), pagoDTO.getFecha());
+        assertEquals(testPago.getRecurrente(), pagoDTO.getRecurrente());
+        assertEquals(testPago.getFrecuencia(), pagoDTO.getFrecuencia());
+
+        // Validar que las fechas de los pagos son correctas
+        for (int i = 0; i < 12; i++) {
+            PagoDTO ocurrencia = result.get(i);
+            LocalDate expectedDate = testPago.getFecha().plusMonths(i);
+            assertEquals(expectedDate, ocurrencia.getFecha()); // Verifica las fechas generadas
+        }
+
+        // Verificar interacciones con los mocks
+        verify(userRepository, times(1)).findById(1);
+        verify(pagoRepository, times(1)).findByUsuarioId(1);
+    }
+
 }
