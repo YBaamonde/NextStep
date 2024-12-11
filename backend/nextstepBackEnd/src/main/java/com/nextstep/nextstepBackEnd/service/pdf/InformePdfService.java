@@ -40,22 +40,26 @@ public class InformePdfService extends PdfService {
     }
 
     public byte[] generarPdfEvolucionTrimestral(Map<String, Double> evolucionTrimestral) {
+        // Validar si el mapa es nulo o está vacío
+        if (evolucionTrimestral == null || evolucionTrimestral.isEmpty() || evolucionTrimestral.values().stream().allMatch(v -> v == null || v <= 0)) {
+            throw new RuntimeException("Datos inválidos para generar el PDF de evolución trimestral");
+        }
+
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
             Document document = iniciarDocumento(byteArrayOutputStream);
 
             agregarTitulo(document, "Evolución Trimestral de Gastos");
             agregarTablaEvolucionTrimestral(document, evolucionTrimestral);
-            agregarResumenTotales(document, evolucionTrimestral);
-            agregarDistribucionGastos(document, evolucionTrimestral);
-            agregarRecomendacionesPdfInicio(document, evolucionTrimestral);
 
             cerrarDocumento(document);
             return byteArrayOutputStream.toByteArray();
         } catch (DocumentException | IOException e) {
             e.printStackTrace();
-            throw new RuntimeException("Error al generar el PDF de evolución trimestral");
+            throw new RuntimeException("Error al generar el PDF de evolución trimestral", e);
         }
     }
+
+
 
 
 
