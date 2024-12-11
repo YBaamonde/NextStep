@@ -1,6 +1,5 @@
 package com.nextstep.nextstepBackEnd.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -24,5 +23,5 @@ public class GastoDTO {
         this.fecha = fecha;
         this.categoriaId = categoriaId;
     }
-}
 
+}

@@ -8,7 +8,6 @@ import com.nextstep.nextstepBackEnd.model.PagoDTO;
 import com.nextstep.nextstepBackEnd.service.PagoService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,9 +38,6 @@ public class PagoControllerTest {
     @MockBean
     private PagoService pagoService;
 
-    @InjectMocks
-    private PagoController pagoController;
-
     private ObjectMapper objectMapper;
     private PagoDTO mockPagoDTO;
 
@@ -62,7 +58,7 @@ public class PagoControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "normal")  // Simula un usuario autenticado con rol normal
+    @WithMockUser(roles = "normal") // Simula un usuario autenticado con rol normal
     public void testGetPagosByUsuario() throws Exception {
         when(pagoService.getPagosByUsuarioId(1)).thenReturn(List.of(mockPagoDTO));
 
@@ -75,21 +71,52 @@ public class PagoControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "normal")  // Simula un usuario autenticado con rol normal
+    @WithMockUser(roles = "normal")
+    public void testGetPagosByUsuario_UserNotFound() throws Exception {
+        when(pagoService.getPagosByUsuarioId(1)).thenThrow(new IllegalArgumentException("Usuario no encontrado."));
+
+        mockMvc.perform(get("/pagos/1"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Usuario no encontrado."));
+
+        verify(pagoService, times(1)).getPagosByUsuarioId(1);
+    }
+
+
+    @Test
+    @WithMockUser(roles = "normal") // Simula un usuario autenticado con rol normal
     public void testCreatePago() throws Exception {
         when(pagoService.createPago(eq(1), any(PagoDTO.class))).thenReturn(mockPagoDTO);
 
         mockMvc.perform(post("/pagos/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(mockPagoDTO)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.nombre").value("Internet"));
 
         verify(pagoService, times(1)).createPago(eq(1), any(PagoDTO.class));
     }
 
     @Test
-    @WithMockUser(roles = "normal")  // Simula un usuario autenticado con rol normal
+    @WithMockUser(roles = "normal")
+    public void testCreatePago_InvalidData() throws Exception {
+        mockPagoDTO.setNombre(null); // Nombre inválido
+
+        when(pagoService.createPago(eq(1), any(PagoDTO.class)))
+                .thenThrow(new IllegalArgumentException("El nombre del pago es obligatorio."));
+
+        mockMvc.perform(post("/pagos/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(mockPagoDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("El nombre del pago es obligatorio."));
+
+        verify(pagoService, times(1)).createPago(eq(1), any(PagoDTO.class));
+    }
+
+
+    @Test
+    @WithMockUser(roles = "normal") // Simula un usuario autenticado con rol normal
     public void testUpdatePago() throws Exception {
         when(pagoService.updatePago(eq(1), any(PagoDTO.class))).thenReturn(mockPagoDTO);
 
@@ -103,20 +130,49 @@ public class PagoControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "normal")  // Simula un usuario autenticado con rol normal
+    @WithMockUser(roles = "normal")
+    public void testUpdatePago_PagoNotFound() throws Exception {
+        when(pagoService.updatePago(eq(1), any(PagoDTO.class)))
+                .thenThrow(new IllegalArgumentException("Pago no encontrado."));
+
+        mockMvc.perform(put("/pagos/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(mockPagoDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Pago no encontrado."));
+
+        verify(pagoService, times(1)).updatePago(eq(1), any(PagoDTO.class));
+    }
+
+
+    @Test
+    @WithMockUser(roles = "normal") // Simula un usuario autenticado con rol normal
     public void testDeletePago() throws Exception {
         doNothing().when(pagoService).deletePago(1);
 
         mockMvc.perform(delete("/pagos/1"))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         verify(pagoService, times(1)).deletePago(1);
     }
 
     @Test
     @WithMockUser(roles = "normal")
+    public void testDeletePago_PagoNotFound() throws Exception {
+        doThrow(new IllegalArgumentException("Pago no encontrado.")).when(pagoService).deletePago(99);
+
+        mockMvc.perform(delete("/pagos/99"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Pago no encontrado."));
+
+        verify(pagoService, times(1)).deletePago(99);
+    }
+
+
+    @Test
+    @WithMockUser(roles = "normal")
     public void testGetPagosRecurrentesByUsuario() throws Exception {
-        when(pagoService.getPagosRecurrentesByUsuarioId(1)).thenReturn(List.of(mockPagoDTO));
+        when(pagoService.getPagosConRecurrencia(1)).thenReturn(List.of(mockPagoDTO));
 
         mockMvc.perform(get("/pagos/recurrentes/1"))
                 .andExpect(status().isOk())
@@ -124,6 +180,19 @@ public class PagoControllerTest {
                 .andExpect(jsonPath("$[0].recurrente").value(true))
                 .andExpect(jsonPath("$[0].frecuencia").value("MENSUAL"));
 
-        verify(pagoService, times(1)).getPagosRecurrentesByUsuarioId(1);
+        verify(pagoService, times(1)).getPagosConRecurrencia(1);
     }
+
+    @Test
+    @WithMockUser(roles = "normal")
+    public void testGetPagosRecurrentesByUsuario_UserNotFound() throws Exception {
+        when(pagoService.getPagosConRecurrencia(1)).thenThrow(new IllegalArgumentException("Usuario no encontrado."));
+
+        mockMvc.perform(get("/pagos/recurrentes/1"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Usuario no encontrado."));
+
+        verify(pagoService, times(1)).getPagosConRecurrencia(1);
+    }
+
 }

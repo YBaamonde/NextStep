@@ -2,10 +2,12 @@ package com.nextstep.nextstepBackEnd.controller;
 
 import com.nextstep.nextstepBackEnd.model.PagoDTO;
 import com.nextstep.nextstepBackEnd.service.PagoService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -18,57 +20,60 @@ public class PagoController {
         this.pagoService = pagoService;
     }
 
-    // Obtener todos los pagos de un usuario
+    // Obtener todos los pagos sin su recurrencia
     @GetMapping("/{usuarioId}")
-    public List<PagoDTO> getPagosByUsuario(@PathVariable Integer usuarioId) {
-        return pagoService.getPagosByUsuarioId(usuarioId)
-                .stream()
-                .map(pago -> new PagoDTO(
-                        pago.getId(),
-                        pago.getNombre(),
-                        pago.getMonto(),
-                        pago.getFecha(),
-                        pago.getRecurrente(),
-                        pago.getFrecuencia()))
-                .collect(Collectors.toList());
+    public ResponseEntity<?> getPagosByUsuario(@PathVariable Integer usuarioId) {
+        try {
+            List<PagoDTO> pagos = pagoService.getPagosByUsuarioId(usuarioId);
+            return ResponseEntity.ok(pagos);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    // Obtener todos los pagos con su recurrencia
+    @GetMapping("/recurrentes/{usuarioId}")
+    public ResponseEntity<?> getPagosRecurrentesByUsuario(@PathVariable Integer usuarioId) {
+        try {
+            List<PagoDTO> pagosRecurrentes = pagoService.getPagosConRecurrencia(usuarioId);
+            return ResponseEntity.ok(pagosRecurrentes);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     // Crear un nuevo pago
     @PostMapping("/{usuarioId}")
-    public ResponseEntity<PagoDTO> createPago(@PathVariable Integer usuarioId,
-                                              @RequestBody PagoDTO pagoDTO) {
-        PagoDTO createdPago = pagoService.createPago(usuarioId, pagoDTO);
-        return ResponseEntity.ok(createdPago);
+    public ResponseEntity<?> createPago(@PathVariable Integer usuarioId,
+                                        @RequestBody PagoDTO pagoDTO) {
+        try {
+            PagoDTO createdPago = pagoService.createPago(usuarioId, pagoDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdPago);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     // Actualizar un pago existente
     @PutMapping("/{pagoId}")
-    public ResponseEntity<PagoDTO> updatePago(@PathVariable Integer pagoId,
-                                              @RequestBody PagoDTO pagoDTO) {
-        PagoDTO updatedPago = pagoService.updatePago(pagoId, pagoDTO);
-        return ResponseEntity.ok(updatedPago);
+    public ResponseEntity<?> updatePago(@PathVariable Integer pagoId,
+                                        @RequestBody PagoDTO pagoDTO) {
+        try {
+            PagoDTO updatedPago = pagoService.updatePago(pagoId, pagoDTO);
+            return ResponseEntity.ok(updatedPago);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     // Eliminar un pago
     @DeleteMapping("/{pagoId}")
-    public ResponseEntity<Void> deletePago(@PathVariable Integer pagoId) {
-        pagoService.deletePago(pagoId);
-        return ResponseEntity.ok().build();
-    }
-
-    // Obtener todos los pagos recurrentes de un usuario
-    @GetMapping("/recurrentes/{usuarioId}")
-    public List<PagoDTO> getPagosRecurrentesByUsuario(@PathVariable Integer usuarioId) {
-        return pagoService.getPagosRecurrentesByUsuarioId(usuarioId)
-                .stream()
-                .map(pago -> new PagoDTO(
-                        pago.getId(),
-                        pago.getNombre(),
-                        pago.getMonto(),
-                        pago.getFecha(),
-                        pago.getRecurrente(),
-                        pago.getFrecuencia()))
-                .collect(Collectors.toList());
+    public ResponseEntity<?> deletePago(@PathVariable Integer pagoId) {
+        try {
+            pagoService.deletePago(pagoId);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 }
-

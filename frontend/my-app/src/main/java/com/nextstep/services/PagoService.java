@@ -60,10 +60,11 @@ public class PagoService {
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            if (response.statusCode() == 200) {
+            if (response.statusCode() == 200 || response.statusCode() == 201) {
                 Map<String, Object> responseMap = objectMapper.readValue(response.body(), new TypeReference<>() {});
                 return Optional.of(responseMap);
-            } else {
+            }
+            else {
                 Notification.show("Error al crear el pago: " + response.statusCode());
             }
         } catch (IOException | InterruptedException e) {
@@ -82,12 +83,18 @@ public class PagoService {
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return response.statusCode() == 200;
+            // Manejar códigos 200 y 204 como éxito
+            if (response.statusCode() == 200 || response.statusCode() == 204) {
+                return true;
+            } else {
+                Notification.show("Error al eliminar el pago: " + response.statusCode() + " - " + response.body());
+            }
         } catch (IOException | InterruptedException e) {
             Notification.show("Error al eliminar el pago: " + e.getMessage());
         }
         return false;
     }
+
 
     // Actualizar un pago existente
     public boolean updatePago(int pagoId, String nombre, double monto, LocalDate fecha, boolean recurrente, String frecuencia) {

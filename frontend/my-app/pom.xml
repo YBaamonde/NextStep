@@ -95,6 +95,23 @@
             <version>6.3.3</version>
         </dependency>
 
+        <!-- ApexCharts -->
+        <dependency>
+            <groupId>com.github.appreciated</groupId>
+            <artifactId>apexcharts</artifactId>
+            <version>24.0.2</version>
+        </dependency>
+
+
+        <!-- Calendario de Pagos -->
+        <dependency>
+            <groupId>org.vaadin.stefan</groupId>
+            <artifactId>fullcalendar2</artifactId>
+            <version>6.0.0</version>
+        </dependency>
+
+
+
     </dependencies>
 
     <build>

@@ -114,8 +114,8 @@ public class ResultadosView extends VerticalLayout implements BeforeEnterObserve
         metaAhorroLabel.setText("Meta de Ahorro: " + metaAhorro + " €");
 
         // Actualizar barras de progreso
-        esencialesBar.setValue(esencialesPorcentaje / 100.0);
-        opcionalesBar.setValue(opcionalesPorcentaje / 100.0);
+        esencialesBar.setValue(ajustarValorBarra(esencialesPorcentaje));
+        opcionalesBar.setValue(ajustarValorBarra(opcionalesPorcentaje));
 
         Span esencialesLabel = new Span("Esenciales: " + String.format("%.1f", esencialesPorcentaje) + "%");
         esencialesLabel.addClassName("progreso-esenciales");
@@ -141,6 +141,16 @@ public class ResultadosView extends VerticalLayout implements BeforeEnterObserve
         // Debug: Confirmar que los datos se configuraron correctamente
         System.out.println("Vista ResultadosView configurada con datos: " + simulacionData); // Debug
     }
+
+    private double ajustarValorBarra(double porcentaje) {
+        if (porcentaje < 0.0) {
+            return 0.0;
+        } else if (porcentaje > 100.0) {
+            return 1.0;
+        }
+        return porcentaje / 100.0;
+    }
+
 
 
     private void exportarPdf() {

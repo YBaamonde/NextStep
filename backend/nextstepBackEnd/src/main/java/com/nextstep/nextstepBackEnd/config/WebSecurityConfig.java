@@ -40,6 +40,7 @@ public class WebSecurityConfig {
                 .requestMatchers("/gastos/**").authenticated()
                 .requestMatchers("/pagos/**").authenticated()
                 .requestMatchers("/notificaciones/**").authenticated()
+                .requestMatchers("/inicio/**").authenticated()
                 .requestMatchers("/").authenticated() // Bloquear la ruta raíz si no está autenticado
                 .anyRequest().authenticated() // Proteger cualquier otra ruta
         );

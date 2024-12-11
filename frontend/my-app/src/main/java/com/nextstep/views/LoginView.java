@@ -1,7 +1,6 @@
 package com.nextstep.views;
 
 import com.nextstep.services.AuthService;
-import com.nextstep.views.helloworld.HelloWorldView;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -10,12 +9,14 @@ import com.vaadin.flow.component.login.LoginForm;
 import com.vaadin.flow.component.login.LoginI18n;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.server.VaadinSession;
 
 @CssImport("./themes/nextstepfrontend/login-view.css")
 @Route("login")
+@PageTitle("Login | NextStep")
 public class LoginView extends Div {
 
     public LoginView() {
@@ -77,7 +78,7 @@ public class LoginView extends Div {
                 if (success) {
                     System.out.println("Login exitoso, redirigiendo..."); // Debug
                     // Redirigir a la página principal si el login es exitoso
-                    UI.getCurrent().navigate(HelloWorldView.class);
+                    UI.getCurrent().navigate(InicioView.class);
                 } else {
                     // Mostrar una notificación de error
                     Notification.show("Error en el inicio de sesión. Por favor, revisa tus credenciales.");

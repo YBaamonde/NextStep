@@ -1,6 +1,5 @@
 package com.nextstep.nextstepBackEnd.controller;
 
-import com.nextstep.nextstepBackEnd.model.Gasto;
 import com.nextstep.nextstepBackEnd.model.GastoDTO;
 import com.nextstep.nextstepBackEnd.service.GastoService;
 import org.springframework.http.ResponseEntity;
@@ -52,4 +51,21 @@ public class GastoController {
         gastoService.deleteGasto(gastoId);
         return ResponseEntity.ok().build();
     }
+
+    // Obtener gastos históricos agrupados por categoría
+    @GetMapping("/categoria/{categoriaId}/historicos")
+    public ResponseEntity<List<GastoDTO>> getGastosHistoricosPorCategoria(@PathVariable Integer categoriaId) {
+        List<GastoDTO> gastos = gastoService.getGastosByCategoriaConLimite(categoriaId, Integer.MAX_VALUE); // Sin límite
+        return ResponseEntity.ok(gastos);
+    }
+
+    @GetMapping("/categoria/{categoriaId}")
+    public ResponseEntity<List<GastoDTO>> getGastosPorCategoriaConLimite(
+            @PathVariable Integer categoriaId,
+            @RequestParam(defaultValue = "10") int limite) {
+        List<GastoDTO> gastos = gastoService.getGastosByCategoriaConLimite(categoriaId, limite);
+        return ResponseEntity.ok(gastos);
+    }
+
+
 }

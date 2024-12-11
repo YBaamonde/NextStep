@@ -44,5 +44,5 @@ public class Pago {
     public enum Frecuencia {
         DIARIA, SEMANAL, MENSUAL, ANUAL
     }
-}
 
+}

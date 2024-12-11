@@ -7,10 +7,16 @@ import com.nextstep.nextstepBackEnd.model.Usuario;
 import com.nextstep.nextstepBackEnd.repository.CategoriaRepository;
 import com.nextstep.nextstepBackEnd.repository.GastoRepository;
 import com.nextstep.nextstepBackEnd.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
+import org.springframework.data.domain.Pageable;
+
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -96,4 +102,50 @@ public class GastoService {
             throw new IllegalArgumentException("Gasto no encontrado.");
         }
     }
+
+
+    // Obtener gastos de un usuario agrupados por categoría
+    public Map<String, BigDecimal> getGastosPorCategoria(Integer usuarioId) {
+        List<Object[]> resultados = gastoRepository.findGastosGroupedByCategoria(usuarioId);
+
+        // Cambiar a BigDecimal en lugar de Double
+        return resultados.stream()
+                .collect(Collectors.toMap(
+                        resultado -> (String) resultado[0], // Nombre de la categoría
+                        resultado -> (BigDecimal) resultado[1] // Total de gastos como BigDecimal
+                ));
+    }
+
+
+    // Obtener gastos de un usuario con un límite de resultados
+    public List<GastoDTO> getGastosByCategoriaConLimite(Integer categoriaId, int limite) {
+        Pageable pageable = PageRequest.of(0, limite); // Define la paginación con el límite especificado
+        Page<Gasto> gastosPaginados = gastoRepository.findTopGastosByCategoria(categoriaId, pageable);
+
+        // Mapea los resultados a DTO
+        return gastosPaginados.stream()
+                .map(gasto -> new GastoDTO(
+                        gasto.getId(),
+                        gasto.getNombre(),
+                        gasto.getMonto(),
+                        gasto.getFecha(),
+                        gasto.getCategoria().getId()))
+                .collect(Collectors.toList());
+    }
+
+
+
+
+    // Obtener gastos de un usuario por trimestre
+    public Map<String, Double> getGastosPorTrimestre(Integer usuarioId) {
+        List<Object[]> resultados = gastoRepository.findGastosByTrimestre(usuarioId);
+
+        return resultados.stream()
+                .collect(Collectors.toMap(
+                        resultado -> "Q" + resultado[0], // Convierte el trimestre (Integer) a String con prefijo "Q"
+                        resultado -> ((BigDecimal) resultado[1]).doubleValue() // Convierte BigDecimal a Double
+                ));
+    }
+
+
 }
