@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   db:
     image: mysql:8.0.36
@@ -8,3 +10,35 @@ services:
     ports:
       - "3306:3306"
     restart: unless-stopped
+    networks:
+      - nextstep-network
+
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/nextstep?useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      SPRING_PROFILES_ACTIVE: prod
+      JWT_SECRET: ${JWT_SECRET}
+    depends_on:
+      - db
+    networks:
+      - nextstep-network
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - backend
+    networks:
+      - nextstep-network
+
+networks:
+  nextstep-network:
+    driver: bridge
