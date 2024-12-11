@@ -8,8 +8,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component
 public class AdminInitializer {
+    private static final Logger logger = LoggerFactory.getLogger(AdminInitializer.class);
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -33,9 +37,11 @@ public class AdminInitializer {
             admin.setPassword(passwordEncoder.encode(adminConfig.getAdminPassword()));
             admin.setRol(Rol.admin);
             userRepository.save(admin);  // Guarda el usuario en la base de datos
-            System.out.println("Usuario admin creado con éxito");
+            //System.out.println("Usuario admin creado con éxito");
+            logger.info("Usuario admin creado con éxito.");
         } else {
-            System.out.println("El usuario admin ya existe");
+            //System.out.println("El usuario admin ya existe");
+            logger.info("El usuario admin ya existe.");
         }
     }
 }

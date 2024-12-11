@@ -15,7 +15,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class CategoriaService {
+    private static final Logger logger = LoggerFactory.getLogger(CategoriaService.class);
+
     private final String baseUrl;
     private final HttpClient client;
     private final ObjectMapper objectMapper;
@@ -88,7 +93,9 @@ public class CategoriaService {
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println("Delete Categoria Response Code: " + response.statusCode()); // Debug
+            //System.out.println("Delete Categoria Response Code: " + response.statusCode()); // Debug
+            logger.info("Delete Categoria Response Code: " + response.statusCode());
+
             return response.statusCode() == 200;
         } catch (IOException | InterruptedException e) {
             Notification.show("Error al eliminar la categoría: " + e.getMessage());

@@ -23,10 +23,14 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Route("simulacion")
 @PageTitle("Simulación | NextStep")
 @CssImport("./themes/nextstepfrontend/simulacion-view.css")
 public class SimulacionView extends VerticalLayout {
+    private static final Logger logger = LoggerFactory.getLogger(SimulacionView.class);
 
     private final NumberField ingresosField;
     private final NumberField mesesField;
@@ -192,13 +196,16 @@ public class SimulacionView extends VerticalLayout {
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getValue()));
         simulacionData.put("gastosOpcionales", gastosOpcionales);
 
-        System.out.println("Datos enviados al backend para la simulación: " + simulacionData);
+        //System.out.println("Datos enviados al backend para la simulación: " + simulacionData);
+        logger.info("Datos enviados al backend para la simulación: " + simulacionData);
 
         SimulacionService simulacionService = new SimulacionService();
         Optional<Map<String, Object>> result = simulacionService.calcularSimulacion(simulacionData);
 
         if (result.isPresent()) {
-            System.out.println("Simulación calculada con éxito: " + result.get());
+            //System.out.println("Simulación calculada con éxito: " + result.get());
+            logger.info("Simulación calculada con éxito: " + result.get());
+
             UI.getCurrent().getSession().setAttribute("simulacionData", result.get());
             UI.getCurrent().navigate("resultados");
         } else {

@@ -17,7 +17,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class SimulacionService {
+    private static final Logger logger = LoggerFactory.getLogger(SimulacionService.class);
+
     private final String baseUrl;
     private final HttpClient client;
     private final ObjectMapper objectMapper;
@@ -30,7 +35,8 @@ public class SimulacionService {
 
     // Metodo para enviar datos de simulación y calcular resultados
     public Optional<Map<String, Object>> calcularSimulacion(Map<String, Object> simulacionData) {
-        System.out.println("Datos enviados al backend para la simulación: " + simulacionData); // Debug
+        //System.out.println("Datos enviados al backend para la simulación: " + simulacionData); // Debug
+        logger.info("Datos enviados al backend para la simulación: " + simulacionData);
         try {
             // Validar tipos de datos de gastos
             if (!(simulacionData.get("gastosEsenciales") instanceof Map) || !(simulacionData.get("gastosOpcionales") instanceof Map)) {
@@ -47,7 +53,8 @@ public class SimulacionService {
             simulacionData.remove("gastosOpcionales");
             simulacionData.put("gastosClasificados", gastosClasificados);
 
-            System.out.println("Datos estructurados para la simulación: " + simulacionData); // Debug
+            //System.out.println("Datos estructurados para la simulación: " + simulacionData); // Debug
+            logger.info("Datos estructurados para la simulación: " + simulacionData);
 
             // Serializa el JSON y envía la solicitud
             String json = objectMapper.writeValueAsString(simulacionData);
@@ -58,22 +65,29 @@ public class SimulacionService {
                     .POST(HttpRequest.BodyPublishers.ofString(json))
                     .build();
 
-            System.out.println("Enviando solicitud al backend..."); // Debug
+            //System.out.println("Enviando solicitud al backend..."); // Debug
+            logger.info("Enviando solicitud al backend...");
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println("Respuesta recibida del backend: " + response.body()); // Debug
+            //System.out.println("Respuesta recibida del backend: " + response.body()); // Debug
+            logger.info("Respuesta recibida del backend: " + response.body());
 
             if (response.statusCode() == 200) {
                 Map<String, Object> responseMap = objectMapper.readValue(response.body(), new TypeReference<>() {});
-                System.out.println("Datos procesados correctamente en el backend: " + responseMap); // Debug
-                System.out.println("Proporciones enviadas por el backend: " + responseMap.get("proporciones")); // Debug
+                //System.out.println("Datos procesados correctamente en el backend: " + responseMap); // Debug
+                //System.out.println("Proporciones enviadas por el backend: " + responseMap.get("proporciones")); // Debug
+                logger.info("Datos procesados correctamente en el backend: " + responseMap);
+                logger.info("Proporciones enviadas por el backend: " + responseMap.get("proporciones"));
+
                 return Optional.of(responseMap);
             } else {
                 Notification.show("Error al calcular la simulación: " + response.statusCode());
-                System.out.println("Error al calcular la simulación: " + response.body()); // Debug
+                //System.out.println("Error al calcular la simulación: " + response.body()); // Debug
+                logger.error("Error al calcular la simulación: " + response.body());
             }
         } catch (IOException | InterruptedException e) {
             Notification.show("Error al calcular la simulación: " + e.getMessage());
-            System.out.println("Error al calcular la simulación: " + e.getMessage()); // Debug
+            //System.out.println("Error al calcular la simulación: " + e.getMessage()); // Debug
+            logger.error("Error al calcular la simulación: " + e.getMessage());
         }
         return Optional.empty();
     }
@@ -83,12 +97,14 @@ public class SimulacionService {
 
     // Metodo para exportar la simulación como PDF
     public void exportarSimulacionPdf(Map<String, Object> simulacionData) {
-        System.out.println("Exportando simulación a PDF con datos: " + simulacionData); // Debug
+        //System.out.println("Exportando simulación a PDF con datos: " + simulacionData); // Debug
+        logger.info("Exportando simulación a PDF con datos: " + simulacionData);
         try {
             if (!simulacionData.containsKey("ingresos") || !simulacionData.containsKey("mesesSimulacion") ||
                     !simulacionData.containsKey("gastosClasificados") || simulacionData.get("gastosClasificados") == null) {
                 Notification.show("Error: Datos incompletos para la exportación.");
-                System.out.println("Datos incompletos para la exportación: " + simulacionData); // Debug
+                //System.out.println("Datos incompletos para la exportación: " + simulacionData); // Debug
+                logger.error("Datos incompletos para la exportación: " + simulacionData);
                 return;
             }
 
@@ -100,12 +116,14 @@ public class SimulacionService {
                     .POST(HttpRequest.BodyPublishers.ofString(json))
                     .build();
 
-            System.out.println("Enviando solicitud para generar PDF..."); // Debug
+            //System.out.println("Enviando solicitud para generar PDF..."); // Debug
+            logger.info("Enviando solicitud para generar PDF...");
             HttpResponse<byte[]> response = client.send(request, HttpResponse.BodyHandlers.ofByteArray());
 
             if (response.statusCode() == 200) {
                 byte[] pdfBytes = response.body();
-                System.out.println("PDF recibido correctamente del backend."); // Debug
+                //System.out.println("PDF recibido correctamente del backend."); // Debug
+                logger.info("PDF recibido correctamente del backend.");
 
                 StreamResource pdfResource = new StreamResource("simulacion.pdf", () -> new ByteArrayInputStream(pdfBytes));
                 pdfResource.setContentType("application/pdf");
@@ -116,15 +134,15 @@ public class SimulacionService {
                 UI.getCurrent().getPage().open(pdfUrl, "_blank");
             } else {
                 Notification.show("Error al exportar el PDF: " + response.statusCode());
-                System.out.println("Error al exportar el PDF: " + response.body()); // Debug
+                //System.out.println("Error al exportar el PDF: " + response.body()); // Debug
+                logger.error("Error al exportar el PDF: " + response.body());
             }
         } catch (IOException | InterruptedException e) {
             Notification.show("Error al exportar el PDF: " + e.getMessage());
-            System.out.println("Error al exportar el PDF: " + e.getMessage()); // Debug
+            //System.out.println("Error al exportar el PDF: " + e.getMessage()); // Debug
+            logger.error("Error al exportar el PDF: " + e.getMessage());
         }
     }
-
-
 
 
     // Obtener el token de autenticación

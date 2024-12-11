@@ -6,8 +6,12 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 public class PdfService {
+    private static final Logger logger = LoggerFactory.getLogger(PdfService.class);
 
     public Document iniciarDocumento(ByteArrayOutputStream byteArrayOutputStream) throws DocumentException {
         Document document = new Document();
@@ -22,7 +26,8 @@ public class PdfService {
             document.add(logo);
             document.add(new Paragraph(" "));
         } catch (Exception e) {
-            System.out.println("Error al agregar el logotipo al PDF: " + e.getMessage());
+            //System.out.println("Error al agregar el logotipo al PDF: " + e.getMessage());
+            logger.error("Error al agregar el logotipo al PDF", e);
         }
 
         return document;

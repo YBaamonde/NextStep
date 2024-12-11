@@ -14,10 +14,14 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.server.VaadinSession;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @CssImport("./themes/nextstepfrontend/login-view.css")
 @Route("login")
 @PageTitle("Login | NextStep")
 public class LoginView extends Div {
+    private static final Logger logger = LoggerFactory.getLogger(LoginView.class);
 
     public LoginView() {
         addClassName("login-view");
@@ -67,7 +71,8 @@ public class LoginView extends Div {
 
         // Capturar el evento de login y llamar a AuthService
         loginForm.addLoginListener(event -> {
-            System.out.println("Evento de login detectado"); // Debug
+            //System.out.println("Evento de login detectado"); // Debug
+            logger.info("Evento de login detectado");
 
             // Deshabilitar el formulario durante el proceso de autenticación
             loginForm.setEnabled(false);
@@ -76,7 +81,9 @@ public class LoginView extends Div {
             //AuthService authService = new AuthService();
             authService.login(event.getUsername(), event.getPassword(), success -> {
                 if (success) {
-                    System.out.println("Login exitoso, redirigiendo..."); // Debug
+                    //System.out.println("Login exitoso, redirigiendo..."); // Debug
+                    logger.info("Login exitoso, redirigiendo...");
+
                     // Redirigir a la página principal si el login es exitoso
                     UI.getCurrent().navigate(InicioView.class);
                 } else {

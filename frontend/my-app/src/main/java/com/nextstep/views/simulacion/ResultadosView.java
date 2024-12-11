@@ -22,10 +22,14 @@ import com.vaadin.flow.router.Route;
 
 import java.util.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Route("resultados")
 @PageTitle("Resultados de Simulación | NextStep")
 @CssImport("./themes/nextstepfrontend/resultados-view.css")
 public class ResultadosView extends VerticalLayout implements BeforeEnterObserver {
+    private static final Logger logger = LoggerFactory.getLogger(ResultadosView.class);
 
     private Span balanceLabel;
     private Span metaAhorroLabel;
@@ -89,7 +93,8 @@ public class ResultadosView extends VerticalLayout implements BeforeEnterObserve
     public void beforeEnter(BeforeEnterEvent event) {
         // Debug: Verificar si los datos de la simulación están disponibles en la sesión
         simulacionData = (Map<String, Object>) UI.getCurrent().getSession().getAttribute("simulacionData");
-        System.out.println("Datos cargados en ResultadosView: " + simulacionData); // Debug
+        //System.out.println("Datos cargados en ResultadosView: " + simulacionData); // Debug
+        logger.info("Datos cargados en ResultadosView: " + simulacionData);
 
         if (simulacionData == null || simulacionData.isEmpty()) {
             Notification.show("No se encontraron datos de simulación.");
@@ -107,7 +112,8 @@ public class ResultadosView extends VerticalLayout implements BeforeEnterObserve
         double opcionalesPorcentaje = proporciones.getOrDefault("opcionales", 0.0);
 
         // Debug: Confirmar proporciones extraídas
-        System.out.println("Proporciones extraídas: Esenciales = " + esencialesPorcentaje + ", Opcionales = " + opcionalesPorcentaje); // Debug
+        //System.out.println("Proporciones extraídas: Esenciales = " + esencialesPorcentaje + ", Opcionales = " + opcionalesPorcentaje); // Debug
+        logger.info("Proporciones extraídas: Esenciales = " + esencialesPorcentaje + ", Opcionales = " + opcionalesPorcentaje);
 
         // Actualizar componentes de la vista
         balanceLabel.setText("Balance Proyectado: " + balanceProyectado + " €");
@@ -139,7 +145,8 @@ public class ResultadosView extends VerticalLayout implements BeforeEnterObserve
         });
 
         // Debug: Confirmar que los datos se configuraron correctamente
-        System.out.println("Vista ResultadosView configurada con datos: " + simulacionData); // Debug
+        //System.out.println("Vista ResultadosView configurada con datos: " + simulacionData); // Debug
+        logger.info("Vista ResultadosView configurada con datos: " + simulacionData);
     }
 
     private double ajustarValorBarra(double porcentaje) {
@@ -154,7 +161,8 @@ public class ResultadosView extends VerticalLayout implements BeforeEnterObserve
 
 
     private void exportarPdf() {
-        System.out.println("Exportando PDF con datos: " + simulacionData);
+        //System.out.println("Exportando PDF con datos: " + simulacionData);
+        logger.info("Exportando PDF con datos: " + simulacionData);
 
         if (simulacionData == null || simulacionData.isEmpty()) {
             Notification.show("Error: Datos incompletos para la exportación.");

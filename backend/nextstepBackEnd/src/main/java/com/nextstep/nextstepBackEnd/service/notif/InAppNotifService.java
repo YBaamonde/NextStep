@@ -8,13 +8,16 @@ import com.nextstep.nextstepBackEnd.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 public class InAppNotifService {
+    private static final Logger logger = LoggerFactory.getLogger(InAppNotifService.class);
 
     private final InAppNotifRepository inAppNotifRepository;
     private final PagoRepository pagoRepository;
@@ -35,7 +38,8 @@ public class InAppNotifService {
 
         if (notificacionExistente.isPresent()) {
             // Si existe una notificación, no creamos una nueva
-            System.out.println("Notificación ya existe para usuarioId: " + usuarioId + ", pagoId: " + pagoId);
+            //System.out.println("Notificación ya existe para usuarioId: " + usuarioId + ", pagoId: " + pagoId);
+            logger.info("Notificación ya existe para usuarioId: " + usuarioId + ", pagoId: " + pagoId);
             return notificacionExistente.get();
         }
 

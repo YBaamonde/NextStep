@@ -11,9 +11,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 @RequiredArgsConstructor
 public class CategoriaService {
+    private static final Logger logger = LoggerFactory.getLogger(CategoriaService.class);
 
     private final CategoriaRepository categoriaRepository;
     private final UserRepository userRepository;
@@ -37,14 +41,18 @@ public class CategoriaService {
 
     // Actualizar una categoría existente
     public Categoria updateCategoria(Integer categoriaId, Categoria categoriaDetails) {
-        System.out.println("Buscando categoría para actualizar con ID: " + categoriaId); // Depuración
+        //System.out.println("Buscando categoría para actualizar con ID: " + categoriaId); // Depuración
+        logger.info("Buscando categoría para actualizar con ID: " + categoriaId);
 
         return categoriaRepository.findById(categoriaId).map(categoria -> {
             //System.out.println("Categoría encontrada, actualizando nombre y descripción"); // Confirmar que encontró la categoría
+            logger.info("Categoría encontrada, actualizando nombre y descripción");
 
             // Mostrar el cambio antes de guardar (Debug)
             //System.out.println("Nuevo Nombre: " + categoriaDetails.getNombre());
             //System.out.println("Nueva Descripción: " + categoriaDetails.getDescripcion());
+            logger.info("Nuevo Nombre: " + categoriaDetails.getNombre());
+            logger.info("Nueva Descripción: " + categoriaDetails.getDescripcion());
 
             categoria.setNombre(categoriaDetails.getNombre());
             categoria.setDescripcion(categoriaDetails.getDescripcion());

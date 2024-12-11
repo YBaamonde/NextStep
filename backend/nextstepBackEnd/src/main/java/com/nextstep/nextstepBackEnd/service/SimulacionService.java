@@ -9,32 +9,41 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 public class SimulacionService {
+    private static final Logger logger = LoggerFactory.getLogger(SimulacionService.class);
 
     public SimulacionDTO calcularSimulacion(SimulacionDTO simulacionDTO) {
-        System.out.println("Datos recibidos en el backend: " + simulacionDTO); // Debug
+        //System.out.println("Datos recibidos en el backend: " + simulacionDTO); // Debug
+        logger.info("Datos recibidos en el backend: " + simulacionDTO);
 
         if (simulacionDTO.getIngresos() < 0 || simulacionDTO.getMesesSimulacion() <= 0) {
             simulacionDTO.getRecomendaciones().add("Los ingresos y la duración de la simulación deben ser positivos.");
             simulacionDTO.setBalanceProyectado(0);
-            System.out.println("Simulación detenida por datos negativos o inválidos."); // Debug
+            //System.out.println("Simulación detenida por datos negativos o inválidos."); // Debug
+            logger.info("Simulación detenida por datos negativos o inválidos.");
             return simulacionDTO;
         }
 
         double ingresos = simulacionDTO.getIngresos();
         double totalGastos = calcularTotalDeGastosClasificados(simulacionDTO.getGastosClasificados());
-        System.out.println("Total de gastos calculados: " + totalGastos); // Debug
+        //System.out.println("Total de gastos calculados: " + totalGastos); // Debug
+        logger.info("Total de gastos calculados: " + totalGastos);
 
         calcularProporcionGastos(simulacionDTO, ingresos);
 
         double balanceProyectado = ingresos - totalGastos;
         simulacionDTO.setBalanceProyectado(balanceProyectado);
-        System.out.println("Balance proyectado calculado: " + balanceProyectado); // Debug
+        //System.out.println("Balance proyectado calculado: " + balanceProyectado); // Debug
+        logger.info("Balance proyectado calculado: " + balanceProyectado);
 
         Map<Integer, Double> balancePorMes = calcularBalanceMensual(simulacionDTO, ingresos, totalGastos);
         simulacionDTO.setBalancePorMes(balancePorMes);
-        System.out.println("Balance mensual calculado: " + balancePorMes); // Debug
+        //System.out.println("Balance mensual calculado: " + balancePorMes); // Debug
+        logger.info("Balance mensual calculado: " + balancePorMes);
 
         if (simulacionDTO.getMetaAhorro() != null) {
             evaluarMetaAhorro(simulacionDTO, balancePorMes);
@@ -42,9 +51,10 @@ public class SimulacionService {
 
         List<String> recomendaciones = generarRecomendaciones(simulacionDTO, balanceProyectado);
         simulacionDTO.setRecomendaciones(recomendaciones);
-        System.out.println("Recomendaciones generadas: " + recomendaciones); // Debug
-
-        System.out.println("Simulación finalizada con éxito: " + simulacionDTO); // Debug
+        //System.out.println("Recomendaciones generadas: " + recomendaciones); // Debug
+        logger.info("Recomendaciones generadas: " + recomendaciones);
+        //System.out.println("Simulación finalizada con éxito: " + simulacionDTO); // Debug
+        logger.info("Simulación finalizada con éxito: " + simulacionDTO);
         return simulacionDTO;
     }
 
@@ -77,7 +87,8 @@ public class SimulacionService {
         simulacionDTO.getProporciones().put("esenciales", proporcionEsenciales);
         simulacionDTO.getProporciones().put("opcionales", proporcionOpcionales);
 
-        System.out.println("Proporciones calculadas: Esenciales = " + proporcionEsenciales + ", Opcionales = " + proporcionOpcionales);
+        //System.out.println("Proporciones calculadas: Esenciales = " + proporcionEsenciales + ", Opcionales = " + proporcionOpcionales);
+        logger.info("Proporciones calculadas: Esenciales = " + proporcionEsenciales + ", Opcionales = " + proporcionOpcionales);
     }
 
 

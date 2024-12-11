@@ -13,9 +13,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @RestController
 @RequestMapping("/simulacion")
 public class SimulacionController {
+    private static final Logger logger = LoggerFactory.getLogger(SimulacionController.class);
 
     private final SimulacionService simulacionService;
     private final InformePdfService informePdfService;
@@ -28,11 +32,13 @@ public class SimulacionController {
     // Endpoint para calcular la simulación financiera avanzada
     @PostMapping("/calcular")
     public ResponseEntity<SimulacionDTO> calcularSimulacion(@RequestBody SimulacionDTO simulacionDTO) {
-        System.out.println("Datos recibidos en el backend para simulación: " + simulacionDTO); // Debug
+        //System.out.println("Datos recibidos en el backend para simulación: " + simulacionDTO); // Debug
+        logger.info("Datos recibidos en el backend para simulación: " + simulacionDTO);
 
         SimulacionDTO resultadoSimulacion = simulacionService.calcularSimulacion(simulacionDTO);
 
-        System.out.println("Resultado de la simulación: " + resultadoSimulacion); // Debug
+        //System.out.println("Resultado de la simulación: " + resultadoSimulacion); // Debug
+        logger.info("Resultado de la simulación: " + resultadoSimulacion);
 
         return ResponseEntity.ok(resultadoSimulacion);
     }

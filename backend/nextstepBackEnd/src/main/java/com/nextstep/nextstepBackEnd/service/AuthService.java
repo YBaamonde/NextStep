@@ -43,7 +43,6 @@ public class AuthService {
             loginIdentifier = usuario.getUsername(); // Si es un email, usa el nombre de usuario para la autenticación
         }
 
-        //System.out.println("Password from DB: " + usuario.getPassword()); // Debug
 
         // Autentica al usuario usando las credenciales proporcionadas
         authenticationManager.authenticate(

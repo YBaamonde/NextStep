@@ -18,8 +18,12 @@ import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 public class EmailNotifService {
+    private static final Logger logger = LoggerFactory.getLogger(EmailNotifService.class);
 
     private final JavaMailSender mailSender;
     private final EmailNotifRepository emailNotifRepository; // Repositorio para gestionar correos enviados
@@ -77,7 +81,8 @@ public class EmailNotifService {
 
         if (notificacionExistente.isPresent()) {
             // Si ya existe, no enviamos el correo nuevamente
-            System.out.println("Correo ya enviado para usuario ID: " + usuarioId + ", pago ID: " + pagoId);
+            //System.out.println("Correo ya enviado para usuario ID: " + usuarioId + ", pago ID: " + pagoId);
+            logger.info("Correo ya enviado para usuario ID: " + usuarioId + ", pago ID: " + pagoId);
             return false;
         }
 

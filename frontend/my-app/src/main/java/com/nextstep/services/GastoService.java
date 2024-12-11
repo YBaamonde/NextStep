@@ -16,7 +16,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class GastoService {
+    private static final Logger logger = LoggerFactory.getLogger(GastoService.class);
+
     private final String baseUrl;
     private final HttpClient client;
     private final ObjectMapper objectMapper;
@@ -108,8 +113,11 @@ public class GastoService {
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println("Update Gasto Response Code: " + response.statusCode());
-            System.out.println("Update Gasto Response Body: " + response.body());
+            //System.out.println("Update Gasto Response Code: " + response.statusCode());
+            //System.out.println("Update Gasto Response Body: " + response.body());
+            logger.info("Update Gasto Response Code: " + response.statusCode());
+            logger.info("Update Gasto Response Body: " + response.body());
+
             return response.statusCode() == 200;
         } catch (IOException | InterruptedException e) {
             Notification.show("Error al actualizar el gasto: " + e.getMessage());

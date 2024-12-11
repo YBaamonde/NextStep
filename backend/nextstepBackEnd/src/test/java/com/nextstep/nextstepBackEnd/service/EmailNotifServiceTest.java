@@ -29,8 +29,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @ExtendWith(MockitoExtension.class)
 public class EmailNotifServiceTest {
+    private static final Logger logger = LoggerFactory.getLogger(EmailNotifServiceTest.class);
 
     @Mock
     private JavaMailSender mailSender;
@@ -80,7 +84,8 @@ public class EmailNotifServiceTest {
         String html = emailNotifService.generarPlantillaHtml(pago);
 
         // Imprimir el HTML generado para depuración
-        System.out.println("HTML generado:\n" + html);
+        //System.out.println("HTML generado:\n" + html);
+        logger.info("HTML generado:\n" + html);
 
         // Verifica que el HTML no sea nulo y contenga las cadenas esperadas
         assertNotNull(html, "El HTML generado no debe ser nulo");

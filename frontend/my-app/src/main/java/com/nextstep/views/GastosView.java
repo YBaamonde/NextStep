@@ -370,7 +370,7 @@ public class GastosView extends VerticalLayout {
             int categoriaId = (Integer) categoria.get("id");
 
             // Obtener los últimos 10 gastos de la categoría
-            List<Map<String, Object>> gastos = gastoService.getGastosPorCategoriaConLimite(categoriaId, 10);
+            List<Map<String, Object>> gastos = gastoService.getGastosPorCategoriaConLimite(categoriaId, 5);
 
             VerticalLayout gastosContainer = categoriaRefs.get(categoriaId);
             if (gastosContainer != null) {
@@ -414,7 +414,7 @@ public class GastosView extends VerticalLayout {
             gastosContainer.add(gastoDiv);
         }
 
-        // Agregar botón "Ver menos" para mostrar los últimos 10 gastos
+        // Agregar botón "Ver menos" para mostrar los últimos gastos
         Button verMenosButton = new Button("Ver menos", event -> cargarGastosPorUsuario(usuarioId));
         verMenosButton.addClassName("ver-menos-button");
         gastosContainer.add(verMenosButton);

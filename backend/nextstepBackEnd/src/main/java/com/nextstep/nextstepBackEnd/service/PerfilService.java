@@ -14,9 +14,13 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Collections;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 @RequiredArgsConstructor
 public class PerfilService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PerfilService.class);
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -50,6 +54,7 @@ public class PerfilService {
     // Eliminar la cuenta del usuario
     public void deleteAccount(Integer usuarioId) {
         //System.out.println("Intentando eliminar usuario con ID: " + usuarioId); // Debug
+
         if (!userRepository.existsById(usuarioId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado");
         }
