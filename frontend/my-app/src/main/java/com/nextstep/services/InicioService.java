@@ -10,6 +10,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -81,6 +82,52 @@ public class InicioService {
     // En caso de error, devolver un Optional vacío
     return Optional.empty();
 }
+
+
+    // Metodo para generar y descargar el informe trimestral en PDF
+    public Optional<byte[]> generarInformePdf(int usuarioId) {
+        Logger logger = Logger.getLogger(getClass().getName());
+
+        // Validar entrada
+        if (usuarioId <= 0) {
+            logger.warning("ID de usuario inválido para generar informe PDF: " + usuarioId);
+            return Optional.empty();
+        }
+
+        try {
+            // Construir la solicitud HTTP
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(baseUrl + "/inicio/informe/" + usuarioId))
+                    .header("Authorization", "Bearer " + getToken())
+                    .header("Accept", "application/pdf")
+                    .GET()
+                    .build();
+
+            // Enviar la solicitud y manejar la respuesta
+            HttpResponse<byte[]> response = client.send(request, HttpResponse.BodyHandlers.ofByteArray());
+
+            // Manejar respuesta exitosa
+            if (response.statusCode() == 200) {
+                logger.info("PDF generado exitosamente para el usuario ID: " + usuarioId);
+                return Optional.of(response.body());
+            } else {
+                logger.warning("Error al generar informe PDF para el usuario ID: " + usuarioId +
+                        ". Código de estado: " + response.statusCode() + ". Respuesta: " + Arrays.toString(response.body()));
+            }
+        } catch (IOException e) {
+            logger.severe("Error de entrada/salida al generar informe PDF para el usuario ID: " + usuarioId +
+                    ". Mensaje: " + e.getMessage());
+        } catch (InterruptedException e) {
+            logger.severe("Solicitud interrumpida al generar informe PDF para el usuario ID: " + usuarioId);
+            Thread.currentThread().interrupt();
+        } catch (Exception e) {
+            logger.severe("Error inesperado al generar informe PDF para el usuario ID: " + usuarioId +
+                    ". Mensaje: " + e.getMessage());
+        }
+
+        // En caso de error, devolver un Optional vacío
+        return Optional.empty();
+    }
 
     private String getToken() {
         return (String) UI.getCurrent().getSession().getAttribute("authToken");

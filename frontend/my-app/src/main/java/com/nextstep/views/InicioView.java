@@ -9,8 +9,10 @@ import com.nextstep.services.AuthService;
 import com.nextstep.services.InAppNotifService;
 import com.nextstep.services.InicioService;
 import com.nextstep.views.components.MainNavbar;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.notification.Notification;
@@ -19,6 +21,8 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
+import com.vaadin.flow.server.StreamRegistration;
+import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.stefan.fullcalendar.Entry;
@@ -26,6 +30,7 @@ import org.vaadin.stefan.fullcalendar.FullCalendar;
 import org.vaadin.stefan.fullcalendar.FullCalendarBuilder;
 import org.vaadin.stefan.fullcalendar.dataprovider.InMemoryEntryProvider;
 
+import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -101,14 +106,40 @@ public class InicioView extends VerticalLayout {
         panelCategorias.add(addGastoButton);
 
         // Panel de trimestres
-        Div panelTrimestres = crearPanelConGrafico("Evolución por Trimestre", crearGraficoBarra(evolucionTrimestral));
-        Button createInformeButton = new Button("Crear Informe");
+        Div panelTrimestres = crearPanelConGrafico("Evolución por Trimestre", crearGraficoBarras(evolucionTrimestral));
+        Button createInformeButton = new Button("Generar Informe");
         createInformeButton.setClassName("boton-panel");
+        createInformeButton.addClickListener(e -> generarInforme());
         panelTrimestres.add(createInformeButton);
 
         panelesContainer.add(panelPagos, panelCategorias, panelTrimestres);
         add(panelesContainer);
     }
+
+    private void generarInforme() {
+        inicioService.generarInformePdf(usuarioId).ifPresentOrElse(
+                pdfBytes -> {
+                    // Crear un recurso para el PDF
+                    StreamResource pdfResource = new StreamResource("informe.pdf", () -> new ByteArrayInputStream(pdfBytes));
+                    pdfResource.setContentType("application/pdf");
+                    pdfResource.setCacheTime(0);
+
+                    // Registrar el recurso en la sesión actual
+                    StreamRegistration registration = UI.getCurrent().getSession().getResourceRegistry().registerResource(pdfResource);
+
+                    // Obtener la URL del recurso registrado
+                    String pdfUrl = registration.getResourceUri().toString();
+
+                    // Abrir el PDF en una nueva pestaña
+                    UI.getCurrent().getPage().open(pdfUrl, "_blank");
+
+                    Notification.show("Informe generado correctamente y abierto en una nueva pestaña.");
+                },
+                () -> Notification.show("Error al generar el informe. Verifica tus permisos o inicia sesión nuevamente.")
+        );
+    }
+
+
 
 
     private Div crearPanelPagos(List<Map<String, Object>> pagos) {
@@ -141,7 +172,7 @@ public class InicioView extends VerticalLayout {
             pagos.forEach(pago -> {
                 try {
                     Integer pagoId = (Integer) pago.get("id");
-                    String nombre = (String) pago.get("");
+                    String nombre = (String) pago.get("nombre");
                     String fechaStr = (String) pago.get("fecha");
                     LocalDate fecha = LocalDate.parse(fechaStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
@@ -173,7 +204,6 @@ public class InicioView extends VerticalLayout {
         return panel;
     }
 
-
     private Div crearPanelConGrafico(String titulo, ApexCharts grafico) {
         Div panel = new Div();
         panel.setClassName("panel");
@@ -190,7 +220,6 @@ public class InicioView extends VerticalLayout {
         return panel;
     }
 
-
     private ApexCharts crearGraficoCircular(Map<String, Double> datos) {
         String[] categorias = datos.keySet().toArray(new String[0]);
         Double[] valores = datos.values().toArray(new Double[0]);
@@ -202,7 +231,7 @@ public class InicioView extends VerticalLayout {
                 .build();
     }
 
-    private ApexCharts crearGraficoBarra(Map<String, Double> datos) {
+    private ApexCharts crearGraficoBarras(Map<String, Double> datos) {
         String[] trimestres = datos.keySet().toArray(new String[0]);
         Double[] valores = datos.values().toArray(new Double[0]);
 
@@ -213,6 +242,7 @@ public class InicioView extends VerticalLayout {
                 .withColors("#FF5722")
                 .build();
     }
+
 
     void actualizarCalendario() {
         inicioService.getInicioData(usuarioId).ifPresent(datos -> {
@@ -233,7 +263,7 @@ public class InicioView extends VerticalLayout {
         pagos.forEach(pago -> {
             try {
                 Integer pagoId = (Integer) pago.get("id");
-                String nombre = (String) pago.get("");
+                String nombre = (String) pago.get("nombre");
                 String fechaStr = (String) pago.get("fecha");
                 LocalDate fecha = LocalDate.parse(fechaStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 

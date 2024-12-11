@@ -121,6 +121,11 @@ public class SimulacionView extends VerticalLayout {
         }
 
         simulacionContainer.add(ingresosField, mesesField, metaAhorroField, gastosContainer, calcularButton);
+
+        // Espaciador para pantallas móviles
+        Div spacer = new Div();
+        spacer.setHeight("50px");
+        add(spacer);
     }
 
     private Map<String, NumberField> createGastosFields(Map<String, String> placeholders) {
@@ -135,16 +140,21 @@ public class SimulacionView extends VerticalLayout {
         return fields;
     }
 
+
     private Div createCategoryColumn(String headerText, Map<String, NumberField> fields) {
         Span header = new Span(headerText);
         header.addClassName("category-header");
 
+        Span subHeader = new Span(" (al mes)");
+        subHeader.getStyle().set("font-size", "0.8em");
+
         Div content = new Div();
         fields.values().forEach(content::add);
 
-        Div column = new Div(header, content);
+        Div column = new Div(header, subHeader, content);
         return column;
     }
+
 
     private void enableButtonOnValidInputs() {
         ingresosField.addValueChangeListener(event -> validateInputs());

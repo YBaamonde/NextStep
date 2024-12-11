@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.nextstep.nextstepBackEnd.model.SimulacionDTO;
-import com.nextstep.nextstepBackEnd.service.SimulacionPdfService;
+import com.nextstep.nextstepBackEnd.service.pdf.InformePdfService;
 import com.nextstep.nextstepBackEnd.service.SimulacionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,7 +40,7 @@ public class SimulacionControllerTest {
     private SimulacionService simulacionService;
 
     @MockBean
-    private SimulacionPdfService simulacionPdfService;
+    private InformePdfService informePdfService;
 
     private ObjectMapper objectMapper;
     private SimulacionDTO simulacionDTO;
@@ -98,7 +98,7 @@ public class SimulacionControllerTest {
         byte[] pdfContent = new byte[]{1, 2, 3, 4};
 
         // Mock del servicio de exportación a PDF
-        when(simulacionPdfService.generarPdfSimulacion(any(SimulacionDTO.class))).thenReturn(pdfContent);
+        when(informePdfService.generarPdfSimulacion(any(SimulacionDTO.class))).thenReturn(pdfContent);
 
         // Asegurar que el contenido PDF no sea null
         assertNotNull(pdfContent, "El contenido PDF simulado no debe ser null");

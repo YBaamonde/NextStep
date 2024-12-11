@@ -1,7 +1,7 @@
 package com.nextstep.nextstepBackEnd.controller;
 
 import com.nextstep.nextstepBackEnd.model.SimulacionDTO;
-import com.nextstep.nextstepBackEnd.service.SimulacionPdfService;
+import com.nextstep.nextstepBackEnd.service.pdf.InformePdfService;
 import com.nextstep.nextstepBackEnd.service.SimulacionService;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
@@ -18,11 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class SimulacionController {
 
     private final SimulacionService simulacionService;
-    private final SimulacionPdfService simulacionPdfService;
+    private final InformePdfService informePdfService;
 
-    public SimulacionController(SimulacionService simulacionService, SimulacionPdfService simulacionPdfService) {
+    public SimulacionController(SimulacionService simulacionService, InformePdfService informePdfService) {
         this.simulacionService = simulacionService;
-        this.simulacionPdfService = simulacionPdfService;
+        this.informePdfService = informePdfService;
     }
 
     // Endpoint para calcular la simulación financiera avanzada
@@ -49,7 +49,7 @@ public class SimulacionController {
             return ResponseEntity.badRequest().body(null);
         }
 
-        byte[] pdfContent = simulacionPdfService.generarPdfSimulacion(simulacionDTO);
+        byte[] pdfContent = informePdfService.generarPdfSimulacion(simulacionDTO);
         if (pdfContent == null) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
