@@ -1,6 +1,5 @@
 package com.nextstep.nextstepBackEnd.model;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;

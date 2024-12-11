@@ -1,7 +1,7 @@
 -- Eliminar la base de datos si existe
 -- DROP DATABASE IF EXISTS NextStepDB;
 
-CREATE DATABASE NextStepDB;
+CREATE DATABASE IF NOT EXISTS NextStepDB;
 USE NextStepDB;
 
 -- Tabla Usuario
@@ -79,7 +79,6 @@ CREATE TABLE inapp_notif (
   CONSTRAINT fk_pago_notificacion FOREIGN KEY (pago_id) REFERENCES pago (id) ON DELETE CASCADE
 );
 
-
 -- Tabla Notificación email
 CREATE TABLE email_notif (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -92,8 +91,6 @@ CREATE TABLE email_notif (
     FOREIGN KEY (pago_id) REFERENCES pago(id) ON DELETE CASCADE
 );
 
-
-
 -- Configuración de las notificaciones
 CREATE TABLE notificacion_config (
     id INT AUTO_INCREMENT PRIMARY KEY, -- ID único para la configuración
@@ -104,44 +101,3 @@ CREATE TABLE notificacion_config (
     in_app_dias_antes INT NOT NULL DEFAULT 1,     -- Días antes para las notificaciones In-App
     CONSTRAINT fk_usuario_config FOREIGN KEY (usuario_id) REFERENCES usuario(id) ON DELETE CASCADE
 );
-
-
-/*
--- Insertar algunos datos de prueba
-
--- Insertar usuarios
-INSERT INTO usuario (nombre, username, password, rol) VALUES 
-('Juan Perez', 'juan.perez@example.com', 'hashed_password1', 'normal'),
-('Maria Lopez', 'maria.lopez@example.com', 'hashed_password2', 'normal'),
-('Admin', 'admin@example.com', 'hashed_password3', 'admin');
-
--- Insertar pagos
-INSERT INTO pago (usuario_id, nombre, monto, fecha, recurrente, frecuencia) VALUES 
-(1, 'Renta', 500.00, '2024-06-01', TRUE, 'mensual'),
-(1, 'Internet', 50.00, '2024-06-05', TRUE, 'mensual'),
-(2, 'Gym', 30.00, '2024-06-01', TRUE, 'mensual');
-
--- Insertar categorías
-INSERT INTO categoria (nombre, descripcion) VALUES 
-('Alimentación', 'Gastos relacionados con la compra de alimentos'),
-('Transporte', 'Gastos relacionados con transporte'),
-('Ocio', 'Gastos relacionados con actividades recreativas');
-
--- Insertar gastos
-INSERT INTO gasto (usuario_id, nombre, monto, fecha) VALUES 
-(1, 'Supermercado', 150.00, '2024-05-20'),
-(1, 'Taxi', 20.00, '2024-05-22'),
-(2, 'Cine', 15.00, '2024-05-23');
-
--- Insertar relaciones entre gastos y categorías
-INSERT INTO gasto_categoria (gasto_id, categoria_id) VALUES 
-(1, 1), -- Supermercado -> Alimentación
-(2, 2), -- Taxi -> Transporte
-(3, 3); -- Cine -> Ocio
-
--- Insertar informes
-INSERT INTO informe (usuario_id, tipo, contenido) VALUES 
-(1, 'mensual', 'Informe mensual de gastos de Juan Perez.'),
-(2, 'mensual', 'Informe mensual de gastos de Maria Lopez.');
-
-*/

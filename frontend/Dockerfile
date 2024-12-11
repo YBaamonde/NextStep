@@ -5,7 +5,7 @@ FROM amazoncorretto:21
 WORKDIR /app
 
 # Copiar el archivo JAR del frontend al contenedor
-COPY target/nextstep-frontend-0.0.1-SNAPSHOT.jar app.jar
+COPY my-app/target/nextstepFrontEnd-1.0-SNAPSHOT.jar app.jar
 
 # Exponer el puerto 8080
 EXPOSE 8080
