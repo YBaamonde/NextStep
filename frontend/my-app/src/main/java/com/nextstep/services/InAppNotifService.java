@@ -22,7 +22,8 @@ public class InAppNotifService {
     private final ObjectMapper objectMapper;
 
     public InAppNotifService() {
-        this.baseUrl = "http://localhost:8081"; // URL base del backend
+        //this.baseUrl = "http://localhost:8081"; // URL base del backend
+        this.baseUrl = "http://backend:8081"; // Nombre del servicio 'backend' y puerto del backend
         this.client = HttpClient.newHttpClient();
         this.objectMapper = new ObjectMapper();
     }

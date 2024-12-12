@@ -12,3 +12,6 @@ EXPOSE 8080
 
 # Comando para ejecutar el frontend
 CMD ["java", "-jar", "app.jar"]
+
+# Comando para ejecutar el frontend en modo de producción
+ENTRYPOINT ["java", "-Dspring.profiles.active=prod", "-jar", "app.jar"]

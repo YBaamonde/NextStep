@@ -27,7 +27,8 @@ public class GastoService {
     private final ObjectMapper objectMapper;
 
     public GastoService() {
-        this.baseUrl = "http://localhost:8081"; // URL base del backend
+        //this.baseUrl = "http://localhost:8081"; // URL base del backend
+        this.baseUrl = "http://backend:8081"; // Nombre del servicio 'backend' y puerto del backend
         this.client = HttpClient.newHttpClient(); // Cliente HTTP para hacer peticiones
         this.objectMapper = new ObjectMapper(); // Mapeador JSON
     }

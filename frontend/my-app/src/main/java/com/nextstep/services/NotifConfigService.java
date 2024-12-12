@@ -19,7 +19,8 @@ public class NotifConfigService {
     private final ObjectMapper objectMapper;
 
     public NotifConfigService() {
-        this.baseUrl = "http://localhost:8081/notificaciones/config";
+        //this.baseUrl = "http://localhost:8081/notificaciones/config";
+        this.baseUrl = "http://backend:8081/notificaciones/config"; // Nombre del servicio 'backend' y puerto del backend
         this.client = HttpClient.newHttpClient();
         this.objectMapper = new ObjectMapper();
     }

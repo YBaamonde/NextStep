@@ -24,7 +24,8 @@ public class AuthService {
 
     // Constructor para inicializar el HttpClient y el ObjectMapper, además de la URL base del backend.
     public AuthService() {
-        this.baseUrl = "http://localhost:8081"; // Establece la URL base para todas las peticiones al backend
+        //this.baseUrl = "http://localhost:8081"; // Establece la URL base para todas las peticiones al backend
+        this.baseUrl = "http://backend:8081"; // Nombre del servicio 'backend' y puerto del backend
         this.client = HttpClient.newHttpClient(); // Crea un nuevo cliente HTTP para manejar las peticiones
         this.objectMapper = new ObjectMapper(); // Se utiliza para convertir objetos Java a JSON y viceversa
     }

@@ -99,9 +99,10 @@ public class InicioView extends VerticalLayout {
         // Panel de pagos
         Div panelPagos = crearPanelPagos(pagos);
 
-        // Panel de categorías
+        // Panel de gastos
         Div panelCategorias = crearPanelConGrafico("Gastos por Categoría", crearGraficoCircular(gastosPorCategoria));
-        Button addGastoButton = new Button("Añadir Gasto", e -> new GastosView().openAddGastoDialog(1, new VerticalLayout()));
+        // El botón para añadir gastos lleva a la vista de gastos por si no existen categorías creadas
+        Button addGastoButton = new Button("Añadir Gasto", e -> UI.getCurrent().navigate(GastosView.class));
         addGastoButton.setClassName("boton-panel");
         panelCategorias.add(addGastoButton);
 

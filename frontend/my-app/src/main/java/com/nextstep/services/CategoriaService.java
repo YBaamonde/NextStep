@@ -26,7 +26,8 @@ public class CategoriaService {
     private final ObjectMapper objectMapper;
 
     public CategoriaService() {
-        this.baseUrl = "http://localhost:8081";
+        //this.baseUrl = "http://localhost:8081";
+        this.baseUrl = "http://backend:8081"; // Nombre del servicio 'backend' y puerto del backend
         this.client = HttpClient.newHttpClient();
         this.objectMapper = new ObjectMapper();
     }

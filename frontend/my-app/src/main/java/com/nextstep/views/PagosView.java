@@ -151,6 +151,7 @@ public class PagosView extends VerticalLayout {
         amountField.setWidthFull();
 
         DatePicker dateField = new DatePicker("Fecha");
+        dateField.setMin(LocalDate.now()); // Configurar para solo fechas futuras (hoy incluido)
         dateField.setWidthFull();
 
         Checkbox recurrenteCheckbox = new Checkbox("Recurrente");
