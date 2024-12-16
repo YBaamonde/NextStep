@@ -55,13 +55,13 @@ public class LoginView extends Div {
         // Formulario de login
         LoginForm loginForm = new LoginForm();
         loginForm.getElement().getThemeList().add("light");
+        loginForm.setForgotPasswordButtonVisible(false);
 
         // Configurar el texto internacionalizado
         LoginI18n i18n = LoginI18n.createDefault();
         i18n.getForm().setTitle("Inicio de sesión");
         i18n.getForm().setUsername("Username or Email");
         i18n.getForm().setSubmit("Iniciar sesión");
-        i18n.getForm().setForgotPassword("Olvidé mi contraseña");
         i18n.getErrorMessage().setTitle("Credenciales inválidas");
         i18n.getErrorMessage().setMessage("Por favor, verifica tu email y contraseña e intenta nuevamente.");
         loginForm.setI18n(i18n);
