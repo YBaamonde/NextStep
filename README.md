@@ -60,6 +60,7 @@ El proyecto está completamente contenerizado, por lo que no se requieren config
 2. **Clonar el repositorio**:
    ```bash
    git clone git@github.com:UFV-INGINF/proyecto-fin-de-grado-2024-YBaamondeUFV.git
+   cd proyecto-fin-de-grado-2024-YBaamondeUFV
    ```
 
 ---
