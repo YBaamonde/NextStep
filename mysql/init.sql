@@ -46,25 +46,6 @@ CREATE TABLE gasto (
     FOREIGN KEY (categoria_id) REFERENCES categoria(id)
 );
 
--- Tabla Gasto_Categoria (para la relación varios a varios entre Gasto y Categoria)
-CREATE TABLE gasto_categoria (
-    gasto_id INT NOT NULL,
-    categoria_id INT NOT NULL,
-    PRIMARY KEY (gasto_id, categoria_id),
-    FOREIGN KEY (gasto_id) REFERENCES gasto(id),
-    FOREIGN KEY (categoria_id) REFERENCES categoria(id)
-);
-
--- Tabla Informe
-CREATE TABLE informe (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    usuario_id INT NOT NULL,
-    tipo ENUM('diario', 'semanal', 'mensual', 'anual') NOT NULL,
-    fecha_generacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    contenido TEXT,
-    FOREIGN KEY (usuario_id) REFERENCES usuario(id)
-);
-
 -- Tabla Notificacion In-App
 CREATE TABLE inapp_notif (
   id INT AUTO_INCREMENT PRIMARY KEY,

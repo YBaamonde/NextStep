@@ -14,9 +14,9 @@ Thumbs.db
 /.venv
 
 # Archivos de configuración local
-.env
-.env.local
-.env.*.local
+#.env
+#.env.local
+#.env.*.local
 
 # Archivos de registro y salida
 *.log

@@ -73,7 +73,7 @@ public class AuthService {
 
 
     // Metodo para registrar un nuevo usuario enviando los datos al backend
-    public void register(String username, String email, String password, String confirmPassword) {
+    public void register(String username, String email, String password) {
         try {
             // Crea un mapa con los datos de registro del usuario
             Map<String, String> requestBody = new HashMap<>();
@@ -108,17 +108,6 @@ public class AuthService {
             // Captura y muestra cualquier error que ocurra durante el proceso de registro
             Notification.show("Ocurrió un error durante el registro: " + e.getMessage());
         }
-    }
-
-    // Metodo para crear solicitudes autenticadas con el token JWT
-    public HttpRequest createAuthenticatedRequest(String endpoint) {
-        // Recupera el token JWT de la sesión
-        String token = (String) UI.getCurrent().getSession().getAttribute("authToken");
-
-        return HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl + endpoint))
-                .header("Authorization", "Bearer " + token) // Envía el token en el header de autorización
-                .build();
     }
 
 

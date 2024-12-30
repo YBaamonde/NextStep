@@ -75,7 +75,7 @@ public class RegisterView extends Div {
                 Notification.show("La contraseña debe tener al menos 8 caracteres", 3000, Notification.Position.MIDDLE);
             } else {
                 // Usar AuthService para registrar al usuario
-                authService.register(username, email, password, confirmPassword);
+                authService.register(username, email, password);
             }
         });
 

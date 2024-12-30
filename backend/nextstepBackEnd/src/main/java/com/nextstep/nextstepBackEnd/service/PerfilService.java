@@ -64,14 +64,13 @@ public class PerfilService {
 
 
     // Metodo para actualizar el username de un usuario
-    public boolean updateUsername(Integer usuarioId, String newUsername) {
+    public void updateUsername(Integer usuarioId, String newUsername) {
         Optional<Usuario> optionalUsuario = userRepository.findById(usuarioId);
 
         if (optionalUsuario.isPresent()) {
             Usuario usuario = optionalUsuario.get();
             usuario.setUsername(newUsername);
             userRepository.save(usuario);
-            return true;
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado");
         }

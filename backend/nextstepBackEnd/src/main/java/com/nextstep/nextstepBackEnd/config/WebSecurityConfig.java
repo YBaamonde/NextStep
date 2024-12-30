@@ -50,14 +50,6 @@ public class WebSecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         );
 
-        /*
-        PARA DEPURAR
-
-        http.sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // Temporalmente para depuración
-        );
-         */
-
         // Configurar el proveedor de autenticación y añadir el filtro JWT
         http.authenticationProvider(authProvider);
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
