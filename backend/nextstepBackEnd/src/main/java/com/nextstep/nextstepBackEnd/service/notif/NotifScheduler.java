@@ -35,8 +35,8 @@ public class NotifScheduler {
     }
 
 
-    @Scheduled(cron = "0 0 * * * ?") // Programar para ejecutar cada hora
-    //@Scheduled(cron = "0 * * * * ?") // Ejecutar cada minuto para pruebas
+    //@Scheduled(cron = "0 0 * * * ?") // Programar para ejecutar cada hora
+    @Scheduled(cron = "0 * * * * ?") // Ejecutar cada minuto
     public void enviarNotificacionesDePagos() {
         LocalDate hoy = LocalDate.now();
 
