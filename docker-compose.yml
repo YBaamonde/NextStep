@@ -28,6 +28,10 @@ services:
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
       SPRING_PROFILES_ACTIVE: prod
+      SPRING_MAIL_HOST: smtp.gmail.com
+      SPRING_MAIL_PORT: 587
+      SPRING_MAIL_USERNAME: nextstep.esp@gmail.com
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
     depends_on:
       db:
         condition: service_healthy
