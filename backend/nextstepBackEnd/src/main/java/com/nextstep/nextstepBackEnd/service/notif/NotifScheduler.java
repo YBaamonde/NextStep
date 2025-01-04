@@ -7,6 +7,8 @@ import com.nextstep.nextstepBackEnd.model.notif.NotificacionConfig;
 import com.nextstep.nextstepBackEnd.repository.EmailNotifRepository;
 import com.nextstep.nextstepBackEnd.repository.NotificacionConfigRepository;
 import com.nextstep.nextstepBackEnd.repository.PagoRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +24,9 @@ public class NotifScheduler {
     private final InAppNotifService inAppNotifService;
     private final NotificacionConfigRepository notificacionConfigRepository;
     private final EmailNotifRepository emailNotifRepository;
+
+    // Logger
+    private static final Logger logger = LoggerFactory.getLogger(NotifScheduler.class);
 
     public NotifScheduler(PagoRepository pagoRepository, EmailNotifService emailNotifService,
                           InAppNotifService inAppNotifService,
@@ -86,10 +91,11 @@ public class NotifScheduler {
     }
 
     private boolean correoYaEnviado(Integer usuarioId, Integer pagoId, LocalDate fechaPago) {
-        return emailNotifRepository.existsByUsuarioIdAndPagoIdAndFechaEnvio(usuarioId, pagoId, fechaPago.atStartOfDay());
+        //return emailNotifRepository.existsByUsuarioIdAndPagoIdAndFechaEnvio(usuarioId, pagoId, fechaPago.atStartOfDay());
+        LocalDateTime fechaTruncada = fechaPago.atStartOfDay();
+        logger.info("Verificando si el correo ya fue enviado: usuarioId={}, pagoId={}, fechaTruncada={}", usuarioId, pagoId, fechaTruncada);
+        return emailNotifRepository.existsByUsuarioIdAndPagoIdAndFechaEnvio(usuarioId, pagoId, fechaTruncada);
     }
-
-
 
 
     private void enviarNotificacionInApp(Pago pago, NotificacionConfig config, LocalDate fechaPago) {
