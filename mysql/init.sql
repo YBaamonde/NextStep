@@ -54,7 +54,7 @@ CREATE TABLE inapp_notif (
   titulo VARCHAR(100) NOT NULL,
   mensaje VARCHAR(500) NOT NULL,
   leido BOOLEAN NOT NULL DEFAULT FALSE,
-  fecha_creacion DATETIME NOT NULL,
+  fecha_creacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   fecha_leido DATETIME DEFAULT NULL,
   CONSTRAINT fk_usuario_notificacion FOREIGN KEY (usuario_id) REFERENCES usuario (id) ON DELETE CASCADE,
   CONSTRAINT fk_pago_notificacion FOREIGN KEY (pago_id) REFERENCES pago (id) ON DELETE CASCADE
@@ -67,7 +67,7 @@ CREATE TABLE email_notif (
     pago_id INT NOT NULL,
     asunto VARCHAR(255) NOT NULL,
     mensaje TEXT NOT NULL,
-    fecha_envio DATETIME NOT NULL,
+    fecha_envio DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (usuario_id) REFERENCES usuario(id) ON DELETE CASCADE,
     FOREIGN KEY (pago_id) REFERENCES pago(id) ON DELETE CASCADE
 );

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,8 +53,9 @@ public class InAppNotifService {
                 .titulo(titulo)
                 .mensaje(mensaje)
                 .leido(false)
-                .fechaCreacion(fechaPago)
+                .fechaCreacion(fechaPago.truncatedTo(ChronoUnit.SECONDS)) // Truncar a segundos
                 .build();
+
 
         return inAppNotifRepository.save(nuevaNotificacion);
     }
