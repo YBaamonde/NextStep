@@ -46,7 +46,6 @@ public class GastosView extends VerticalLayout {
     private final Integer usuarioId;
     private int categoriaCount;
     private final Div spacer;
-    private final Map<Integer, Span> descriptionRefs = new HashMap<>();
     private final GastoService gastoService = new GastoService();
     private final Map<Integer, VerticalLayout> categoriaRefs = new HashMap<>();
 
@@ -223,7 +222,7 @@ public class GastosView extends VerticalLayout {
     private void openEditCategoryDialog(int categoriaId, H2 title, Span description) {
         Dialog editDialog = new Dialog();
         editDialog.setHeaderTitle("Editar Categoría");
-        editDialog.addClassName("edit-cat-dialog");
+        editDialog.addClassName("dialog");
 
         TextField nameField = new TextField("Nombre");
         nameField.setValue(title.getText());
@@ -289,7 +288,7 @@ public class GastosView extends VerticalLayout {
     void openAddGastoDialog(int categoriaId, VerticalLayout gastosContainer) {
         Dialog addGastoDialog = new Dialog();
         addGastoDialog.setHeaderTitle("Nuevo Gasto");
-        addGastoDialog.addClassName("gasto-dialog");
+        addGastoDialog.addClassName("dialog");
 
         // Campos de entrada
         TextField nameField = new TextField("Nombre del Gasto");
@@ -445,7 +444,7 @@ public class GastosView extends VerticalLayout {
         fechaLabel.addClassName("gasto-fecha");
 
         // Botones de edición y eliminación
-        Button editButton = new Button("Editar", event -> openEditGastoDialog(gastoId, gastoDiv, nombreLabel, montoLabel, fechaLabel));
+        Button editButton = new Button("Editar", event -> openEditGastoDialog(gastoId, nombreLabel, montoLabel, fechaLabel));
         editButton.addClassName("gastos-action-button");
 
         Button deleteButton = new Button("Eliminar", event -> eliminarGasto(gastoId, gastoDiv));
@@ -482,10 +481,10 @@ public class GastosView extends VerticalLayout {
 
 
 
-    private void openEditGastoDialog(int gastoId, Div gastoDiv, NativeLabel nombreLabel, NativeLabel montoLabel, NativeLabel fechaLabel) {
+    private void openEditGastoDialog(int gastoId, NativeLabel nombreLabel, NativeLabel montoLabel, NativeLabel fechaLabel) {
         Dialog editDialog = new Dialog();
         editDialog.setHeaderTitle("Editar Gasto");
-        editDialog.addClassName("gasto-dialog");
+        editDialog.addClassName("dialog");
         //System.out.println("Abriendo diálogo de edición para gastoId: " + gastoId); // Depuración
 
         // Campos de entrada

@@ -28,37 +28,6 @@ public class InAppNotifService {
         this.objectMapper = new ObjectMapper();
     }
 
-    // Crear una nueva notificación In-App
-    public boolean crearNotificacion(Integer usuarioId, Integer pagoId, String titulo, String mensaje) {
-        try {
-            Map<String, String> notificacionData = Map.of(
-                    "titulo", titulo,
-                    "mensaje", mensaje
-            );
-
-            String json = objectMapper.writeValueAsString(notificacionData);
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(baseUrl + "/notificaciones/inapp?usuarioId=" + usuarioId + "&pagoId=" + pagoId))
-                    .header("Authorization", "Bearer " + getToken())
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(json))
-                    .build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            if (response.statusCode() == 200) {
-                Notification.show("Notificación creada correctamente.");
-                return true;
-            } else {
-                Notification.show("Error al crear la notificación: " + response.statusCode());
-                return false;
-            }
-        } catch (IOException | InterruptedException e) {
-            Notification.show("Error al crear la notificación: " + e.getMessage());
-            return false;
-        }
-    }
-
     // Obtener todas las notificaciones de un usuario
     public List<Map<String, Object>> obtenerNotificaciones(Integer usuarioId) {
         try {

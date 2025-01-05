@@ -6,8 +6,6 @@ import com.nextstep.nextstepBackEnd.repository.CategoriaRepository;
 import com.nextstep.nextstepBackEnd.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import java.util.List;
 import java.util.Optional;

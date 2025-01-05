@@ -21,8 +21,5 @@ public interface PagoRepository extends JpaRepository<Pago, Integer> {
     @Query("SELECT p FROM Pago p JOIN FETCH p.usuario WHERE p.fecha BETWEEN :inicio AND :fin")
     List<Pago> findPagosWithUsuarioByFechaBetween(@Param("inicio") LocalDate inicio, @Param("fin") LocalDate fin);
 
-    // Encuentra pagos futuros dentro de los próximos X días
-    @Query("SELECT p FROM Pago p WHERE p.usuario.id = :usuarioId AND p.fecha BETWEEN CURRENT_DATE AND :fechaFin ORDER BY p.fecha ASC")
-    List<Pago> findPagosFuturosByUsuarioIdWithinDays(@Param("usuarioId") Integer usuarioId, @Param("fechaFin") LocalDate fechaFin);
 }
 

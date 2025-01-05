@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 @Service
 @RequiredArgsConstructor
 public class PerfilService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PerfilService.class);
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;

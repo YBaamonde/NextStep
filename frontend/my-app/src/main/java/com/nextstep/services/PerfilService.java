@@ -64,7 +64,6 @@ public class PerfilService {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() == 200) {
-                Map<String, String> responseMap = objectMapper.readValue(response.body(), new TypeReference<>() {});
                 Notification.show("Contraseña actualizada con éxito.");
                 return true;
             } else {

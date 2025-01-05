@@ -50,6 +50,9 @@ public class InformePdfService extends PdfService {
 
             agregarTitulo(document, "Evolución Trimestral de Gastos");
             agregarTablaEvolucionTrimestral(document, evolucionTrimestral);
+            agregarResumenTotales(document, evolucionTrimestral);
+            agregarDistribucionGastos(document, evolucionTrimestral);
+            agregarRecomendacionesPdfInicio(document, evolucionTrimestral);
 
             cerrarDocumento(document);
             return byteArrayOutputStream.toByteArray();
@@ -58,10 +61,6 @@ public class InformePdfService extends PdfService {
             throw new RuntimeException("Error al generar el PDF de evolución trimestral", e);
         }
     }
-
-
-
-
 
     private void agregarTitulo(Document document, String tituloTexto) throws DocumentException {
         Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18, BaseColor.BLACK);
@@ -106,10 +105,15 @@ public class InformePdfService extends PdfService {
     private void agregarProporcionesGastos(Document document, SimulacionDTO simulacionDTO) throws DocumentException {
         Font infoFont = FontFactory.getFont(FontFactory.HELVETICA, 12, BaseColor.DARK_GRAY);
         document.add(new Paragraph("Distribución de Gastos:", infoFont));
-        document.add(new Paragraph("Gastos Esenciales: " + simulacionDTO.getProporciones().getOrDefault("esenciales", 0.0) + " %", infoFont));
-        document.add(new Paragraph("Gastos Opcionales: " + simulacionDTO.getProporciones().getOrDefault("opcionales", 0.0) + " %", infoFont));
+
+        double gastosEsenciales = simulacionDTO.getProporciones().getOrDefault("esenciales", 0.0);
+        double gastosOpcionales = simulacionDTO.getProporciones().getOrDefault("opcionales", 0.0);
+
+        document.add(new Paragraph("Gastos Esenciales: " + String.format("%.2f", gastosEsenciales) + " %", infoFont));
+        document.add(new Paragraph("Gastos Opcionales: " + String.format("%.2f", gastosOpcionales) + " %", infoFont));
         document.add(new Paragraph(" "));
     }
+
 
     private void agregarRecomendacionesPdfSimu(Document document, SimulacionDTO simulacionDTO) throws DocumentException {
         Font infoFont = FontFactory.getFont(FontFactory.HELVETICA, 12, BaseColor.DARK_GRAY);
@@ -124,7 +128,6 @@ public class InformePdfService extends PdfService {
         table.setWidthPercentage(100);
         table.setSpacingBefore(10f);
 
-        // Encabezados de la tabla
         Font headerFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, BaseColor.WHITE);
         PdfPCell trimestreHeader = new PdfPCell(new Phrase("Trimestre", headerFont));
         trimestreHeader.setBackgroundColor(BaseColor.GRAY);
@@ -133,7 +136,6 @@ public class InformePdfService extends PdfService {
         table.addCell(trimestreHeader);
         table.addCell(montoHeader);
 
-        // Agregar datos
         Font cellFont = FontFactory.getFont(FontFactory.HELVETICA, 12, BaseColor.DARK_GRAY);
         for (Map.Entry<String, Double> entry : evolucionTrimestral.entrySet()) {
             table.addCell(new PdfPCell(new Phrase(entry.getKey(), cellFont)));
@@ -142,7 +144,6 @@ public class InformePdfService extends PdfService {
 
         document.add(table);
     }
-
 
     private void agregarResumenTotales(Document document, Map<String, Double> evolucionTrimestral) throws DocumentException {
         double totalGastos = evolucionTrimestral.values().stream().mapToDouble(Double::doubleValue).sum();
@@ -200,5 +201,5 @@ public class InformePdfService extends PdfService {
         document.add(new Paragraph("- Considere equilibrar los gastos trimestrales para una mejor estabilidad financiera.", infoFont));
         document.add(new Paragraph(" "));
     }
-
 }
+

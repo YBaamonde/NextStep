@@ -21,11 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 @PageTitle("Registro | NextStep")
 public class RegisterView extends Div {
 
-    private final AuthService authService;
-
     @Autowired
     public RegisterView(AuthService authService) {
-        this.authService = authService;
 
         addClassName("login-view");
 

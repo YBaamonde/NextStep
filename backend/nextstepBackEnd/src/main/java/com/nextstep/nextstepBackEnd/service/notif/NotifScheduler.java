@@ -2,7 +2,6 @@ package com.nextstep.nextstepBackEnd.service.notif;
 
 import com.nextstep.nextstepBackEnd.model.Pago;
 import com.nextstep.nextstepBackEnd.model.Usuario;
-import com.nextstep.nextstepBackEnd.model.notif.EmailNotif;
 import com.nextstep.nextstepBackEnd.model.notif.NotificacionConfig;
 import com.nextstep.nextstepBackEnd.repository.EmailNotifRepository;
 import com.nextstep.nextstepBackEnd.repository.NotificacionConfigRepository;
@@ -63,13 +62,13 @@ public class NotifScheduler {
                 // Evaluar notificaciones por email
                 if (config.isEmailActivas() && hoy.plusDays(config.getEmailDiasAntes()).equals(pago.getFecha())) {
                     if (!correoYaEnviado(usuario.getId(), pago.getId(), pago.getFecha())) {
-                        enviarNotificacionEmail(pago, config);
+                        enviarNotificacionEmail(pago);
                     }
                 }
 
                 // Evaluar notificaciones In-App
                 if (config.isInAppActivas() && hoy.plusDays(config.getInAppDiasAntes()).equals(pago.getFecha())) {
-                    enviarNotificacionInApp(pago, config, pago.getFecha());
+                    enviarNotificacionInApp(pago, pago.getFecha());
                 }
 
             } catch (Exception e) {
@@ -78,7 +77,7 @@ public class NotifScheduler {
         }
     }
 
-    private void enviarNotificacionEmail(Pago pago, NotificacionConfig config) {
+    private void enviarNotificacionEmail(Pago pago) {
         try {
             String asunto = "Recordatorio de pago: " + pago.getNombre();
             String mensajeHtml = emailNotifService.generarPlantillaHtml(pago);
@@ -98,7 +97,7 @@ public class NotifScheduler {
     }
 
 
-    private void enviarNotificacionInApp(Pago pago, NotificacionConfig config, LocalDate fechaPago) {
+    private void enviarNotificacionInApp(Pago pago, LocalDate fechaPago) {
         try {
             String titulo = "Recordatorio de pago";
             String mensaje = "Tienes un pago programado para el " + pago.getFecha() + ": " + pago.getNombre();

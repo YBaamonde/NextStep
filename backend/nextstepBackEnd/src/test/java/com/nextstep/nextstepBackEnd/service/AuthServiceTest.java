@@ -96,12 +96,6 @@ public class AuthServiceTest {
         // Arrange
         String token = "testtoken";
         RegisterRequest request = new RegisterRequest("newuser", "newemail@example.com", "newpassword");
-        Usuario newUser = Usuario.builder()
-                .username("newuser")
-                .email("newemail@example.com")
-                .password("encodedpassword")  // Lo que esperamos después de la codificación
-                .rol(Rol.normal)
-                .build();
 
         // Simulamos que no existe un usuario con el mismo nombre ni email
         when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
@@ -164,13 +158,6 @@ public class AuthServiceTest {
         request.setEmail("admin@example.com");
         request.setPassword("password123");
         request.setRol("admin");
-
-        Usuario newUser = Usuario.builder()
-                .username(request.getUsername())
-                .email(request.getEmail())
-                .password("encodedpassword")  // Lo que esperamos después de la codificación
-                .rol(Rol.admin)
-                .build();
 
         // Simulamos que no existe un usuario con el mismo nombre ni email
         when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());

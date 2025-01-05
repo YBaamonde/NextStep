@@ -123,7 +123,7 @@ public class PagosView extends VerticalLayout {
 
         pagoDatos.add(nombreLabel, montoLabel, fechaLabel, recurrenteLabel, frecuenciaLabel);
 
-        Button editButton = new Button("Editar", event -> openEditPagoDialog(pagoId, pagoDiv, nombreLabel, montoLabel, fechaLabel, recurrenteLabel, frecuenciaLabel));
+        Button editButton = new Button("Editar", event -> openEditPagoDialog(pagoId, nombreLabel, montoLabel, fechaLabel, recurrenteLabel, frecuenciaLabel));
         editButton.addClassName("pago-button-editar");
 
         Button deleteButton = new Button("Eliminar", event -> eliminarPago(pagoId, pagoDiv));
@@ -218,7 +218,7 @@ public class PagosView extends VerticalLayout {
 
 
 
-    private void openEditPagoDialog(Integer pagoId, Div pagoDiv, NativeLabel nombreLabel, NativeLabel montoLabel, NativeLabel fechaLabel, NativeLabel recurrenteLabel, NativeLabel frecuenciaLabel) {
+    private void openEditPagoDialog(Integer pagoId, NativeLabel nombreLabel, NativeLabel montoLabel, NativeLabel fechaLabel, NativeLabel recurrenteLabel, NativeLabel frecuenciaLabel) {
         Dialog editDialog = new Dialog();
         editDialog.addClassName("pago-dialog");
         editDialog.setHeaderTitle("Editar Pago");

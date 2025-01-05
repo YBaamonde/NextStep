@@ -126,29 +126,6 @@ public class PagoService {
     }
 
 
-    // Obtener todos los pagos recurrentes de un usuario
-    public List<Map<String, Object>> getPagosRecurrentesPorUsuario(int usuarioId) {
-        try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(baseUrl + "/pagos/recurrentes/" + usuarioId))
-                    .header("Authorization", "Bearer " + getToken())
-                    .GET()
-                    .build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            if (response.statusCode() == 200) {
-                return objectMapper.readValue(response.body(), new TypeReference<>() {});
-            } else {
-                Notification.show("Error al cargar los pagos recurrentes: " + response.statusCode());
-            }
-        } catch (IOException | InterruptedException e) {
-            Notification.show("Error al cargar los pagos recurrentes: " + e.getMessage());
-        }
-
-        return Collections.emptyList();
-    }
-
     // Obtener el token de autenticación
     private String getToken() {
         // Implementación para obtener el token JWT de la sesión o almacenamiento

@@ -1,7 +1,5 @@
 package com.nextstep.nextstepBackEnd.service;
 
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
 import com.nextstep.nextstepBackEnd.model.SimulacionDTO;
 import com.nextstep.nextstepBackEnd.service.pdf.InformePdfService;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,9 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

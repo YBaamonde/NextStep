@@ -13,9 +13,6 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/notificaciones/config")
 public class NotifConfigController {
 
-    // Logger
-    private static final Logger log = LoggerFactory.getLogger(NotifConfigController.class);
-
     private final NotifConfigService notifConfigService;
 
     public NotifConfigController(NotifConfigService notifConfigService) {
