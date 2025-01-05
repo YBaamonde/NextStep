@@ -223,6 +223,7 @@ public class GastosView extends VerticalLayout {
     private void openEditCategoryDialog(int categoriaId, H2 title, Span description) {
         Dialog editDialog = new Dialog();
         editDialog.setHeaderTitle("Editar Categoría");
+        editDialog.addClassName("edit-cat-dialog");
 
         TextField nameField = new TextField("Nombre");
         nameField.setValue(title.getText());
