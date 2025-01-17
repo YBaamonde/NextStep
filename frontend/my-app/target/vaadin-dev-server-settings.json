@@ -9,7 +9,7 @@
   "devBundleOutput": "H:/Documentos/UFV/PFG II/frontend/my-app/target/dev-bundle/webapp",
   "devBundleStatsOutput": "H:/Documentos/UFV/PFG II/frontend/my-app/target/dev-bundle/config",
   "jarResourcesFolder": "H:/Documentos/UFV/PFG II/frontend/my-app/src/main/frontend/generated/jar-resources",
-  "themeName": "",
+  "themeName": "nextstepfrontend",
   "clientServiceWorkerSource": "H:\\Documentos\\UFV\\PFG II\\frontend\\my-app\\target\\sw.ts",
   "pwaEnabled": false,
   "offlineEnabled": false,

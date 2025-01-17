@@ -1,0 +1,279 @@
+/* Estilo general */
+body, #outlet {
+    min-height: 100vh; /* Permite que el body se expanda con el contenido */
+    height: auto !important; /* Sobreescribe cualquier propiedad de height */
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+.gastos-view {
+    background-image: url('../../../resources/media/escalonesGastos.jpg');
+    background-size: cover;
+    background-position: center top;
+    background-repeat: repeat-y;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Contenedor de categorías */
+.categories-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 20px;
+}
+
+/* Estilo de los paneles */
+.panel {
+    background: rgba(255, 255, 255, 0.22);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(6.1px);
+    -webkit-backdrop-filter: blur(6.1px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 20px;
+    max-width: 300px;
+    flex: 1 1 250px; /* Ajuste flexible de ancho mínimo */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 10px;
+}
+
+.gastos-action-button {
+    background-color: #FF5722;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+/* Estilo del icono del menú contextual */
+.context-menu-icon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 0.6rem;
+    cursor: pointer;
+}
+
+.category-title {
+    margin: 1rem;
+}
+
+/* Espaciador al final del contenedor de categorías */
+.category-spacer {
+    width: 100%;       /* Ocupa el ancho del contenedor */
+    height: 100px;     /* Ajusta este valor para controlar el espacio extra */
+    flex-shrink: 0;    /* Evita que el espaciador se reduzca en tamaño */
+}
+
+.category-description {
+    font-size: 0.9em;
+    margin-bottom: 5px;
+    margin-top: -5px;
+    text-align: center;
+}
+
+.gastos-container {
+    padding-top: 10px;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    margin-top: 10px;
+}
+
+.gasto-item {
+    padding: 10px;
+    margin-top: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.9);
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+}
+
+.gasto-nombre {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.gasto-monto {
+    color: #ff5722;
+    font-size: 1rem;
+}
+
+.gasto-fecha {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.gasto-eliminar {
+    align-self: flex-end;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+
+.gasto-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 5px; /* Espacio entre los botones */
+}
+
+.gasto-editar {
+    cursor: pointer;
+}
+
+.gasto-editar, .gasto-eliminar {
+    width: 100%; /* Ajustar al ancho del contenedor */
+}
+
+.gasto-editar:hover {
+    background-color: #e64a19;
+}
+
+.categoria-button {
+    width: 200px;
+    position: fixed;
+    bottom: 20px;
+    /* Alinar en el centro de la pantalla (verticalmente) */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #FF5722;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s;
+    z-index: 1000;
+}
+
+.botones-menu {
+    cursor: pointer;
+}
+
+
+.ver-mas-button {
+    background-color: #0074DB;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.ver-mas-button:hover {
+    background-color: #005BB5;
+}
+
+.ver-menos-button {
+    background-color: #FF5722;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.ver-menos-button:hover {
+    background-color: #e64a19;
+}
+
+
+.dialog {
+    background: rgba(255, 255, 255, 0.22);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(6.1px);
+    -webkit-backdrop-filter: blur(6.1px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+
+/* Estilo en pantallas grandes */
+@media (min-width: 768px) {
+    .categories-container {
+        justify-content: flex-start;
+        padding-top: 20px;
+    }
+    .panel {
+        flex: 1 1 30%; /* Ocupa un 30% del ancho disponible */
+        max-width: 350px; /* Limita el ancho máximo */
+    }
+
+}
+
+/* Estilo para dispositivos móviles */
+@media (max-width: 767px) {
+    .gastos-view {
+        justify-content: center;
+        align-items: center;
+    }
+    .panel {
+        width: 80%;
+        margin: 10px auto;
+    }
+
+    .mobile-navbar {
+        display: flex;
+        justify-content: space-around;
+        width: 100%;
+        position: fixed;
+        bottom: 0;
+        background-color: white;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        padding: 10px;
+        z-index: 1000;
+    }
+
+    .categoria-button {
+        width: 50px; /* Tamaño cuadrado */
+        height: 50px;
+        border-radius: 50%; /* Bordes redondeados para darle forma circular */
+        position: fixed;
+        bottom: 80px; /* Posición sobre el menú inferior */
+        left: 50px;
+        background-color: #FF5722;
+        color: white;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem; /* Tamaño del icono de suma */
+        z-index: 1000;
+        cursor: pointer;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        transition: background-color 0.3s;
+    }
+
+    .categoria-button:hover {
+        background-color: #e64a19;
+    }
+
+}
+

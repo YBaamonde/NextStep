@@ -1,18 +1,5 @@
 {
-  "productionMode": false,
+  "productionMode": true,
   "eagerServerLoad": false,
-  "npmFolder": "H:\\Documentos\\UFV\\PFG II\\frontend\\my-app",
-  "node.version": "v20.15.0",
-  "node.download.root": "https://nodejs.org/dist/",
-  "frontendFolder": "H:\\Documentos\\UFV\\PFG II\\frontend\\my-app\\src\\main\\frontend",
-  "connect.javaSourceFolder": "H:\\Documentos\\UFV\\PFG II\\frontend\\my-app\\src\\main\\java",
-  "javaResourceFolder": "H:\\Documentos\\UFV\\PFG II\\frontend\\my-app\\src\\main\\resources",
-  "connect.applicationProperties": "H:\\Documentos\\UFV\\PFG II\\frontend\\my-app\\src\\main\\resources\\application.properties",
-  "connect.openApiFile": "H:\\Documentos\\UFV\\PFG II\\frontend\\my-app\\target\\generated-resources\\openapi.json",
-  "project.frontend.generated": "H:\\Documentos\\UFV\\PFG II\\frontend\\my-app\\src\\main\\frontend\\generated",
-  "pnpm.enable": false,
-  "bun.enable": false,
-  "require.home.node": false,
-  "build.folder": "target",
   "react.enable": true
 }

@@ -1,0 +1,74 @@
+/* login-view.css */
+.login-view {
+    display: flex;
+    justify-content: flex-start; /* Alinea a la izquierda */
+    align-items: center;
+    height: 100vh;
+    padding-left: 5%; /* Añade un padding para dar un poco de margen a la izquierda */
+    background: url('../../../resources/media/edificiosLogin.jpg') no-repeat center center;
+    background-size: cover;
+}
+
+.login-container {
+    background-color: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 2rem;
+    width: 350px; /* Ajuste a un ancho más normal */
+    max-width: 350px; /* Fija el ancho máximo */
+    text-align: center;
+}
+
+.login-container h1 {
+    color: #FF5722; /* Color similar al del botón */
+    font-size: 2rem;
+    margin-bottom: 0;
+}
+
+.login-container p {
+    font-size: 1rem;
+    color: #9E9E9E;
+    margin-top: 0;
+}
+
+.login-container .vaadin-button {
+    background-color: #FF5722; /* Color del botón de inicio */
+    color: white;
+    width: 100%; /* Asegura que el botón ocupe el ancho completo */
+}
+
+/* Estilo del enlace de registro en la vista de login */
+.register-link {
+    background: none;
+    border: none;
+    color: #FF5722;
+    text-align: center;
+    font-size: 0.875rem;
+    margin-top: -4rem;
+}
+
+/* Estilo del botón de registro en la vista de registro */
+.register-summit-button {
+    background-color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    font-size: 1rem;
+    background-color: #FF5722;
+    color: white;
+    width: 70%;
+}
+
+/* Estilo del enlace de login en la vista de registro */
+.login-link {
+    background: none;
+    border: none;
+    color: #FF5722;
+    text-align: center;
+    font-size: 0.875rem;
+    margin-top: -1rem;
+}
+
+/* Cambio color H1 Registro */
+.titulo-registro {
+    color: var(--lumo-header-text-color) !important;
+}

@@ -1,0 +1,125 @@
+.resultados-view {
+    background-image: url('../../../resources/media/monteSimu.jpg');
+    background-size: cover;
+    background-position: center top;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0;
+    width: 100%;
+    overflow-x: hidden;
+}
+
+.resultados-container {
+    width: 90%;
+    max-width: 600px;
+    background: rgba(255, 255, 255, 0.22);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(6.1px);
+    -webkit-backdrop-filter: blur(6.1px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 20px;
+    margin-top: 50px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+}
+
+.resultado-balance {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.resultado-recomendaciones-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-top: 20px;
+    color: #555;
+}
+
+.recomendaciones-container {
+    margin-top: 10px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.resultado-recomendacion {
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.button-layout {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.export-pdf-button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 1rem;
+}
+
+.export-pdf-button:hover {
+    background-color: #0056b3;
+}
+
+.nueva-simulacion-button {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 1rem;
+}
+
+.nueva-simulacion-button:hover {
+    background-color: #218838;
+}
+
+/* Ajustes para pantallas pequeñas */
+@media (max-width: 768px) {
+    .resultados-container {
+        width: 95%;
+        max-width: 80%;
+        padding: 15px;
+        margin-top: 30px;
+    }
+
+    .resultado-balance {
+        font-size: 1.3rem;
+    }
+
+    .resultado-recomendaciones-title {
+        font-size: 1rem;
+    }
+
+    .resultado-recomendacion {
+        font-size: 1rem;
+    }
+
+    .button-layout {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .export-pdf-button,
+    .nueva-simulacion-button {
+        width: 100%;
+        font-size: 0.9rem;
+    }
+}
