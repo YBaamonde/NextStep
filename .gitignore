@@ -6,7 +6,7 @@ Thumbs.db
 *.exe
 *.dll
 *.class
-*.jar
+#*.jar Necesario para hacer docker-compose build y docker-compose up
 
 # Directorios de dependencias y entornos virtuales
 /node_modules
