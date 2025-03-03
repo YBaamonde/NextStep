@@ -116,4 +116,4 @@ nextstep/
 
 - **Autor:** Yago Baamonde Soengas
 - **Correo:** yagobaamonde@gmail.com
-- **GitHub:** https://github.com/UFV-INGINF/proyecto-fin-de-grado-2024-YBaamondeUFV](https://github.com/YBaamonde/NextStep
+- **GitHub:** https://github.com/YBaamonde/NextStep
